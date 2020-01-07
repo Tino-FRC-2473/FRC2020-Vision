@@ -1,6 +1,6 @@
 import argparse
 import cv2
-from cv import VisionTargetDetector
+from cv_loading_bay import VisionTargetDetector
 
 # "python test.py 0" to run from camera in port 0
 # "python test.py video.mp4" to run from the video recording video.mp4
