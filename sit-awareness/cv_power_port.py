@@ -14,6 +14,7 @@ class VisionTargetDetector:
 	def __init__(self, input):
 
 		self.input_path = input
+		
 
 		try:
 			# if input is a camera port
@@ -151,15 +152,15 @@ class VisionTargetDetector:
 
 		cv2.drawContours(frame, approx, -1, (0,0,255), 6)
 
-		r, t, o = self.get_angle_dist(approx)
-		rmat, _ = cv2.Rodrigues(r)
+		# r, t, o = self.get_angle_dist(approx)
+		# rmat, _ = cv2.Rodrigues(r)
 
-		yaw, pitch, roll = self.get_euler_from_rodrigues(rmat)
+		# yaw, pitch, roll = self.get_euler_from_rodrigues(rmat)
 
-		font = cv2.FONT_HERSHEY_SIMPLEX
-		cv2.putText(frame, "Yaw: " + str(round(yaw,2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
-		cv2.putText(frame, "Pitch: " + str(round(pitch,2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
-		cv2.putText(frame, "Roll: " + str(round(roll,2)), (20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
+		# font = cv2.FONT_HERSHEY_SIMPLEX
+		# cv2.putText(frame, "Yaw: " + str(round(yaw,2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
+		# cv2.putText(frame, "Pitch: " + str(round(pitch,2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
+		# cv2.putText(frame, "Roll: " + str(round(roll,2)), (20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
 
 		# show windows
 		cv2.imshow("contours: " + str(self.input_path), mask)
