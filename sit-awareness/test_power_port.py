@@ -21,6 +21,6 @@ if len(args.input) == 1:
 with vtd as v:
 	while True:
 		v.run_cv()
-		key = cv2.waitKey(wait_time)
-		if key == ord('q'):
-			break
+		# key = cv2.waitKey(wait_time)
+		# if key == ord('q'):
+		# 	break
