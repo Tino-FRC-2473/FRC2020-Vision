@@ -90,27 +90,26 @@ class VisionTargetDetector:
 
 		return euler_deg[0][0], euler_deg[1][0], euler_deg[2][0]
 
-	def get_angle_dist(self, rectangles):
+	def get_angle_dist(self, target):
 
-		obj_points = [[ 0.0,  0.0, 0],
-					  [ 3.5,  5.5, 0],
-					  [-3.5,  5.5, 0],
-					  [-3.5, -5.5, 0],
-					  [ 3.5, -5.5, 0],
-					  [ 1.5,  3.5, 0],
-					  [-1.5,  3.5, 0],
-					  [-1.5, -3.5, 0],
-					  [ 1.5, -3.5, 0]]
+		obj_points = [[ 0.0,                      0, 0],
+					  [ 19.625,                   0, 0],
+					  [ 19.625 - 4/math.sqrt(3),  0, 0],
+					  [ 9.8125 - 2/math.sqrt(3), 15, 0],
+					  [-9.8125 + 2/math.sqrt(3), 15, 0],
+					  [-19.625 + 4/math.sqrt(3),  0, 0],
+					  [-19.625,                   0, 0],
+					  [-9.8125,                  17, 0],
+					  [ 9.8125,                  17, 0]]
 
-		mx = rectangles[0].get_center().x
-		my = rectangles[0].get_center().y
+		mx = sum(p[0][0] for p in target) / 8
+		my = sum(p[0][1] for p in target) / 8
 
 		img_points = []
 		img_points.append([0,0])
 
-		for r in rectangles:
-			for p in r.get_points():
-				img_points.append([p.x - mx, p.y - my])
+		for p in target:
+			img_points.append([p[0][0] - mx, p[0][1] - my])
 
 		frame = self.get_frame()
 
@@ -152,58 +151,21 @@ class VisionTargetDetector:
 
 		cv2.drawContours(frame, approx, -1, (0,0,255), 6)
 
-		print(approx)
+		r, t, o = self.get_angle_dist(approx)
+		rmat, _ = cv2.Rodrigues(r)
 
-		# rectangles = []
-		# for i in range(2):
-		# 	c = contours[i]
-		# 	if cv2.contourArea(c) < 100:
-		# 		return [360, 360, 360], -1
-		#
-		# 	area = cv2.contourArea(c)
-		# 	corners = self.get_corners(c)
-		# 	rectangles.append(Rectangle(corners, area))
-		# 	cv2.drawContours(frame, corners, -1, (0,0,255), 6)
-		#
-		# r, t, o = self.get_angle_dist(rectangles)
-		# rmat, _ = cv2.Rodrigues(r)
+		yaw, pitch, roll = self.get_euler_from_rodrigues(rmat)
 
-		# yaw, pitch, roll = self.get_euler_from_rodrigues(rmat)
-		#
-		# font = cv2.FONT_HERSHEY_SIMPLEX
-		# cv2.putText(frame, "Yaw: " + str(round(yaw,2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
-		# cv2.putText(frame, "Pitch: " + str(round(pitch,2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
-		# cv2.putText(frame, "Roll: " + str(round(roll,2)), (20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
+		font = cv2.FONT_HERSHEY_SIMPLEX
+		cv2.putText(frame, "Yaw: " + str(round(yaw,2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
+		cv2.putText(frame, "Pitch: " + str(round(pitch,2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
+		cv2.putText(frame, "Roll: " + str(round(roll,2)), (20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
 
 		# show windows
 		cv2.imshow("contours: " + str(self.input_path), mask)
 		cv2.imshow("frame: " + str(self.input_path), frame)
 
 		# return [yaw, pitch, roll], t
-
-class Rectangle:
-
-	def __init__(self, box, area):
-		self.box = box
-		self.area = area
-		self.points = []
-		for coordinates in box:
-			self.points.append(Point(coordinates[0][0], coordinates[0][1]))
-
-	def get_center(self):
-		x = sum(point.x for point in self.points)/4
-		y = sum(point.y for point in self.points)/4
-		return Point(x, y)
-
-	def get_points(self):
-		points = self.points
-		mx, my = self.get_center().x, self.get_center().y
-
-		#sort points clockwise
-		def sort_clockwise(p):
-			return (math.atan2(p.y - my, p.x - mx) + 2 * math.pi) % (2*math.pi)
-		points.sort(key=sort_clockwise)
-		return points
 
 # this class defines a point
 class Point:

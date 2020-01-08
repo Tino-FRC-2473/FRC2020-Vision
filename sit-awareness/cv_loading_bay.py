@@ -208,8 +208,8 @@ class Rectangle:
 			self.points.append(Point(coordinates[0][0], coordinates[0][1]))
 
 	def get_center(self):
-		x = sum(point.x for point in self.points)/4
-		y = sum(point.y for point in self.points)/4
+		x = sum(point.x for point in self.points) / 4
+		y = sum(point.y for point in self.points) / 4
 		return Point(x, y)
 
 	def get_points(self):
