@@ -45,7 +45,7 @@ class VisionTargetDetector:
 
 		self.TRUE_GREEN_VALS = cv2.cvtColor(bgr_data, cv2.COLOR_BGR2HSV)
 
-		self.LOW_GREEN = np.array([68, 100, 10])
+		self.LOW_GREEN = np.array([68, 100, 50])
 		self.HIGH_GREEN = np.array([84, 255, 255])
 
 
@@ -193,7 +193,7 @@ class VisionTargetDetector:
 
 		# isolate the desired shades of green
 		mask = cv2.inRange(hsv, self.LOW_GREEN, self.HIGH_GREEN)
-		contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		_, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
 
 		greens = hsv[np.where((mask == 255))]

@@ -182,9 +182,7 @@ class VisionTargetDetector:
 
 		# r, t, o = self.get_angle_dist(approx)
 		# rmat, _ = cv2.Rodrigues(r)
-		#
 		# yaw, pitch, roll = self.get_euler_from_rodrigues(rmat)
-		#
 		# font = cv2.FONT_HERSHEY_SIMPLEX
 		# cv2.putText(frame, "Yaw: " + str(round(yaw,2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
 		# cv2.putText(frame, "Pitch: " + str(round(pitch,2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
