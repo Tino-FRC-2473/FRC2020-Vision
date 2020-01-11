@@ -7,6 +7,9 @@ import os
 class ImageCapture:
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Add test images
     # initilaze variables
     def __init__(self, input, angle, distance):
 
@@ -21,6 +24,7 @@ class ImageCapture:
         except:
             # if input is a path
             self.input = cv2.VideoCapture(input)
+<<<<<<< HEAD
             
         frame = self.get_frame()
         self.input.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
@@ -28,6 +32,12 @@ class ImageCapture:
         
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
         print(self.SCREEN_HEIGHT)
+=======
+
+        frame = self.get_frame()
+        
+        self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
+>>>>>>> Add test images
 
     def __enter__(self):
         return self
@@ -70,18 +80,28 @@ class ImageCapture:
         cv2.imshow("frame: " + str(self.input_path), frame)
 
         ref_frame = self.get_frame()
+<<<<<<< HEAD
         cv2.circle(frame, (320, 240), 2, (255,255,255), 2)
         cv2.circle(frame, (320, 400), 2, (255,255,255), 2)
         cv2.imshow("ref: " + str(self.input_path), frame)
 
     def capture(self):
         filename = "test_photos/" + str(self.angle) + "_degrees" + str(self.distance) + "inches.png"
+=======
+        cv2.circle(frame, (self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT - 20), 2, (255,255,255), 2)
+        cv2.circle(frame, (self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2), 2, (255,255,255), 2)
+        cv2.imshow("ref: " + str(self.input_path), frame)
+
+    def capture(self):
+        filename = "test_photos/" + str(self.angle) + "degrees" + str(self.distance) + "inches.png"
+>>>>>>> Add test images
         cv2.imwrite(filename, self.get_frame())
 
     def prompt(self):
         print("Capture another image! yay")
         self.angle = input("Angle: ")
         self.distance = input("Distance: ")
+<<<<<<< HEAD
 =======
 	# initilaze variables
 	def __init__(self, input, angle, distance):
@@ -149,3 +169,5 @@ class ImageCapture:
 		self.angle = input("Angle: ")
 		self.distance = input("Distance: ")
 >>>>>>> Add code to capture images
+=======
+>>>>>>> Add test images
