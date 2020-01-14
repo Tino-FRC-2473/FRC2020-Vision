@@ -8,6 +8,9 @@ import cv2
 # parser.add_argument("input", default="0 0 0")
 # args = parser.parse_args(input)
 # print(args)
+parser = argparse.ArgumentParser()
+parser.add_argument("input", help="read from the given camera or file", default="0")
+args = parser.parse_args()
 
 slider = Tk()
 slider.geometry("300x300")
@@ -31,20 +34,20 @@ def set_r_slider():
     r.set(float(r_input))
 
 def test_values():
-    yaw = y.get()
-    pitch = p.get()
-    roll = r.get()
+    yaw = math.pi * y.get() / 180.0
+    pitch = math.pi * p.get() / 180.0
+    roll = math.pi * r.get() / 180.0
 
-    yaw_mat = np.matrix([
-    [math.cos(yaw), -math.sin(yaw), 0],
-    [math.sin(yaw), math.cos(yaw), 0],
-    [0, 0, 1]
-    ]) #z
-    pitch_mat = np.matrix([
-    [math.cos(pitch), 0, math.sin(pitch)],
-    [0, 1, 0],
-    [-math.sin(pitch), 0, math.cos(pitch)]
-    ]) #y
+    # print("hello:", yaw, pitch, roll)
+
+    yaw_mat = np.matrix([[math.cos(yaw), -math.sin(yaw), 0],
+                        [math.sin(yaw), math.cos(yaw), 0],
+                        [0, 0, 1]
+                        ]) #z
+    pitch_mat = np.matrix([[math.cos(pitch), 0, math.sin(pitch)],
+                            [0, 1, 0],
+                            [-math.sin(pitch), 0, math.cos(pitch)]
+                            ]) #y
     roll_mat = np.matrix([[1, 0, 0],
                           [0, math.cos(roll), -math.sin(roll)],
                           [0, math.sin(roll), math.cos(roll)]
@@ -84,13 +87,29 @@ def test_values():
     #         img_points.append([p.x - mx, p.y - my])
 
     obj_points = np.float64(obj_points)
+    test_tvec = (0, 0, 0)
+
+    SCREEN_WIDTH = 640
+    SCREEN_HEIGHT = 480
 
 
-    camera_matrix = np.float64([[self.FOCAL_LENGTH_PIXELS, 0,                        self.SCREEN_WIDTH/2],
-                                [0,                        self.FOCAL_LENGTH_PIXELS, self.SCREEN_HEIGHT/2],
+    # intialize angle of field of view in radians
+    FIELD_OF_VIEW_RAD = 70.42 * math.pi / 180.0
+
+    # calculates focal length based on a right triangle representing the "image" side of a pinhole camera
+    # ABC where A is FIELD_OF_VIEW_RAD/2, a is SCREEN_WIDTH/2, and b is the focal length
+    FOCAL_LENGTH_PIXELS = (SCREEN_WIDTH / 2.0) / math.tan(FIELD_OF_VIEW_RAD / 2.0)
+    distance_co = []
+    camera_matrix = np.float64([[FOCAL_LENGTH_PIXELS, 0,                        SCREEN_WIDTH/2],
+                                [0,                        FOCAL_LENGTH_PIXELS, SCREEN_HEIGHT/2],
                                 [0,                        0,                        1]])
 
-    cv2.projectPoints(obj_points, translated, , camera_matrix, )
+    img_points = np.array(cv2.projectPoints(obj_points, translated, test_tvec, camera_matrix, None))[0]
+    print(img_points)
+
+
+    # frame = cv2.imread(args.input)
+    # cv2.drawContours(frame, img_points, -1, (0,255,0), 6)
 
 
 
