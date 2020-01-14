@@ -62,6 +62,7 @@ while True:
     # frame = cv2.imread("/Users/praneethguduguntla/Downloads/yellowcheck.mp4")
 
     _, frame = vidcap.read()
+    frame = cv2.blur(frame,(5,5))
     SCREEN_HEIGHT, SCREEN_WIDTH = frame.shape[:2]
     FOCAL_LENGTH_PIXELS = (SCREEN_WIDTH / 2.0) / math.tan(FIELD_OF_VIEW_RAD / 2.0)
     
