@@ -38,7 +38,7 @@ class ColorCalibration:
 		high_h, high_s, high_v = (h.mean() + 3.25 * h.std()), (s.mean() + 3.5 * s.std()), (v.mean() + 3.25 * v.std())
 
 		return np.array([int(low_h), int(low_s), int(low_v)]), np.array([int(high_h), int(high_s), int(high_v)])
-
+    
     def get_low_green(self.res):
         return self.LOW_GREEN
     
