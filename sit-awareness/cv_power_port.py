@@ -3,7 +3,9 @@ import cv2
 import numpy as np
 import subprocess
 import imghdr
-import random
+import traceback
+import os
+from math import sin, cos
 
 # finds angle between robot's heading and the perpendicular to the targets
 class VisionTargetDetector:
@@ -12,7 +14,6 @@ class VisionTargetDetector:
 	def __init__(self, input):
 
 		self.input_path = input
-		
 
 		try:
 			# if input is a camera port
@@ -33,18 +34,6 @@ class VisionTargetDetector:
 		# calculates focal length based on a right triangle representing the "image" side of a pinhole camera
 		# ABC where A is FIELD_OF_VIEW_RAD/2, a is SCREEN_WIDTH/2, and b is the focal length
 		self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(self.FIELD_OF_VIEW_RAD / 2.0)
-
-		rgb_data = np.loadtxt('green_data.csv', dtype=np.uint8, delimiter=',')
-		bgr_data = np.copy(rgb_data)
-		bgr_data[:, 0] = rgb_data[:, 2]
-		bgr_data[:, 2] = rgb_data[:, 0]
-
-		bgr_data = np.reshape(bgr_data, (79, 1, 3))
-
-		self.TRUE_GREEN_VALS = cv2.cvtColor(bgr_data, cv2.COLOR_BGR2HSV)
-
-		self.LOW_GREEN = np.array([68, 100, 10])
-		self.HIGH_GREEN = np.array([84, 255, 255])
 
 	def __enter__(self):
 		return self
@@ -101,22 +90,6 @@ class VisionTargetDetector:
 
 		return euler_deg[0][0], euler_deg[1][0], euler_deg[2][0]
 
-	def get_new_hsv(self, res):
-		if (len(res) == 0):
-			return self.LOW_GREEN, self.HIGH_GREEN
-		for i in range(100):
-			row = random.randrange(0, len(res))
-			self.TRUE_GREEN_VALS = np.append(self.TRUE_GREEN_VALS, np.reshape(np.array(res[row]), (1, 1, 3)), 0)
-
-		h = self.TRUE_GREEN_VALS[:, :, 0]
-		s = self.TRUE_GREEN_VALS[:, :, 1]
-		v = self.TRUE_GREEN_VALS[:, :, 2]
-
-		low_h, low_s, low_v = (h.mean() - 3.25 * h.std()), (s.mean() - 3.5 * s.std()), (v.mean() - 3.25 * v.std())
-		high_h, high_s, high_v = (h.mean() + 3.25 * h.std()), (s.mean() + 3.5 * s.std()), (v.mean() + 3.25 * v.std())
-
-		return np.array([int(low_h), int(low_s), int(low_v)]), np.array([int(high_h), int(high_s), int(high_v)])
-
 	def get_angle_dist(self, target):
 
 		obj_points = [[ 0.0,                      0, 0],
@@ -159,14 +132,12 @@ class VisionTargetDetector:
 		frame = self.get_frame()
 
 		hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+		low_green = np.array([65,145,65])
+		high_green= np.array([87,255,229])
 
 		# isolate the desired shades of green
-		mask = cv2.inRange(hsv, self.LOW_GREEN, self.HIGH_GREEN)
+		mask = cv2.inRange(hsv, low_green, high_green)
 		contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-		greens = hsv[np.where((mask == 255))]
-
-		self.LOW_GREEN, self.HIGH_GREEN = self.get_new_hsv(greens)
 
 		if len(contours) < 1:
 			return [360, 360, 360], -1
@@ -180,18 +151,20 @@ class VisionTargetDetector:
 
 		cv2.drawContours(frame, approx, -1, (0,0,255), 6)
 
-		# r, t, o = self.get_angle_dist(approx)
-		# rmat, _ = cv2.Rodrigues(r)
-		# yaw, pitch, roll = self.get_euler_from_rodrigues(rmat)
-		# font = cv2.FONT_HERSHEY_SIMPLEX
-		# cv2.putText(frame, "Yaw: " + str(round(yaw,2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
-		# cv2.putText(frame, "Pitch: " + str(round(pitch,2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
-		# cv2.putText(frame, "Roll: " + str(round(roll,2)), (20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
+		r, t, o = self.get_angle_dist(approx)
+		rmat, _ = cv2.Rodrigues(r)
+
+		yaw, pitch, roll = self.get_euler_from_rodrigues(rmat)
+
+		font = cv2.FONT_HERSHEY_SIMPLEX
+		cv2.putText(frame, "Yaw: " + str(round(yaw,2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
+		cv2.putText(frame, "Pitch: " + str(round(pitch,2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
+		cv2.putText(frame, "Roll: " + str(round(roll,2)), (20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
 
 		# show windows
 		cv2.imshow("contours: " + str(self.input_path), mask)
 		cv2.imshow("frame: " + str(self.input_path), frame)
-		print("hello")
+
 		# return [yaw, pitch, roll], t
 
 # this class defines a point
