@@ -34,7 +34,6 @@ class DepthLiveGenerator:
         frames = self.pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
-
         if not depth_frame or not color_frame:
             return None, None, None
 
@@ -43,7 +42,7 @@ class DepthLiveGenerator:
 
         colorizer = rs.colorizer()
         colorized_depth = np.asanyarray(colorizer.colorize(depth_frame).get_data())
-        cv2.imshow("map", colorized_depth)
+        #cv2.imshow("map", colorized_depth)
 
         return color_image, depth_image, depth_frame
 
