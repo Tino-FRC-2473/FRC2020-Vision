@@ -17,12 +17,13 @@ class PowerCellDetector:
 
     def run_detector(self):
         img, depth_frame = self.input.generate()
-
+        scale_percent = 1
+        scaled_img = cv2.resize(img, (int(640*scale_percent), int(480*scale_percent)), interpolation=cv2.INTER_AREA)
         if img is None:
             return None, None
 
-        output = img.copy()
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        output = scaled_img.copy()
+        hsv = cv2.cvtColor(scaled_img, cv2.COLOR_BGR2HSV)
         hsv = cv2.medianBlur(hsv, 5)
         mask = cv2.inRange(hsv, self.LOW_YELLOW, self.HIGH_YELLOW)
 
@@ -36,11 +37,13 @@ class PowerCellDetector:
         # print(hsv[:,:,1])
         mask_copy = mask.copy()
         mask_copy[mask_copy > 1] = 1
-        output = np.multiply(mask_copy, hsv[:, :, 2])
+        output = np.multiply(mask_copy, hsv[:, :, 1])
         # the two numbers at the end are the blockSize, which is basically how many pixels do we use to calculate the value of one of them
         # the last number is the number to subtract from the current weighted mean
         th2 = cv2.adaptiveThreshold(output, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 10)
-        circles = cv2.HoughCircles(th2, cv2.HOUGH_GRADIENT, 1.8, 40, param1=70, param2=50, minRadius=20, maxRadius=60)
+        th2 = ~th2
+        cv2.imshow("input", th2)
+        circles = cv2.HoughCircles(th2, cv2.HOUGH_GRADIENT, 1.8, int(40*scale_percent), param1=int(70*scale_percent), param2=int(50*scale_percent), minRadius=int(20*scale_percent), maxRadius=int(60*scale_percent))
 
         if(circles is None):
             return None, mask, img, depth_frame
@@ -50,7 +53,7 @@ class PowerCellDetector:
         circles = []
 
         for (x, y, r) in detected_circles[0, :]:
-            circles.append([x, y, r])
+            circles.append([x/scale_percent, y/scale_percent, r/scale_percent])
 
         return circles, mask, img, depth_frame
 

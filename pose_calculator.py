@@ -24,7 +24,8 @@ class PoseCalculator:
         self.previous_t = []
 
         self.obj_points = []
-
+        
+        self.floor_frame = np.loadtxt("FLOOR_4.csv", dtype=np.float32, delimiter=',')
         if type(detector) is LoadingBayDetector:
             self.obj_points = [[3.5,   5.5, 0],
                                [-3.5,  5.5, 0],
@@ -142,9 +143,8 @@ class PoseCalculator:
             return False
         return True
 
-    def subtract_floor(self, depth, path="FLOOR_2.csv"):
-        floor_frame = np.loadtxt(path, dtype=np.float32, delimiter=',')
-        floor = floor_frame.copy()
+    def subtract_floor(self, depth):
+        floor = self.floor_frame.copy()
         floor[floor > 4] = 0
         subtracted = np.where(abs(depth - floor) < 0.05, 0, depth)
         return subtracted
@@ -154,17 +154,17 @@ class PoseCalculator:
             return None
 
         removed_floor = self.subtract_floor(depth)
-
+        cv2.imshow("subtracted", removed_floor)
         self.low_obstacle_distance = 0.56
         self.high_obstacle_distance = float(max_distance) - 0.05
-
+        print("dist", self.high_obstacle_distance)
         mask = cv2.inRange(removed_floor, self.low_obstacle_distance, self.high_obstacle_distance)
         kernel = np.ones((5, 5), np.uint8)
-        cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        #cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         cv2.imshow("Obstacles", mask)
 
         obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        obstacle_contours.sort(key=lambda obstacle: self.get_distance_center(depth, self.get_contour_center(obstacle)[0], self.get_contour_center(obstacle)[1]))
+        obstacle_contours[:5].sort(key=lambda obstacle: self.get_distance_center(depth, self.get_contour_center(obstacle)[0], self.get_contour_center(obstacle)[1]))
 
 
 
@@ -196,7 +196,7 @@ class PoseCalculator:
         if depth_frame is not None:
             if detected_balls is None:
                 cv2.imshow("color frame", color_frame)
-                cv2.imshow("mask", mask)
+               # cv2.imshow("mask", mask)
                 return None, False
 
             # data[2] is the radius which we don't really need --> comes in the form [x, y, r]
@@ -207,18 +207,23 @@ class PoseCalculator:
             for i in range(0, 4):
                 if i < len(detected_balls):
                     closest_balls[i] = detected_balls[i]
+            dist_order = []
+            for i in list(filter(None, closest_balls)):
+                dist_order.append(self.get_distance_center(depth_frame, i[0], i[1]))
 
+            print(dist_order)
             x_change = -23
-            y_change = 31
+            y_change = 23
 
             balls_left_to_right = list(filter(None, closest_balls))
+            print("# of balls", len(balls_left_to_right))
             balls_left_to_right.sort(key=lambda data: data[0])
             left_ball = balls_left_to_right[0]
             right_ball = balls_left_to_right[len(balls_left_to_right) - 1]
             x_range = left_ball[0] - left_ball[2], right_ball[0] + right_ball[2]
-            max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change, closest_balls[0][1] + y_change)
+            max_dist = self.get_distance_center(depth_frame, closest_balls[0][0]+x_change, closest_balls[0][1] + y_change)
             if max_dist == 0:
-                max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change + 10, closest_balls[0][1] + y_change)
+                max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change -5, closest_balls[0][1] + y_change)
             obstacles = self.find_obstacles(depth_frame, max_dist, x_range)
 
             if obstacles is not None and len(obstacles) > 0:
@@ -253,7 +258,7 @@ class PoseCalculator:
             print("Finding all balls instead of closest ones. (Not running DepthLiveGenerator)")
 
             if detected_balls is None:
-                cv2.imshow("color frame", color_frame)
+                #cv2.imshow("color frame", color_frame)
                 return None, False
 
             ball_data = []
@@ -262,7 +267,7 @@ class PoseCalculator:
                 cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (255, 0, 0), 1)
 
         cv2.imshow("color frame", color_frame)
-        cv2.imshow("mask", mask)
+        #cv2.imshow("mask", mask)
 
         return ball_data, obstacle_present
 
