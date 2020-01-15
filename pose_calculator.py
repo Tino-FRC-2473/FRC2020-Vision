@@ -42,7 +42,7 @@ class PoseCalculator:
         self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
 
         # experimentally determined distance constant
-        self.DISTANCE_CONSTANT = 1.359624061
+        self.DISTANCE_CONSTANT = 1.70541793097
 
         # number of previous values to keep for average
         self.NUM_VALS = 10
