@@ -10,9 +10,8 @@ args = parser.parse_args()
 
 setup = TwoCameraSetup(args.input_first, args.input_second)
 
-with setup:
-    while True:
-        setup.run_cv()
-        key = cv2.waitKey(1)
-        if key == ord('q'):
-            break
+while True:
+    setup.run_cv()
+    key = cv2.waitKey(1)
+    if key == ord('q'):
+        break
