@@ -1,20 +1,20 @@
 import cv2
-from cv_color_calibration import ColorCalibration
+from cv_color_calibration import GreenCalibration
 class PowerPortDetector:
 
     # Constructor
     # int input_type(0-image, 1-video, 2-live-camera, 3-depth-image, 4-depth-video)
     def __init__(self, input_type): 
-        calib = ColorCalibration()
+        calib = GreenCalibration()
         inp = None
         if(input_type == 0):
             inp = 
         elif(input_type == 1):
-            inp =
+            inp = 
         elif(input_type == 2):
-            inp =
+            inp = 
         elif(input_type == 3):
-            inp =
+            inp = 
         else:
             inp = 
 
