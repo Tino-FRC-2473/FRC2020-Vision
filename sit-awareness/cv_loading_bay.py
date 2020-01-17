@@ -72,35 +72,50 @@ class VisionTargetDetector:
 		return frame
 
 	def get_euler_from_rodrigues(self, rmat):
-		sin = math.sqrt(rmat[2][0] * rmat[2][0] + rmat[2][1] * rmat[2][1])
-		if sin >= 1e-6:
-			z1 = math.atan2(rmat[2][0], rmat[2][1])  # around z1-axis
-			x = math.atan2(sin, rmat[2][2])  # around x-axis
-			z2 = math.atan2(rmat[0][2], -rmat[1][2])  # around z2-axis
-		else:  # gimbal lock
-			z1 = 0  # around z1-axis
-			x = math.atan2(sin, rmat[2][2])  # around x-axis
-			z2 = 0  # around z2-axis
+		roll = 180*math.atan2(-rmat[2][1], rmat[2][2])/math.pi
+		pitch = 180*math.asin(rmat[2][0])/math.pi
+		yaw = 180*math.atan2(-rmat[1][0], rmat[0][0])/math.pi
+		return yaw, pitch, roll
 
-		euler = np.array([[z1], [x], [z2]])
-
-		euler_deg = -180 * euler / math.pi
-		# euler_deg[0][0] = (360 - euler_deg[0][0])%360
-		euler_deg[1][0] = euler_deg[1][0]
-
-		return euler_deg[0][0], euler_deg[1][0], euler_deg[2][0]
+		# sin = math.sqrt(rmat[2][0] * rmat[2][0] + rmat[2][1] * rmat[2][1])
+		# if sin >= 1e-6:
+		#     z1 = math.atan2(rmat[2][0], rmat[2][1])  # around z1-axis
+		#     x = math.atan2(sin, rmat[2][2])  # around x-axis
+		#     z2 = math.atan2(rmat[0][2], -rmat[1][2])  # around z2-axis
+		# else:  # gimbal lock
+		#     z1 = 0  # around z1-axis
+		#     x = math.atan2(sin, rmat[2][2])  # around x-axis
+		#     z2 = 0  # around z2-axis
+		#
+		# euler = np.array([[z1], [x], [z2]])
+		#
+		# euler_deg = -180 * euler / math.pi
+		# # euler_deg[0][0] = (360 - euler_deg[0][0])%360
+		# euler_deg[1][0] = euler_deg[1][0]
+		#
+		# return euler_deg[0][0], euler_deg[1][0], euler_deg[2][0]
 
 	def get_angle_dist(self, rectangles):
 
-		obj_points = [[ 0.0,  0.0, 0],
-					  [ 3.5,  5.5, 0],
-					  [-3.5,  5.5, 0],
-					  [-3.5, -5.5, 0],
-					  [ 3.5, -5.5, 0],
-					  [ 1.5,  3.5, 0],
-					  [-1.5,  3.5, 0],
-					  [-1.5, -3.5, 0],
-					  [ 1.5, -3.5, 0]]
+		# obj_points = [[ 0.0,  0.0, 0],
+		# 			  [ 3.5,  5.5, 0],
+		# 			  [-3.5,  5.5, 0],
+		# 			  [-3.5, -5.5, 0],
+		# 			  [ 3.5, -5.5, 0],
+		# 			  [ 1.5,  3.5, 0],
+		# 			  [-1.5,  3.5, 0],
+		# 			  [-1.5, -3.5, 0],
+		# 			  [ 1.5, -3.5, 0]]
+
+		obj_points = [[ 320.0,  0.0, 0],
+					  [ 390,  350, 0],
+					  [ 250,  350, 0],
+					  [ 250,  130, 0],
+					  [ 390,  130, 0],
+					  [ 350,  310, 0],
+					  [ 290,  310, 0],
+					  [ 290,  170, 0],
+					  [ 350,  170, 0]]
 
 		mx = rectangles[0].get_center().x
 		my = rectangles[0].get_center().y
@@ -111,6 +126,7 @@ class VisionTargetDetector:
 		for r in rectangles:
 			for p in r.get_points():
 				img_points.append([p.x - mx, p.y - my])
+				# img_points.append([p.x, p.y])
 
 		frame = self.get_frame()
 
@@ -165,7 +181,7 @@ class VisionTargetDetector:
 
 		# isolate the desired shades of green
 		mask = cv2.inRange(hsv, low_green, high_green)
-		contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		_, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
 
 		if len(contours) < 2:

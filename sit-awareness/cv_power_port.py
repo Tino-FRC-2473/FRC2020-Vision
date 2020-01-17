@@ -137,7 +137,7 @@ class VisionTargetDetector:
 
 		# isolate the desired shades of green
 		mask = cv2.inRange(hsv, low_green, high_green)
-		contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		_, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 		if len(contours) < 1:
 			return [360, 360, 360], -1
