@@ -48,8 +48,8 @@ class DepthLiveGenerator:
 
     def generate(self):
         arr = np.empty((self.SCREEN_HEIGHT, self.SCREEN_WIDTH))
-        _, _, frame = self.get_frame()
+        image, _, frame = self.get_frame()
         for y in range(self.SCREEN_HEIGHT):
             for x in range(self.SCREEN_WIDTH):
                 arr[y, x] = frame.get_distance(x, y)
-        return np.asanyarray(arr)
+        return np.asanyarray(image), np.asanyarray(arr)
