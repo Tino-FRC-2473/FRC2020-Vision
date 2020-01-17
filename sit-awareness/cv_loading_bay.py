@@ -97,14 +97,12 @@ class VisionTargetDetector:
 
 	def get_angle_dist(self, rectangles):
 
-		obj_points = [[ 0.0,  0.0, 0],
-					  [ 3.5,  5.5, 0],
+		obj_points = [[ 3.5,  5.5, 0],
 					  [-3.5,  5.5, 0],
 					  [-3.5, -5.5, 0],
 					  [ 3.5, -5.5, 0]]
 
 		img_points = []
-		img_points.append([0,0])
 
 		for r in rectangles:
 			for p in r.get_points():
