@@ -19,4 +19,4 @@ class DepthDataGenerator:
                 depth_frame.append(row)
 
         image = cv2.cvtColor(cv2.imread(self.image_path), cv2.COLOR_BGR2RGB)
-        return np.asanyarray(depth_frame), image
+        return np.asanyarray(image), np.asanyarray(depth_frame)
