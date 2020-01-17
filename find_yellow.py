@@ -2,7 +2,7 @@ import cv2
 import os
 import numpy as np
 import math
-
+from yellow_calibration import YellowCalibration
 
 
 
@@ -13,25 +13,28 @@ def calc_ang(pinX):
     return deg
 
 
-directory = "test_photos"
+directory = "yellow_vals"
 true_yellow_vals = np.array([[5, 10, 15], [5, 10, 15]])
-#print(true_yellow_vals.shape)
 for filename in os.listdir(directory):
     #print(len(true_yellow_vals))
-    if filename.endswith(".png"): 
+    if filename.endswith(".png"):
         #print(os.path.join(directory, filename))
-
-
         img = cv2.imread(os.path.join(directory, filename))
         img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        c = 0
+        # f = open("yellow_data.csv", "a")
         for pixel in img[1,:,:]:
+            # if(c%50==0):
+            #     f.write(str(pixel[0]) + ", " + str(pixel[1]) + ", " + str(pixel[2]) + "\n")
             true_yellow_vals = np.append(true_yellow_vals, [pixel], axis=0)
-    
+            # c=c+1
+
 
 
         continue
     else:
         continue
+
 
 # print(true_yellow_vals.shape)
 # print(true_yellow_vals[:,0])
@@ -49,9 +52,9 @@ v = true_yellow_vals[:,2]
 low_h, low_s, low_v = (h.mean() - 3.25 * h.std()), (s.mean() - 3.5 * s.std()), (v.mean() - 3.25 * v.std())
 high_h, high_s, high_v = (h.mean() + 3.25 * h.std()), (s.mean() + 3.5 * s.std()), (v.mean() + 3.25 * v.std())
 
-# print(low_h, low_s, low_v)
-# print(high_h, high_s, high_v)
-
+print(low_h, low_s, low_v)
+print(high_h, high_s, high_v)
+#
 #vidcap = cv2.VideoCapture('test_photos/yellowcheck.mp4')
 vidcap = cv2.VideoCapture(1)
 FIELD_OF_VIEW_RAD = 67.823 * math.pi / 180.0
@@ -59,13 +62,13 @@ while True:
     low_yellow = np.array([17, 80, 80])
     high_yellow = np.array([40, 255, 255])
 
-    # frame = cv2.imread("/Users/praneethguduguntla/Downloads/yellowcheck.mp4")
+    frame = cv2.imread("yellow_vals/yellow_pic_1.png")
 
-    _, frame = vidcap.read()
-    frame = cv2.blur(frame,(5,5))
+    # _, frame = vidcap.read()
+    #frame = cv2.blur(frame,(5,5))
     SCREEN_HEIGHT, SCREEN_WIDTH = frame.shape[:2]
     FOCAL_LENGTH_PIXELS = (SCREEN_WIDTH / 2.0) / math.tan(FIELD_OF_VIEW_RAD / 2.0)
-    
+
     hsv2 = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
 		# isolate the desired shades of green
@@ -85,7 +88,7 @@ while True:
 
         if(y<SCREEN_HEIGHT/2):
             continue
-        
+
         approx = cv2.approxPolyDP(contour,0.01*cv2.arcLength(contour,True),True)
         if( not len(approx) > 8):
             continue
@@ -99,18 +102,18 @@ while True:
         cv2.putText(frame, str(calc_ang(x+w/2)), (int(SCREEN_WIDTH/2),int(SCREEN_HEIGHT/2)),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,0),2,cv2.LINE_AA)
 
 
-    cv2.resize(frame, (960, 540))   
-    cv2.resize(mask, (960, 540))   
+    cv2.resize(frame, (960, 540))
+    cv2.resize(mask, (960, 540))
     cv2.imshow("mask", mask)
     cv2.imshow("frame", frame)
     cv2.waitKey(1)
-    
+
 
 # vidcap = cv2.VideoCapture('/Users/praneethguduguntla/Desktop/yellowvals')
 # success,image = vidcap.read()
 # count = 0
 # while success:
-#   cv2.imwrite("/Users/praneethguduguntla/Downloads/YellowBallTraining/third_frame%d.jpg" % count, image)     # save frame as JPEG file      
+#   cv2.imwrite("/Users/praneethguduguntla/Downloads/YellowBallTraining/third_frame%d.jpg" % count, image)     # save frame as JPEG file
 #   success,image = vidcap.read()
 #   print('Read a new frame: ', success)
 #   count += 1
