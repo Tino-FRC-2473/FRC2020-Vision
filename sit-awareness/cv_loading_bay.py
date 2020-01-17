@@ -151,7 +151,7 @@ class VisionTargetDetector:
 			arrmax_changed.append([max_arr[i]])
 		return np.int0(arrmax_changed)
 
-	def run_cv(self):
+	def run_cv(self, display=True):
 
 		frame = self.get_frame()
 
@@ -161,7 +161,7 @@ class VisionTargetDetector:
 
 		# isolate the desired shades of green
 		mask = cv2.inRange(hsv, low_green, high_green)
-		_, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 		contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
 
 		if len(contours) < 2:
@@ -189,8 +189,9 @@ class VisionTargetDetector:
 		cv2.putText(frame, "Roll: " + str(round(roll,2)), (20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
 
 		# show windows
-		cv2.imshow("contours: " + str(self.input_path), mask)
-		cv2.imshow("frame: " + str(self.input_path), frame)
+		if display:
+			cv2.imshow("contours: " + str(self.input_path), mask)
+			cv2.imshow("frame: " + str(self.input_path), frame)
 
 		return [yaw, pitch, roll], t
 
