@@ -97,36 +97,18 @@ class VisionTargetDetector:
 
 	def get_angle_dist(self, rectangles):
 
-		# obj_points = [[ 0.0,  0.0, 0],
-		# 			  [ 3.5,  5.5, 0],
-		# 			  [-3.5,  5.5, 0],
-		# 			  [-3.5, -5.5, 0],
-		# 			  [ 3.5, -5.5, 0],
-		# 			  [ 1.5,  3.5, 0],
-		# 			  [-1.5,  3.5, 0],
-		# 			  [-1.5, -3.5, 0],
-		# 			  [ 1.5, -3.5, 0]]
-
-		obj_points = [[ 320.0,  0.0, 0],
-					  [ 390,  350, 0],
-					  [ 250,  350, 0],
-					  [ 250,  130, 0],
-					  [ 390,  130, 0],
-					  [ 350,  310, 0],
-					  [ 290,  310, 0],
-					  [ 290,  170, 0],
-					  [ 350,  170, 0]]
-
-		mx = rectangles[0].get_center().x
-		my = rectangles[0].get_center().y
+		obj_points = [[ 0.0,  0.0, 0],
+					  [ 3.5,  5.5, 0],
+					  [-3.5,  5.5, 0],
+					  [-3.5, -5.5, 0],
+					  [ 3.5, -5.5, 0]]
 
 		img_points = []
 		img_points.append([0,0])
 
 		for r in rectangles:
 			for p in r.get_points():
-				img_points.append([p.x - mx, p.y - my])
-				# img_points.append([p.x, p.y])
+				img_points.append([p.x, p.y])
 
 		frame = self.get_frame()
 
@@ -188,7 +170,7 @@ class VisionTargetDetector:
 			return [360, 360, 360], -1
 
 		rectangles = []
-		for i in range(2):
+		for i in range(1):
 			c = contours[i]
 			if cv2.contourArea(c) < 100:
 				return [360, 360, 360], -1
