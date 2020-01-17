@@ -20,7 +20,6 @@ class DepthLiveGenerator:
         self.set_camera_settings(str(input_port))
 
         frame, _, _ = self.get_frame()
-
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
 
     def __enter__(self):
@@ -52,4 +51,4 @@ class DepthLiveGenerator:
         for y in range(self.SCREEN_HEIGHT):
             for x in range(self.SCREEN_WIDTH):
                 arr[y, x] = frame.get_distance(x, y)
-        return np.asanyarray(image), np.asanyarray(arr)
+        return np.asanyarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), np.asanyarray(arr)
