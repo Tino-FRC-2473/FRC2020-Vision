@@ -5,7 +5,7 @@ import pyrealsense2 as rs
 
 
 class DepthLiveGenerator:
-    def __init__(self, input):
+    def __init__(self, input_port):
         self.pipeline = rs.pipeline()
         self.config = rs.config()
         self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
@@ -14,10 +14,10 @@ class DepthLiveGenerator:
         prof = self.pipeline.start(self.config)
         s = prof.get_device().query_sensors()[1]
         s.set_option(rs.option.exposure, 50)
-        self.input_path = input
+        self.input_path = input_port
 
-        self.input = cv2.VideoCapture(int(input))
-        self.set_camera_settings(str(input))
+        self.input = cv2.VideoCapture(int(input_port))
+        self.set_camera_settings(str(input_port))
 
         frame, _, _ = self.get_frame()
 
@@ -32,7 +32,7 @@ class DepthLiveGenerator:
         try:
             subprocess.call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_auto=1"])
             subprocess.call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_absolute=1"])
-        except:
+        except FileNotFoundError:
             print("exposure adjustment not completed")
 
     def get_frame(self):
