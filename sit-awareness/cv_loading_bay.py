@@ -35,6 +35,7 @@ class VisionTargetDetector:
         # ABC where A is FIELD_OF_VIEW_RAD/2, a is SCREEN_WIDTH/2, and b is the focal length
         self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(self.FIELD_OF_VIEW_RAD / 2.0)
 
+                # experimentally determined distance constant
         self.DISTANCE_CONSTANT = 1.359624061
 
     def __enter__(self):
@@ -43,7 +44,7 @@ class VisionTargetDetector:
     def __exit__(self, type, value, tb):
         self.input.release()
         cv2.destroyAllWindows()
-        print("\nexited")
+        print("exited")
 
     # sets exposure of the camera (will only work on Linux systems)
     def set_camera_settings(self, camera_port):
@@ -73,31 +74,15 @@ class VisionTargetDetector:
 
         return frame
 
+    # convert rotation matrix to euler angles
     def get_euler_from_rodrigues(self, rmat):
-        roll = 180*math.atan2(-rmat[2][1], rmat[2][2])/math.pi
-        pitch = 180*math.asin(rmat[2][0])/math.pi
-        yaw = 180*math.atan2(-rmat[1][0], rmat[0][0])/math.pi
-        return yaw, pitch, roll
+        rx = 180*math.atan2(-rmat[2][1], rmat[2][2])/math.pi
+        ry = 180*math.asin(rmat[2][0])/math.pi
+        rz = 180*math.atan2(-rmat[1][0], rmat[0][0])/math.pi
+        return rx, ry, rz
 
-        # sin = math.sqrt(rmat[2][0] * rmat[2][0] + rmat[2][1] * rmat[2][1])
-        # if sin >= 1e-6:
-        #     z1 = math.atan2(rmat[2][0], rmat[2][1])  # around z1-axis
-        #     x = math.atan2(sin, rmat[2][2])  # around x-axis
-        #     z2 = math.atan2(rmat[0][2], -rmat[1][2])  # around z2-axis
-        # else:  # gimbal lock
-        #     z1 = 0  # around z1-axis
-        #     x = math.atan2(sin, rmat[2][2])  # around x-axis
-        #     z2 = 0  # around z2-axis
-        #
-        # euler = np.array([[z1], [x], [z2]])
-        #
-        # euler_deg = -180 * euler / math.pi
-        # # euler_deg[0][0] = (360 - euler_deg[0][0])%360
-        # euler_deg[1][0] = euler_deg[1][0]
-        #
-        # return euler_deg[0][0], euler_deg[1][0], euler_deg[2][0]
-
-    def get_angle_dist(self, rectangles):
+    # calculate rotation and translation vectors from contour rectangle
+    def get_angle_dist(self, rectangle):
 
         obj_points = [[ 3.5,  5.5, 0],
                       [-3.5,  5.5, 0],
@@ -106,9 +91,8 @@ class VisionTargetDetector:
 
         img_points = []
 
-        for r in rectangles:
-            for p in r.get_points():
-                img_points.append([p.x, p.y])
+        for p in rectangle.get_points():
+            img_points.append([p.x, p.y])
 
         frame = self.get_frame()
 
@@ -122,10 +106,10 @@ class VisionTargetDetector:
                                     [0,                        self.FOCAL_LENGTH_PIXELS, self.SCREEN_HEIGHT/2],
                                     [0,                        0,                        1]])
 
-        #Returning solvePnP which returns the rotation vector and translation vector
-        bool, rvec, tvec = cv2.solvePnP(obj_points, img_points, camera_matrix, None)
-        return rvec, tvec, np.float64(obj_points)
+        _, rvec, tvec = cv2.solvePnP(obj_points, img_points, camera_matrix, None)
+        return rvec, tvec
 
+    # simplify contour into four corner points
     def get_corners(self, contour):
 
         hull = cv2.convexHull(contour)
@@ -153,6 +137,10 @@ class VisionTargetDetector:
             arrmax_changed.append([max_arr[i]])
         return np.int0(arrmax_changed)
 
+    def display_windows(self, frame, mask):
+        cv2.imshow("contours: " + str(self.input_path), mask)
+        cv2.imshow("frame: " + str(self.input_path), frame)
+
     def run_cv(self, display=True):
 
         frame = self.get_frame()
@@ -164,49 +152,52 @@ class VisionTargetDetector:
         # isolate the desired shades of green
         mask = cv2.inRange(hsv, low_green, high_green)
 
+                # temporary fix until the Jetson is updated to opencv version 4
         if (cv2.__version__[0] == '3'):
             _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        else: 
+        else:
             contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+                # sort contours by area in descending order
         contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
 
         if len(contours) < 2:
+            self.display_windows(frame, mask)
             return [360, 360, 360], -1
 
-        rectangles = []
-        for i in range(1):
-            c = contours[i]
-            if cv2.contourArea(c) < 100:
-                return [360, 360, 360], -1
+        c = contours[0] # use the largest contour
 
-            area = cv2.contourArea(c)
-            corners = self.get_corners(c)
-            rectangles.append(Rectangle(corners, area))
-            cv2.drawContours(frame, corners, -1, (0,0,255), 6)
+        if cv2.contourArea(c) < 100:
+            self.display_windows(frame, mask)
+            return [360, 360, 360], -1
 
-        r, t, o = self.get_angle_dist(rectangles)
-        rmat, _ = cv2.Rodrigues(r)
+        corners = self.get_corners(c)
+        area = cv2.contourArea(c)
+        cv2.drawContours(frame, corners, -1, (0,0,255), 6)
 
-        rz, ry, rx = self.get_euler_from_rodrigues(rmat)
+        r, t = self.get_angle_dist(Rectangle(corners, area))
+        rmat, _ = cv2.Rodrigues(r) # convert rotation vector to matrix
+
+        rx, ry, rz = self.get_euler_from_rodrigues(rmat)
         t *= self.DISTANCE_CONSTANT
+        tx, ty, tz = t[0][0], t[1][0], t[2][0]
 
+	    # display values in the frame
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(frame, "rx: " + str(round(rx,2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
         cv2.putText(frame, "ry: " + str(round(ry,2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
         cv2.putText(frame, "rz: " + str(round(rz,2)), (20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(frame, "tx: " + str(round(tx,2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(frame, "ty: " + str(round(ty,2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(frame, "tz: " + str(round(tz,2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
 
-        cv2.putText (frame, "tx: " + str(round(t[0][0],2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
-        cv2.putText (frame, "ty: " + str(round(t[1][0],2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
-        cv2.putText (frame, "tz: " + str(round(t[2][0],2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
-        
         # show windows
         if display:
-            cv2.imshow("contours: " + str(self.input_path), mask)
-            cv2.imshow("frame: " + str(self.input_path), frame)
+            self.display_windows(frame, mask)
 
-        return [rx, ry, rz], t
+        return [rx, ry, rz], [tx, ty, tz]
 
+# this class defines a rectangle
 class Rectangle:
 
     def __init__(self, box, area):
@@ -225,9 +216,9 @@ class Rectangle:
         points = self.points
         mx, my = self.get_center().x, self.get_center().y
 
-        #sort points clockwise
         def sort_clockwise(p):
             return (math.atan2(p.y - my, p.x - mx) + 2 * math.pi) % (2*math.pi)
+
         points.sort(key=sort_clockwise)
         return points
 
