@@ -6,6 +6,7 @@ import imghdr
 import traceback
 import os
 from math import sin, cos
+from operator import add
 
 # finds angle between robot's heading and the perpendicular to the targets
 class VisionTargetDetector:
@@ -25,6 +26,9 @@ class VisionTargetDetector:
 
         frame = self.get_frame()
 
+        self.previous_r = []
+        self.previous_t = []
+
         # intialize screen width and screen height
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
 
@@ -35,8 +39,11 @@ class VisionTargetDetector:
         # ABC where A is FIELD_OF_VIEW_RAD/2, a is SCREEN_WIDTH/2, and b is the focal length
         self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(self.FIELD_OF_VIEW_RAD / 2.0)
 
-                # experimentally determined distance constant
+        # experimentally determined distance constant
         self.DISTANCE_CONSTANT = 1.359624061
+
+        # number of previous values to keep for average
+        self.NUM_VALS = 5
 
     def __enter__(self):
         return self
@@ -141,6 +148,28 @@ class VisionTargetDetector:
         cv2.imshow("contours: " + str(self.input_path), mask)
         cv2.imshow("frame: " + str(self.input_path), frame)
 
+    def update_values(self, r, t):
+
+        if len(self.previous_r) == self.NUM_VALS:
+            self.previous_r.pop(0)
+
+        if len(self.previous_t) == self.NUM_VALS:
+            self.previous_t.pop(0)
+
+        self.previous_r.append(r)
+        self.previous_t.append(t)
+
+    def get_avg_values(self):
+
+        r_sum = [0, 0, 0]
+        t_sum = [0, 0, 0]
+
+        for i in range(3):
+            r_sum[i] = sum(r[i] for r in self.previous_r)
+            t_sum[i] = sum(t[i] for t in self.previous_t)
+
+        return r_sum, t_sum
+
     def run_cv(self, display=True):
 
         frame = self.get_frame()
@@ -152,13 +181,13 @@ class VisionTargetDetector:
         # isolate the desired shades of green
         mask = cv2.inRange(hsv, low_green, high_green)
 
-                # temporary fix until the Jetson is updated to opencv version 4
+        # temporary fix until the Jetson is updated to opencv version 4
         if (cv2.__version__[0] == '3'):
             _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         else:
             contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-                # sort contours by area in descending order
+        # sort contours by area in descending order
         contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
 
         if len(contours) < 2:
@@ -182,7 +211,7 @@ class VisionTargetDetector:
         t *= self.DISTANCE_CONSTANT
         tx, ty, tz = t[0][0], t[1][0], t[2][0]
 
-	    # display values in the frame
+        # display values in the frame
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(frame, "rx: " + str(round(rx,2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
         cv2.putText(frame, "ry: " + str(round(ry,2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
@@ -195,7 +224,8 @@ class VisionTargetDetector:
         if display:
             self.display_windows(frame, mask)
 
-        return [rx, ry, rz], [tx, ty, tz]
+        self.update_values([rx, ry, rz], [tx, ty, tz])
+        return self.get_avg_values()
 
 # this class defines a rectangle
 class Rectangle:
