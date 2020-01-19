@@ -22,6 +22,9 @@ class DepthLiveGenerator:
         frame, _, _ = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
 
+        self.H_FIELD_OF_VIEW_RAD = 69.4 * math.pi / 180.0
+        self.V_FIELD_OF_VIEW_RAD = 42.5 * math.pi / 180.0
+
     def __enter__(self):
         return self
 
@@ -52,3 +55,9 @@ class DepthLiveGenerator:
             for x in range(self.SCREEN_WIDTH):
                 arr[y, x] = frame.get_distance(x, y)
         return np.asanyarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), np.asanyarray(arr)
+
+    def get_horizontal_fov(self):
+        return self.H_FIELD_OF_VIEW_RAD
+
+    def get_vertical_fov(self):
+        return self.V_FIELD_OF_VIEW_RAD
