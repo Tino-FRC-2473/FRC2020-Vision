@@ -6,10 +6,14 @@ class ImageGenerator:
     def __init__(self, input_path):
         self.input_path = input_path
 
-        self.FIELD_OF_VIEW = 70.42 * math.pi / 180.0
+        self.H_FIELD_OF_VIEW_RAD = 70.42 * math.pi / 180.0
+        self.V_FIELD_OF_VIEW_RAD = 43.3 * math.pi / 180.0
 
-    def get_field_of_view(self):
-        return self.FIELD_OF_VIEW
+    def get_horizontal_fov(self):
+        return self.H_FIELD_OF_VIEW_RAD
+
+    def get_vertical_fov(self):
+        return self.V_FIELD_OF_VIEW_RAD
 
     def generate(self):
         frame = cv2.imread(self.input_path)
