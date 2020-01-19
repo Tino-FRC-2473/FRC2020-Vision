@@ -9,13 +9,13 @@ from video_live_generator import VideoLiveGenerator
 
 parser = argparse.ArgumentParser()
 parser.add_argument("generator", help="which of the generator classes to test")
-parser.add_argument("input_depth", help="path of the CSV file to read from")
-parser.add_argument("input_image", help="path of the image file to read from")
-parser.add_argument("destination", help="file to save the results to")
+parser.add_argument("-destination", nargs="?", help="file to save the results to")
+parser.add_argument("-depth", nargs="?", help="path of the CSV file to read from")
+parser.add_argument("-image", nargs="?", help="path of the image file to read from")
 args = parser.parse_args()
 
 if args.generator == "DepthDataGenerator":
-    depth_data_generator = DepthDataGenerator(args.input_depth, args.input_image)
+    depth_data_generator = DepthDataGenerator(args.depth, args.image)
     rgb, depth = depth_data_generator.generate()
     np.savetxt(args.destination, depth, delimiter=",", fmt="%s")
 
@@ -27,7 +27,7 @@ elif args.generator == "DepthLiveGenerator":
     np.savetxt(args.destination, depth, delimiter=",", fmt="%s")
 
 elif args.generator == "ImageGenerator":
-    image_generator = ImageGenerator(args.input_image)
+    image_generator = ImageGenerator(args.image)
     rgb, depth = image_generator.generate()
     print(rgb.shape)
 
