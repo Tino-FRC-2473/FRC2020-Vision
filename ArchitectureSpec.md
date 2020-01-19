@@ -22,7 +22,7 @@ Returns float degrees
 ### generate()
 Gets data for one frame
 
-Returns: `tuple(rgb ndarray shape (x, y, 3), depth ndarray shape(x,y))`
+Returns: `tuple(rgb ndarray shape (y, x, 3), depth ndarray shape(y,x))`
 For sources with no depth data, return `tuple(ndarray, None)`
 
 # Detection Team:
@@ -59,11 +59,13 @@ Utilizes contours from detection team to gain actionable data for the robot
 Constructor takes in a *Detector object
 
 ## API
-### run_cv()
+### get_values()
 Call Detector.run_detection()
 
-Return: `tuple(Euler Rotation: (yaw, pitch, roll) in degrees, World Position (x, y, z) in meters)`
+Return: `tuple(Euler Rotation: (yaw, pitch, roll) in degrees, Position (x, y, z) in meters)`
 - Ex. ((10º, 0º, 3º), (2m, 3m, 4m))
+- These coordinates and rotations are defined in the camera coordinate system (the camera is at the origin).
+- To go from object coordinate to camera coordinate, apply Rotation first, then translate by Position.
 
 # Driver/Testing file
 Common script for running any configuration of the CV pipeline.  
