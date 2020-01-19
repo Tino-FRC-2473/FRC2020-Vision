@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import cv2
 from cv_loading_bay import VisionTargetDetector
