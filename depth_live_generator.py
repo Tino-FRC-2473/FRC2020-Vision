@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import subprocess
 import pyrealsense2 as rs
+import math
 
 
 class DepthLiveGenerator:
@@ -48,6 +49,12 @@ class DepthLiveGenerator:
 
         return color_image, depth_image, depth_frame
 
+    def get_horizontal_fov(self):
+        return self.H_FIELD_OF_VIEW_RAD
+
+    def get_vertical_fov(self):
+        return self.V_FIELD_OF_VIEW_RAD
+
     def generate(self):
         arr = np.empty((self.SCREEN_HEIGHT, self.SCREEN_WIDTH))
         image, _, frame = self.get_frame()
@@ -55,9 +62,3 @@ class DepthLiveGenerator:
             for x in range(self.SCREEN_WIDTH):
                 arr[y, x] = frame.get_distance(x, y)
         return np.asanyarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), np.asanyarray(arr)
-
-    def get_horizontal_fov(self):
-        return self.H_FIELD_OF_VIEW_RAD
-
-    def get_vertical_fov(self):
-        return self.V_FIELD_OF_VIEW_RAD
