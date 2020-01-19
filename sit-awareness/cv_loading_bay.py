@@ -35,6 +35,8 @@ class VisionTargetDetector:
 		# ABC where A is FIELD_OF_VIEW_RAD/2, a is SCREEN_WIDTH/2, and b is the focal length
 		self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(self.FIELD_OF_VIEW_RAD / 2.0)
 
+		self.DISTANCE_CONSTANT = 1.359624061
+
 	def __enter__(self):
 		return self
 
@@ -193,7 +195,9 @@ class VisionTargetDetector:
 			cv2.imshow("contours: " + str(self.input_path), mask)
 			cv2.imshow("frame: " + str(self.input_path), frame)
 
-		return [yaw, pitch, roll], t
+		print(t*self.DISTANCE_CONSTANT)
+
+		return [yaw, pitch, roll], t*self.DISTANCE_CONSTANT
 
 class Rectangle:
 
