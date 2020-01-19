@@ -1,4 +1,5 @@
 import cv2
+import math
 import subprocess
 
 
@@ -10,6 +11,8 @@ class VideoLiveGenerator:
 
         frame = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
+
+        self.FIELD_OF_VIEW = 70.42 * math.pi / 180.0
 
     def __enter__(self):
         return self
@@ -26,6 +29,9 @@ class VideoLiveGenerator:
     def get_frame(self):
         _, frame = self.input.read()
         return frame
+
+    def get_field_of_view(self):
+        return self.FIELD_OF_VIEW
 
     def generate(self):
         frame = self.get_frame()
