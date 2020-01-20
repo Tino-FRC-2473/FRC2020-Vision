@@ -17,8 +17,10 @@ class VideoFileGenerator:
         return self
 
     def get_frame(self):
-        _, frame = self.input.read()
-        return frame
+        success,frame = self.input.read()
+        if(success):
+            return frame
+        return None
 
     def get_horizontal_fov(self):
         return self.H_FIELD_OF_VIEW_RAD
