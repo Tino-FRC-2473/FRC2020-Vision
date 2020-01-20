@@ -9,8 +9,8 @@ class DepthDataGenerator:
         self.depth_file = open(depth_path, "r")
         self.image_path = image_path
 
-        self.H_FIELD_OF_VIEW_RAD = 69.4 * math.pi / 180.0
-        self.V_FIELD_OF_VIEW_RAD = 42.5 * math.pi / 180.0
+        self.H_FIELD_OF_VIEW_RAD = 69.4
+        self.V_FIELD_OF_VIEW_RAD = 42.5
 
     def __enter__(self):
         return self

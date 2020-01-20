@@ -6,8 +6,8 @@ class ImageGenerator:
     def __init__(self, input_path):
         self.input_path = input_path
 
-        self.H_FIELD_OF_VIEW_RAD = 70.42 * math.pi / 180.0
-        self.V_FIELD_OF_VIEW_RAD = 43.3 * math.pi / 180.0
+        self.H_FIELD_OF_VIEW_RAD = 70.42
+        self.V_FIELD_OF_VIEW_RAD = 43.3
 
     def get_horizontal_fov(self):
         return self.H_FIELD_OF_VIEW_RAD
