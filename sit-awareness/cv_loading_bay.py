@@ -19,11 +19,13 @@ class VisionTargetDetector:
         try:
             # if input is a camera port
             self.input = cv2.VideoCapture(int(input))
-            self.set_camera_settings(input)
+            # self.set_camera_settings(input)
         except:
             # if input is a path
             self.input = cv2.VideoCapture(input)
 
+        self.input.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.input.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         frame = self.get_frame()
 
         self.previous_r = []
@@ -59,7 +61,7 @@ class VisionTargetDetector:
         camera_path = "/dev/video" + camera_port
 
         try:
-            subprocess.call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_auto=1"])
+            subprocess.check_call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_auto=1"])
             subprocess.call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_absolute=1"])
         except:
             print("exposure adjustment not completed")
@@ -211,21 +213,23 @@ class VisionTargetDetector:
         t *= self.DISTANCE_CONSTANT
         tx, ty, tz = t[0][0], t[1][0], t[2][0]
 
+        self.update_values([rx, ry, rz], [tx, ty, tz])
+        r, t = self.get_avg_values()
+
         # display values in the frame
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(frame, "rx: " + str(round(rx,2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
-        cv2.putText(frame, "ry: " + str(round(ry,2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
-        cv2.putText(frame, "rz: " + str(round(rz,2)), (20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
-        cv2.putText(frame, "tx: " + str(round(tx,2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
-        cv2.putText(frame, "ty: " + str(round(ty,2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
-        cv2.putText(frame, "tz: " + str(round(tz,2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(frame, "rx: " + str(round(r[0],2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(frame, "ry: " + str(round(r[1],2)), (20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(frame, "rz: " + str(round(r[2],2)), (20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(frame, "tx: " + str(round(t[0],2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 90), font, 1, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(frame, "ty: " + str(round(t[1],2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 60), font, 1, (255,255,255), 2, cv2.LINE_AA)
+        cv2.putText(frame, "tz: " + str(round(t[2],2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 30), font, 1, (255,255,255), 2, cv2.LINE_AA)
 
         # show windows
         if display:
             self.display_windows(frame, mask)
 
-        self.update_values([rx, ry, rz], [tx, ty, tz])
-        return self.get_avg_values()
+        return r, t
 
 # this class defines a rectangle
 class Rectangle:
