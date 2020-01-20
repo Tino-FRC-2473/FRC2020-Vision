@@ -3,7 +3,6 @@ import numpy as np
 import time
 import cv2
 from depth_data_generator import DepthDataGenerator
-from depth_live_generator import DepthLiveGenerator
 from image_generator import ImageGenerator
 from video_live_generator import VideoLiveGenerator
 from video_file_generator import VideoFileGenerator
@@ -11,11 +10,11 @@ from video_file_generator import VideoFileGenerator
 
 parser = argparse.ArgumentParser()
 parser.add_argument("generator", help="which of the generator classes to test")
-parser.add_argument("-destination", nargs="?", help="path of the file to save the results to")
-parser.add_argument("-depth", nargs="?", help="path of the CSV file to read")
-parser.add_argument("-image", nargs="?", help="path of the image file to read")
-parser.add_argument("-video", nargs="?", help="path of the video file to read")
-parser.add_argument("-play", action="store_true", help="specify whether or not to play live feeds or videos")
+parser.add_argument("--destination", nargs="?", help="path of the file to save the results to")
+parser.add_argument("--depth", nargs="?", help="path of the CSV file to read")
+parser.add_argument("--image", nargs="?", help="path of the image file to read")
+parser.add_argument("--video", nargs="?", help="path of the video file to read")
+parser.add_argument("--play", action="store_true", help="specify whether or not to play live feeds or videos")
 args = parser.parse_args()
 
 if args.generator == "DepthDataGenerator":
@@ -24,6 +23,7 @@ if args.generator == "DepthDataGenerator":
     np.savetxt(args.destination, depth, delimiter=",", fmt="%s")
 
 elif args.generator == "DepthLiveGenerator":
+    from depth_live_generator import DepthLiveGenerator
     depth_live_generator = DepthLiveGenerator(1)
 
     if not args.play:
