@@ -1,5 +1,6 @@
 import cv2
 
+
 class VideoFileGenerator:
     def __init__(self, input_path):
         self.input_path = input_path
