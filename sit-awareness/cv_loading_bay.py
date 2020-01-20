@@ -45,7 +45,7 @@ class VisionTargetDetector:
         self.DISTANCE_CONSTANT = 1.359624061
 
         # number of previous values to keep for average
-        self.NUM_VALS = 5
+        self.NUM_VALS = 10
 
     def __enter__(self):
         return self
@@ -167,8 +167,8 @@ class VisionTargetDetector:
         t_sum = [0, 0, 0]
 
         for i in range(3):
-            r_sum[i] = sum(r[i] for r in self.previous_r)
-            t_sum[i] = sum(t[i] for t in self.previous_t)
+            r_sum[i] = sum(r[i] for r in self.previous_r)/len(self.previous_r)
+            t_sum[i] = sum(t[i] for t in self.previous_t)/len(self.previous_t)
 
         return r_sum, t_sum
 
