@@ -9,7 +9,7 @@ from video_file_generator import VideoFileGenerator
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("generator", help="which of the generator classes to test")
+parser.add_argument("generator", help="choices = [DepthDataGenerator, DepthLiveGenerator, ImageGenerator, VideoLiveGenerator, VideoFileGenerator]")
 parser.add_argument("--destination", nargs="?", help="path of the file to save the results to")
 parser.add_argument("--depth", nargs="?", help="path of the CSV file to read")
 parser.add_argument("--image", nargs="?", help="path of the image file to read")
