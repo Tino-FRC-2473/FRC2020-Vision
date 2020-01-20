@@ -1,5 +1,4 @@
 import cv2
-import math
 
 
 class VideoFileGenerator:
@@ -10,8 +9,8 @@ class VideoFileGenerator:
         frame = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
 
-        self.H_FIELD_OF_VIEW_RAD = 70.42
-        self.V_FIELD_OF_VIEW_RAD = 43.3
+        self.H_FIELD_OF_VIEW = 70.42
+        self.V_FIELD_OF_VIEW = 43.3
 
     def __enter__(self):
         return self
@@ -23,10 +22,10 @@ class VideoFileGenerator:
         return None
 
     def get_horizontal_fov(self):
-        return self.H_FIELD_OF_VIEW_RAD
+        return self.H_FIELD_OF_VIEW
 
     def get_vertical_fov(self):
-        return self.V_FIELD_OF_VIEW_RAD
+        return self.V_FIELD_OF_VIEW
 
     def generate(self):
         frame = self.get_frame()
