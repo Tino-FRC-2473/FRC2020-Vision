@@ -23,8 +23,8 @@ class DepthLiveGenerator:
         frame, _, _ = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
 
-        self.H_FIELD_OF_VIEW_RAD = 69.4 * math.pi / 180.0
-        self.V_FIELD_OF_VIEW_RAD = 42.5 * math.pi / 180.0
+        self.H_FIELD_OF_VIEW_RAD = 69.4
+        self.V_FIELD_OF_VIEW_RAD = 42.5
 
     def __enter__(self):
         return self
