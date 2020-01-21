@@ -108,8 +108,12 @@ class ImageCapture:
         cv2.imshow("ref: " + str(self.input_path), frame)
 
     def capture(self):
+<<<<<<< HEAD
         filename = "test_photos/" + str(self.angle) + "degrees" + str(self.distance) + "inches.png"
 >>>>>>> Add test images
+=======
+        filename = "test_photos/" + str(self.angle) + "_degrees" + str(self.distance) + "inches.png"
+>>>>>>> Add underscore in file name
         cv2.imwrite(filename, self.get_frame())
 
     def prompt(self):
