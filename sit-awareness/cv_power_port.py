@@ -93,10 +93,10 @@ class VisionTargetDetector:
     # calculate rotation and translation vectors from contour trapezoid
     def get_angle_dist(self, trapezoid):
 
-        obj_points = [[ 19.625,  0, 0],
-                      [ 9.8125, 17, 0],
+        obj_points = [[ 9.8125, 17, 0],
                       [-9.8125, 17, 0],
-                      [-19.625,  0, 0]]
+                      [-19.625,  0, 0],
+					  [ 19.625,  0, 0]]
 
         img_points = []
 
