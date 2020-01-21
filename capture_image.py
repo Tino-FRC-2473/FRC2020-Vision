@@ -20,10 +20,13 @@ class ImageCapture:
         except:
             # if input is a path
             self.input = cv2.VideoCapture(input)
-
+            
         frame = self.get_frame()
+        self.input.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.input.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
+        print(self.SCREEN_HEIGHT)
 
     def __enter__(self):
         return self
@@ -66,8 +69,8 @@ class ImageCapture:
         cv2.imshow("frame: " + str(self.input_path), frame)
 
         ref_frame = self.get_frame()
-        cv2.circle(frame, (self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT - 20), 2, (255,255,255), 2)
-        cv2.circle(frame, (self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2), 2, (255,255,255), 2)
+        cv2.circle(frame, (320, 240), 2, (255,255,255), 2)
+        cv2.circle(frame, (320, 400), 2, (255,255,255), 2)
         cv2.imshow("ref: " + str(self.input_path), frame)
 
     def capture(self):
