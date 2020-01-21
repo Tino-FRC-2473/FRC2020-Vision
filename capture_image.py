@@ -74,7 +74,7 @@ class ImageCapture:
         cv2.imshow("ref: " + str(self.input_path), frame)
 
     def capture(self):
-        filename = "test_photos/" + str(self.angle) + "degrees" + str(self.distance) + "inches.png"
+        filename = "test_photos/" + str(self.angle) + "_degrees" + str(self.distance) + "inches.png"
         cv2.imwrite(filename, self.get_frame())
 
     def prompt(self):
