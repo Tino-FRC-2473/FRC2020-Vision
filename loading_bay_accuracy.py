@@ -5,7 +5,6 @@ import math
 
 
 
-
 def sort_x(points):
 	return points[0]
 def sort_y(points):
@@ -16,17 +15,28 @@ def dist(x1,y1,x2,y2):
 	return math.sqrt(math.pow(x1-x2,2)+math.pow(y1-y2,2))
 
 calibrator = GreenCalibration()
-
+vid = cv2.VideoCapture(1)
 while True:
-    direction = "left"
+    direction = "right"
     img = cv2.imread("test_photos/40degrees_24inches.png")
-    img = img[:, ::-1]
+    #_, img = vid.read()
+    #img = img[:][::-1]
     
     img = cv2.GaussianBlur(img, (5,5), cv2.BORDER_DEFAULT) #blurs image
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, calibrator.LOW_GREEN, calibrator.HIGH_GREEN)
     contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
+
+
+    greens = hsv[np.where((mask == 255))]
+    calibrator.get_new_hsv(greens)
+    
+    cv2.imshow("img", img)
+    cv2.imshow("mask", mask)
+
+    cv2.waitKey(1)
+    successes = 0
 
     points = []
     for contour in contours:
@@ -41,16 +51,15 @@ while True:
         cv2.drawContours(img, approx, -1, (0, 0, 255), 3)
 
 
-    greens = hsv[np.where((mask == 255))]
-    calibrator.get_new_hsv(greens)
-    
-    cv2.imshow("img", img)
-    cv2.imshow("mask", mask)
-
-    cv2.waitKey(1)
-    successes = 0
-
+    if len(contours)<2:
+        print("fail")
+        continue
     margin_error = 0.05
+    if len(points[0])<4 or len(points[1])<4:
+        print("fail")
+        continue
+
+
     print("testing left...")
     outer_left = dist(points[0][0][0],points[0][0][1],points[0][1][0],points[0][1][1])
     inner_left = dist(points[1][0][0],points[1][0][1],points[1][1][0],points[1][1][1])
@@ -155,5 +164,5 @@ while True:
     
 
     print(str(successes)+" successes out of 4\n\n")
-    break
     
+     
