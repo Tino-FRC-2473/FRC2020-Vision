@@ -41,7 +41,7 @@ class PoseDetector:
 
         self.FOCAL_LENGTH_PIXELS = (self.generator.SCREEN_WIDTH / 2.0) / math.tan(self.generator.get_horizontal_fov())
 
-    # experimentally determined distance constant
+        # experimentally determined distance constant
         self.DISTANCE_CONSTANT = 1.359624061
 
         # number of previous values to keep for average
@@ -126,14 +126,10 @@ class PoseDetector:
     # get average of previous rotation and translation values
     def get_avg_values(self):
 
-        r_sum = [0, 0, 0]
-        t_sum = [0, 0, 0]
+        r_sum = np.mean(self.previous_r, axis=0)
+        t_sum = np.mean(self.previous_t, axis=0)
 
-        for i in range(3):
-            r_sum[i] = sum(r[i] for r in self.previous_r)/len(self.previous_r)
-            t_sum[i] = sum(t[i] for t in self.previous_t)/len(self.previous_t)
-
-        return r_sum, t_sum
+        return r_sum.tolist(), t_sum.tolist()
 
     # runs pose detection code and returns rotation and translation
     def get_values(self, display=True):
@@ -207,11 +203,11 @@ class Target:
     # returns a sorted list of points
     def get_points(self):
         points = self.points
-        mx, my = self.get_center().x, self.get_center().y
+        center = self.get_center
 
         # sort points clockwise, starting with the upper right point
         def sort_clockwise(p):
-            return (math.atan2(p.y - my, p.x - mx) + 2 * math.pi) % (2*math.pi)
+            return (math.atan2(p.y - center.y, p.x - center.x) + 2 * math.pi) % (2*math.pi)
 
         points.sort(key=sort_clockwise)
         return points

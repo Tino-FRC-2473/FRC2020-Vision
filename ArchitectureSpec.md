@@ -48,14 +48,15 @@ Returns: List of contours, one per target sorted by enclosed area
 "Contour" is output of [cv2.findContours](https://docs.opencv.org/2.4/modules/imgproc/doc/structural_analysis_and_shape_descriptors.html#findcontours)
 - For goal, return list with one contour (U shape)
 - For loading, return list with two contours (inside and outside)
-- For balls, return list with zero or more contours 
+- For balls, return list with zero or more contours
 
-# Situational Awareness: 
+# Situational Awareness:
 Utilizes contours from detection team to gain actionable data for the robot
 ## Responsibilities
 - Position of camera relative to targets (3D position)
 - Angle (3D)
 ## Class Structure
+1 PoseDetector class
 Constructor takes in a *Detector object
 
 ## API

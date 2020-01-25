@@ -9,14 +9,10 @@ from cv import PoseDetector
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input", help="read from the given camera or file", default="0")
-parser.add_argument("target", help="target to detect pose for", default="lb")
+parser.add_argument("target", help="target to detect pose for", choices=["loading_bay", "power_port"])
 args = parser.parse_args()
 
 print("reading from", args.input)
-
-if not (args.target == "lb" or args.target == "pp"):
-	print("invalid target specified")
-	return
 
 pd = PoseDetector(args.input, args.target)
 wait_time = 0 # wait time of 0 will wait indefinitely for next key press
