@@ -16,6 +16,8 @@ class DepthLiveGenerator:
         s.set_option(rs.option.exposure, 50)
         self.input_path = input_port
 
+        self.scale = prof.get_device().first_depth_sensor().get_depth_scale()
+
         self.input = cv2.VideoCapture(int(input_port))
         self.set_camera_settings(str(input_port))
 
@@ -55,9 +57,5 @@ class DepthLiveGenerator:
         return self.V_FIELD_OF_VIEW
 
     def generate(self):
-        arr = np.empty((self.SCREEN_HEIGHT, self.SCREEN_WIDTH))
-        image, _, frame = self.get_frame()
-        for y in range(self.SCREEN_HEIGHT):
-            for x in range(self.SCREEN_WIDTH):
-                arr[y, x] = frame.get_distance(x, y)
-        return np.asanyarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), np.asanyarray(arr)
+        image, depth, _ = self.get_frame()
+        return np.asanyarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), self.scale*np.asanyarray(depth)
