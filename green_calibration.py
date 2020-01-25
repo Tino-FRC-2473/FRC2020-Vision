@@ -5,8 +5,8 @@ import subprocess
 import imghdr
 import random
 
-class GreenCalibration:
 
+class GreenCalibration:
 
     def __init__(self):
 
@@ -24,7 +24,7 @@ class GreenCalibration:
 
     def get_new_hsv(self, res):
         if (len(res) == 0):
-        	return self.LOW_GREEN, self.HIGH_GREEN
+            return self.LOW_GREEN, self.HIGH_GREEN
         for i in range(100):
             row = random.randrange(0, len(res))
             self.TRUE_GREEN_VALS = np.append(self.TRUE_GREEN_VALS, np.reshape(np.array(res[row]), (1, 1, 3)), 0)
