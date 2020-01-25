@@ -1,8 +1,7 @@
 import cv2
 import numpy as np
-from green_calibration import GreenCalibration
 import math
-
+from loading_bay_detector import LoadingBayDetector
 
 
 def sort_x(points):
@@ -14,23 +13,21 @@ def sort_y(points):
 def dist(x1,y1,x2,y2):
 	return math.sqrt(math.pow(x1-x2,2)+math.pow(y1-y2,2))
 
-calibrator = GreenCalibration()
+img = cv2.imread("test_photos/40degrees_24inches.png")
 vid = cv2.VideoCapture(1)
+detector = LoadingBayDetector(img)
+
 while True:
     direction = "right"
-    img = cv2.imread("test_photos/40degrees_24inches.png")
+    
     #_, img = vid.read()
     #img = img[:][::-1]
     
-    # img = cv2.GaussianBlur(img, (5,5), cv2.BORDER_DEFAULT) #blurs image
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, calibrator.LOW_GREEN, calibrator.HIGH_GREEN)
-    contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
+    contours = detector.run_detector()
     contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
 
 
-    greens = hsv[np.where((mask == 255))]
-    calibrator.get_new_hsv(greens)
     
     cv2.imshow("img", img)
     cv2.imshow("mask", mask)
