@@ -4,15 +4,20 @@ import cv2
 import argparse
 from cv import PoseDetector
 
+# take in an argument to specify either loading bay or power port
 parser = argparse.ArgumentParser()
 parser.add_argument("target", help="target to detect pose for", default="lb")
 args = parser.parse_args()
+
+if not (args.target == "lb" or args.target == "pp"):
+	print("invalid target specified")
+	return
 
 with open('vision_output.csv', mode='w', newline='') as output_file:
 	output_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 	sorted_photos = sorted(os.listdir('test_photos_' + args.target))
 	output_writer.writerow(["filename", "distance", "angle", "rx", "ry", "rz", "tx", "ty", "tz"])
-	#for every filename
+
 	for filename in sorted_photos:
 		pd = PoseDetector('test_photos_' + args.target + '/' + filename, args.target)
 		print(filename)

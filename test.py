@@ -14,6 +14,10 @@ args = parser.parse_args()
 
 print("reading from", args.input)
 
+if not (args.target == "lb" or args.target == "pp"):
+	print("invalid target specified")
+	return
+
 pd = PoseDetector(args.input, args.target)
 wait_time = 0 # wait time of 0 will wait indefinitely for next key press
 
