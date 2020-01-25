@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 from green_calibration import GreenCalibration
-class LoadingBayDetector:
 
+
+class LoadingBayDetector:
 
     # Constructor
     def __init__(self, generator):
@@ -10,8 +11,8 @@ class LoadingBayDetector:
         self.input = generator
 
     # Runs the detector. This means that it'll actually detect the power port
-    # and then it'll calibrate to the power port green color. This method returns
-    # the contours of the actual power port.
+    # and then it'll calibrate to the loading bay green color. This method returns
+    # the contours of the actual loading bay.
 
     def run_detector(self):
         img = self.input.get_frame()
