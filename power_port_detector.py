@@ -7,12 +7,9 @@ from video_live_generator import VideoLiveGenerator
 # from depth_live_generator import DepthLiveGenerator
 
 class PowerPortDetector:
-
     # Constructor
-    # int input_type(0-image, 1-video, 2-live-camera, 3-depth-image, 4-depth-video)
     def __init__(self, input_type):
         self.calibrator = GreenCalibration()
-
         self.inp = None
         if(input_type == "depth_data"):
             self.inp = DepthDataGenerator()
