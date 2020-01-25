@@ -15,15 +15,15 @@ args = parser.parse_args()
 print("reading from", args.input)
 
 pd = PoseDetector(args.input, args.target)
-wait_time = 0 # wait time of 0 will wait indefinitely for next key press
+wait_time = 0  # wait time of 0 will wait indefinitely for next key press
 
 # if input is from a camera, set wait time to 3 ms
 if len(args.input) == 1:
-	wait_time = 3
+    wait_time = 3
 
 with pd as p:
-	while True:
-		p.get_values()
-		key = cv2.waitKey(wait_time)
-		if key == ord('q'):
-			break
+    while True:
+        p.get_values()
+        key = cv2.waitKey(wait_time)
+        if key == ord('q'):
+            break
