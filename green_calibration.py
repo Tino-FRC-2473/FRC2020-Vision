@@ -7,6 +7,7 @@ import random
 
 class GreenCalibration:
 
+
     def __init__(self):
 
         rgb_data = np.loadtxt('green_data.csv', dtype=np.uint8, delimiter=',')
