@@ -1,9 +1,8 @@
 import cv2 as cv
 from loading_bay_detector import LoadingBayDetector
 
-vid = cv2.VideoCapture(1)
-detector = LoadingBayDetector(None)
+detector = LoadingBayDetector("video_live")
 
 while(True):
-    detector.run_detector(vid.read())
+    detector.run_detector()
     cv2.waitKey(3)

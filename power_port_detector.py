@@ -23,7 +23,7 @@ class PowerPortDetector:
         elif(input_type == "video_file"):
             self.inp = VideoFileGenrator()
         elif(input_type == "video_live"):
-            self.inp = VideoLiveGenerator()
+            self.inp = VideoLiveGenerator(2)
 
 
     # Runs the detector, taking in the input image and calibrator object. This means that it'll actually
