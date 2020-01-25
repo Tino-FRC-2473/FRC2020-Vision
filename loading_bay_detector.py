@@ -4,26 +4,16 @@ from green_calibration import GreenCalibration
 class LoadingBayDetector:
 
     # Constructor
-    # int input_type(0-image, 1-video, 2-live-camera, 3-depth-image, 4-depth-video)
-    def __init__(self, input_img):
+    def __init__(self, generator):
         self.calibrator = GreenCalibration()
-        inp = None
-        if(input_type == 0):
-            inp =
-        elif(input_type == 1):
-            inp =
-        elif(input_type == 2):
-            inp =
-        elif(input_type == 3):
-            inp =
-        else:
-            inp =
+        self.input = generator
 
-    # Runs the detector, taking in the input image and calibrator object. This means that it'll actually
-    # detect the loading bay and then it'll calibrate to the loading bay green color. This method returns
-    # the contours of the actual loading bay.
-    def run_detector(self, inp):
-        img = inp
+
+    # Runs the detector. This means that it'll actually detect the power port
+    # and then it'll calibrate to the power port green color. This method returns
+    # the contours of the actual power port.
+    def run_detector(self):
+        img = self.input.get_frame()
         img = cv2.GaussianBlur(img, (3,3), cv2.BORDER_DEFAULT) #blurs image
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, self.calibrator.LOW_GREEN, self.calibrator.HIGH_GREEN)
@@ -34,6 +24,7 @@ class LoadingBayDetector:
 
         self.calibrator.get_new_hsv(greens)
 
-        cv2.imshow("frame", img)
-        cv2.imshow("contours", contours)
         return contours
+
+    def get_generator():
+        return self.input
