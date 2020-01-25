@@ -7,7 +7,8 @@ import random
 
 class GreenCalibration:
 
-    #This is how many standard deviations below and above the mean the low green/high green will be
+
+    # This is how many standard deviations below and above the mean the low green/high green will be
     H_STD_TOLERANCE = 3.25
     S_STD_TOLERANCE = 3.5
     V_STD_TOLERANCE = 3.25
@@ -28,7 +29,7 @@ class GreenCalibration:
 
     def get_new_hsv(self, mask):
         if (len(mask) == 0):
-        	return self.low_green, self.high_green
+            return self.low_green, self.high_green
         for i in range(100):
             row = random.randrange(0, len(mask))
             self.true_green_vals = np.append(self.true_green_vals, np.reshape(np.array(mask[row]), (1, 1, 3)), 0)
