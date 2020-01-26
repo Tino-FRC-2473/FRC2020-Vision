@@ -41,7 +41,7 @@ class PoseDetector:
                                [19.625,   0, 0]]
 
         frame, _ = self.generator.generate()
-        self.SCREEN_WIDTH, self.SCREEN_HEIGHT = frame.shape[:2]
+        self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
         self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(self.generator.get_horizontal_fov())
 
         # experimentally determined distance constant

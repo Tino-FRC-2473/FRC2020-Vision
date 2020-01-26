@@ -58,4 +58,4 @@ class DepthLiveGenerator:
 
     def generate(self):
         image, depth, _ = self.get_frame()
-        return np.asanyarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), self.scale*np.asanyarray(depth)
+        return image, self.scale*np.asanyarray(depth)

@@ -17,4 +17,3 @@ class ImageGenerator:
     def generate(self):
         frame = cv2.imread(self.input_path)
         return frame, None
-        # return cv2.cvtColor(frame, cv2.COLOR_BGR2HSV), None

@@ -18,6 +18,7 @@ parser.add_argument("--destination", "--dest", nargs="?", help="path of the file
 parser.add_argument("--depth", "-d", nargs="?", help="path of the CSV file to read")
 parser.add_argument("--image", "-i", nargs="?", help="path of the image file to read")
 parser.add_argument("--video", "-v", nargs="?", help="path of the video file to read")
+parser.add_argument("--port", "-p", nargs="?", help="camera port to read from")
 parser.add_argument("target", help="target to detect pose for", choices=["loading_bay", "power_port"])
 args = parser.parse_args()
 
@@ -27,12 +28,12 @@ wait_time = 0  # wait time of 0 will wait indefinitely for next key press
 if args.generator == "depth_data":
     generator = DepthDataGenerator(args.depth, args.image)
 elif args.generator == "depth_live":
-    generator = DepthLiveGenerator(1)
+    generator = DepthLiveGenerator(args.port)
     wait_time = 3
 elif args.generator == "image":
     generator = ImageGenerator(args.image)
 elif args.generator == "video_live":
-    generator = VideoLiveGenerator(1)
+    generator = VideoLiveGenerator(args.port)
     wait_time = 3
 elif args.generator == "video_file":
     generator = VideoFileGenerator(args.video)
