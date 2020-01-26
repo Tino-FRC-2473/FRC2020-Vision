@@ -88,7 +88,7 @@ class PoseDetector:
         hull = cv2.convexHull(contour)
         hull_changed = []
         for i in range(len(hull)):
-            hull_changed.append([hull[i][0][0], hull[i][0][1]])
+            hull_changed.append(Point(hull[i][0][0], hull[i][0][1]))
 
         max = 0
         max_arr = []
@@ -96,18 +96,17 @@ class PoseDetector:
             for j in range(i):
                 for k in range(j):
                     for m in range(k):
-                        total = 0
-                        total += math.hypot(hull_changed[i][0] - hull_changed[j][0], hull_changed[i][1] - hull_changed[j][1])
-                        total += math.hypot(hull_changed[j][0] - hull_changed[k][0], hull_changed[j][1] - hull_changed[k][1])
-                        total += math.hypot(hull_changed[k][0] - hull_changed[m][0], hull_changed[k][1] - hull_changed[m][1])
-                        total += math.hypot(hull_changed[m][0] - hull_changed[i][0], hull_changed[m][1] - hull_changed[i][1])
+                        total = hull_changed[i].get_dist(hull_changed[j])
+                        total += hull_changed[j].get_dist(hull_changed[k])
+                        total += hull_changed[k].get_dist(hull_changed[m])
+                        total += hull_changed[m].get_dist(hull_changed[i])
                         if(total > max):
                             max = total
                             max_arr = [hull_changed[i], hull_changed[j], hull_changed[k], hull_changed[m]]
 
         arrmax_changed = []
-        for i in range(len(max_arr)):
-            arrmax_changed.append([max_arr[i]])
+        for i in max_arr:
+            arrmax_changed.append([i.x, i.y])
         return np.int0(arrmax_changed)
 
     def display_windows(self, frame, mask):
@@ -154,7 +153,7 @@ class PoseDetector:
 
         corners = self.get_corners(c)
         area = cv2.contourArea(c)
-        cv2.drawContours(frame, corners, -1, (0, 0, 255), 6)
+        cv2.drawContours(frame, [corners], -1, (0, 0, 255), 6)
 
         r, t = self.get_angle_dist(Target(corners, area))
         rmat, _ = cv2.Rodrigues(r)  # convert rotation vector to matrix
@@ -189,8 +188,9 @@ class Target:
         self.box = box
         self.area = area
         self.points = []
+        print(box)
         for coordinates in box:
-            self.points.append(Point(coordinates[0][0], coordinates[0][1]))
+            self.points.append(Point(coordinates[0], coordinates[1]))
 
     # return center of target as a Point object
     def get_center(self):
@@ -220,3 +220,6 @@ class Point:
 
     def get_coordinate(self):
         return [self.x, self.y]
+
+    def get_dist(self, other):
+        return math.hypot(self.x - other.x, self.y - other.y)
