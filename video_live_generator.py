@@ -38,4 +38,4 @@ class VideoLiveGenerator:
 
     def generate(self):
         frame = self.get_frame()
-        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), None
+        return frame, None
