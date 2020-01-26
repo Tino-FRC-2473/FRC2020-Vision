@@ -22,25 +22,23 @@ parser.add_argument("target", help="target to detect pose for", choices=["loadin
 args = parser.parse_args()
 
 generator = None
+wait_time = 0  # wait time of 0 will wait indefinitely for next key press
 
 if args.generator == "depth_data":
     generator = DepthDataGenerator(args.depth, args.image)
 elif args.generator == "depth_live":
     generator = DepthLiveGenerator(1)
+    wait_time = 3
 elif args.generator == "image":
     generator = ImageGenerator(args.image)
 elif args.generator == "video_live":
     generator = VideoLiveGenerator(1)
+    wait_time = 3
 elif args.generator == "video_file":
     generator = VideoFileGenerator(args.video)
 
 target_detector = TargetDetector(generator)
 pd = PoseDetector(target_detector, args.target)
-wait_time = 0  # wait time of 0 will wait indefinitely for next key press
-
-# if input is from a camera, set wait time to 3 ms
-if len(args.input) == 1:
-    wait_time = 3
 
 with pd as p:
     while True:

@@ -40,7 +40,9 @@ class PoseDetector:
                                [-19.625,  0, 0],
                                [19.625,   0, 0]]
 
-        self.FOCAL_LENGTH_PIXELS = (self.generator.SCREEN_WIDTH / 2.0) / math.tan(self.generator.get_horizontal_fov())
+        frame, _ = self.generator.generate()
+        self.SCREEN_WIDTH, self.SCREEN_HEIGHT = frame.shape[:2]
+        self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(self.generator.get_horizontal_fov())
 
         # experimentally determined distance constant
         self.DISTANCE_CONSTANT = 1.359624061
@@ -73,8 +75,8 @@ class PoseDetector:
         obj_points = np.float64(self.obj_points)
         img_points = np.float64(img_points)
 
-        camera_matrix = np.float64([[self.FOCAL_LENGTH_PIXELS, 0,                        self.generator.SCREEN_WIDTH/2],
-                                    [0,                        self.FOCAL_LENGTH_PIXELS, self.generator.SCREEN_HEIGHT/2],
+        camera_matrix = np.float64([[self.FOCAL_LENGTH_PIXELS, 0,                        self.SCREEN_WIDTH/2],
+                                    [0,                        self.FOCAL_LENGTH_PIXELS, self.SCREEN_HEIGHT/2],
                                     [0,                        0,                        1]])
 
         _, rvec, tvec = cv2.solvePnP(obj_points, img_points, camera_matrix, None)
@@ -136,8 +138,11 @@ class PoseDetector:
     def get_values(self, display=True):
 
         frame, _ = self.generator.generate()
+        contours, mask = self.detector.run_detector()
 
-        contours = detector.run_detector()
+        if len(contours) < 1:
+            self.display_windows(frame, mask)
+            return [360, 360, 360], -1
 
         # sort contours by area in descending order
         contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
@@ -196,7 +201,7 @@ class Target:
     # returns a sorted list of points
     def get_points(self):
         points = self.points
-        center = self.get_center
+        center = self.get_center()
 
         # sort points clockwise, starting with the upper right point
         def sort_clockwise(p):
