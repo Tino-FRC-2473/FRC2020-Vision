@@ -1,8 +1,3 @@
-import depth_data_generator
-import depth_live_generator
-import image_generator
-import video_file_generator
-import video_live_generator
 import math
 import cv2
 import numpy as np
@@ -12,6 +7,12 @@ import traceback
 import os
 from math import sin, cos
 from operator import add
+# from depth_data_generator import DepthDataGenerator
+# from depth_live_generator import DepthLiveGenerator
+from image_generator import ImageGenerator
+from video_file_generator import VideoFileGenerator
+from video_live_generator import VideoLiveGenerator
+from target_detector import TargetDetector
 
 
 # finds rotation and translation of vision targets
@@ -28,12 +29,12 @@ class PoseDetector:
 
         self.obj_points = []
 
-        if target == "lb":
+        if target == "loading_bay":
             self.obj_points = [[3.5,   5.5, 0],
                                [-3.5,  5.5, 0],
                                [-3.5, -5.5, 0],
                                [3.5,  -5.5, 0]]
-        elif target == "pp":
+        elif target == "power_port":
             self.obj_points = [[9.8125,  17, 0],
                                [-9.8125, 17, 0],
                                [-19.625,  0, 0],
@@ -56,9 +57,9 @@ class PoseDetector:
 
     # convert rotation matrix to euler angles
     def get_euler_from_rodrigues(self, rmat):
-        rx = 180*math.atan2(-rmat[2][1], rmat[2][2])/math.pi
-        ry = 180*math.asin(rmat[2][0])/math.pi
-        rz = 180*math.atan2(-rmat[1][0], rmat[0][0])/math.pi
+        rx = 180 * math.atan2(-rmat[2][1], rmat[2][2]) / math.pi
+        ry = 180 * math.asin(rmat[2][0]) / math.pi
+        rz = 180 * math.atan2(-rmat[1][0], rmat[0][0]) / math.pi
         return rx, ry, rz
 
     # calculate rotation and translation vectors
@@ -136,15 +137,7 @@ class PoseDetector:
 
         frame, _ = self.generator.generate()
 
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        low_green = np.array([65, 145, 65])
-        high_green = np.array([87, 255, 229])
-
-        # isolate the desired shades of green
-        mask = cv2.inRange(hsv, low_green, high_green)
-
-        # temporary fix until the Jetson is updated to opencv version 4
-        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours = detector.run_detector()
 
         # sort contours by area in descending order
         contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
