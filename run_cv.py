@@ -7,7 +7,8 @@ from pose_detector import PoseDetector
 from image_generator import ImageGenerator
 from video_file_generator import VideoFileGenerator
 from video_live_generator import VideoLiveGenerator
-from target_detector import TargetDetector
+from loading_bay_detector import LoadingBayDetector
+from power_port_detector import PowerPortDetector
 
 # "python test.py 0" to run from camera in port 0
 # "python test.py video.mp4" to run from the video recording video.mp4
@@ -38,8 +39,13 @@ elif args.generator == "video_live":
 elif args.generator == "video_file":
     generator = VideoFileGenerator(args.video)
 
-target_detector = TargetDetector(generator)
-pd = PoseDetector(target_detector, args.target)
+target_detector = None
+if args.target == "loading_bay":
+    target_detector = LoadingBayDetector(generator)
+elif args.target == "power_port":
+    target_detector = PowerPortDetector(generator)
+
+pd = PoseDetector(target_detector)
 
 with pd as p:
     while True:
