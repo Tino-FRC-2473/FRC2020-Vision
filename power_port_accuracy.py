@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
-from green_calibration import GreenCalibration
 import math
 
+from image_generator import ImageGenerator
+from power_port_detector import PowerPortDetector
+from loading_bay_detector import LoadingBayDetector
 
 
 def sort_x(points):
@@ -14,42 +16,36 @@ def sort_y(points):
 def dist(x1,y1,x2,y2):
 	return math.sqrt(math.pow(x1-x2,2)+math.pow(y1-y2,2))
 
-calibrator = GreenCalibration()
+detector = LoadingBayDetector(ImageGenerator("test_photos_power_port/0degrees_48inches.png"))
 # starting_val = 0.01
 #vid = cv2.VideoCapture(1)
-while True:
-    direction = "left"
-    img = cv2.imread("test_photos_pp/40degrees_48inches.png")
+total_successes = 0
+for i in range(50):
+    direction = "front"
+    img = cv2.imread("test_photos_power_port/0degrees_48inches.png")
+
     #_, img = vid.read()
     #img = img[:][::-1]
     
     # img = cv2.GaussianBlur(img, (5,5), cv2.BORDER_DEFAULT) #blurs image
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, calibrator.LOW_GREEN, calibrator.HIGH_GREEN)
-    contour, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contour = detector.run_detector()
     contour.sort(key=lambda c: cv2.contourArea(c), reverse=True)
-
     if len(contour)<1:
         print("failed")
         continue
-
-    greens = hsv[np.where((mask == 255))]
-    calibrator.get_new_hsv(greens)
-    
 
     cv2.waitKey(1)
     successes = 0
 
     points = []
     
-    epsilon = 0.006*cv2.arcLength(contour[0],True)
+    epsilon = 0.01*cv2.arcLength(contour[0],True)
     # print("starting val:", starting_val)
     # starting_val = starting_val + 0.0001
     approx = cv2.approxPolyDP(contour[0], epsilon, True)
     cv2.drawContours(img, approx, -1, (0, 0, 255), 3)
 
     cv2.imshow("img", img)
-    cv2.imshow("mask", mask)
 
     for i in range(len(approx)):
     	points.append(approx[i][0])
@@ -57,7 +53,7 @@ while True:
     points.sort(key=sort_x)
 
     
-    margin_error = 0.05
+    margin_error = 0.08
 
     if len(points)<8:
         print("fail")
@@ -172,3 +168,6 @@ while True:
     
 
     print(str(successes)+" successes out of 3\n\n") 
+    if successes==3:
+        total_successes+=1
+print(total_successes)

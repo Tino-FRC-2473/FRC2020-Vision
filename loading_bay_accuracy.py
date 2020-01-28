@@ -2,7 +2,36 @@ import cv2
 import numpy as np
 import math
 from loading_bay_detector import LoadingBayDetector
+from video_live_generator import VideoLiveGenerator
+from image_generator import ImageGenerator
 
+
+def get_corners(contour):
+
+    hull = cv2.convexHull(contour)
+    hull_changed = []
+    for i in range(len(hull)):
+        hull_changed.append([hull[i][0][0], hull[i][0][1]])
+
+    max = 0
+    max_arr = []
+    for i in range(len(hull_changed)):
+        for j in range(i):
+            for k in range(j):
+                for m in range(k):
+                    total = 0
+                    total += math.hypot(hull_changed[i][0] - hull_changed[j][0], hull_changed[i][1] - hull_changed[j][1])
+                    total += math.hypot(hull_changed[j][0] - hull_changed[k][0], hull_changed[j][1] - hull_changed[k][1])
+                    total += math.hypot(hull_changed[k][0] - hull_changed[m][0], hull_changed[k][1] - hull_changed[m][1])
+                    total += math.hypot(hull_changed[m][0] - hull_changed[i][0], hull_changed[m][1] - hull_changed[i][1])
+                    if(total > max):
+                        max = total
+                        max_arr = [hull_changed[i], hull_changed[j], hull_changed[k], hull_changed[m]]
+
+    arrmax_changed = []
+    for i in range(len(max_arr)):
+        arrmax_changed.append([max_arr[i]])
+    return np.int0(arrmax_changed)
 
 def sort_x(points):
 	return points[0]
@@ -13,12 +42,13 @@ def sort_y(points):
 def dist(x1,y1,x2,y2):
 	return math.sqrt(math.pow(x1-x2,2)+math.pow(y1-y2,2))
 
-img = cv2.imread("test_photos/40degrees_24inches.png")
-vid = cv2.VideoCapture(1)
-detector = LoadingBayDetector(img)
+img = cv2.imread("test_photos_loading_bay/0degrees_18inches.png")
 
-while True:
-    direction = "right"
+
+detector = LoadingBayDetector(ImageGenerator("test_photos_loading_bay/0degrees_18inches.png"))
+total_successes = 0;
+for i in range(50):
+    direction = "front"
     
     #_, img = vid.read()
     #img = img[:][::-1]
@@ -26,20 +56,18 @@ while True:
     
     contours = detector.run_detector()
     contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
-
-
     
-    cv2.imshow("img", img)
-    cv2.imshow("mask", mask)
 
     cv2.waitKey(1)
     successes = 0
 
     points = []
     for contour in contours:
-        epsilon = 0.1*cv2.arcLength(contour,True)
-        approx = cv2.approxPolyDP(contour,epsilon, True)
+        # epsilon = 0.2*cv2.arcLength(contour,True)
+        # approx = cv2.approxPolyDP(contour,epsilon, True)
+        approx = get_corners(contour)
         approx2 = []
+        print(len(approx))
         for i in range(len(approx)):
         	approx2.append(approx[i][0])
         #print("hi")
@@ -47,11 +75,14 @@ while True:
         points.append(approx2)
         cv2.drawContours(img, approx, -1, (0, 0, 255), 3)
 
+    
+    cv2.imshow("img", img)
+    #cv2.imshow("mask", mask)
 
     if len(contours)<2:
         print("fail")
         continue
-    margin_error = 0.05
+    margin_error = 0.15
     if len(points[0])<4 or len(points[1])<4:
         print("fail")
         continue
@@ -161,5 +192,8 @@ while True:
     
 
     print(str(successes)+" successes out of 4\n\n")
+    if successes==4:
+        total_successes+=1
+print(total_successes)
     
      
