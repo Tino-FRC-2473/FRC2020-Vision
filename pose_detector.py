@@ -12,15 +12,16 @@ from operator import add
 from image_generator import ImageGenerator
 from video_file_generator import VideoFileGenerator
 from video_live_generator import VideoLiveGenerator
-from target_detector import TargetDetector
+from loading_bay_detector import LoadingBayDetector
+from power_port_detector import PowerPortDetector
 
 
 # finds rotation and translation of vision targets
 class PoseDetector:
 
     # initilaze variables
-    def __init__(self, detector, target):
-
+    def __init__(self, detector):
+        
         self.detector = detector
         self.generator = detector.get_generator()
 
@@ -29,12 +30,12 @@ class PoseDetector:
 
         self.obj_points = []
 
-        if target == "loading_bay":
+        if type(detector) is LoadingBayDetector:
             self.obj_points = [[3.5,   5.5, 0],
                                [-3.5,  5.5, 0],
                                [-3.5, -5.5, 0],
                                [3.5,  -5.5, 0]]
-        elif target == "power_port":
+        elif type(detector) is PowerPortDetector:
             self.obj_points = [[9.8125,  17, 0],
                                [-9.8125, 17, 0],
                                [-19.625,  0, 0],
