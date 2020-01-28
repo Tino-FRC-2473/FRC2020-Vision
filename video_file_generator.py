@@ -5,6 +5,8 @@ class VideoFileGenerator:
     def __init__(self, input_path):
         self.input_path = input_path
         self.input = cv2.VideoCapture(input_path)
+        self.input.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.input.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
         frame = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
