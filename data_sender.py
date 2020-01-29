@@ -15,8 +15,41 @@ class DataSender:
         self.loading_bay_pd = PoseDetector(LoadingBayDetector(VideoLiveGenerator(1)))
         self.power_port_pd = PoseDetector(PowerPortDetector(VideoLiveGenerator(1)))
 
-    def format_data(self):
-        pass
-
     def send_data(self):
-        self.s.write(data="")
+        rot_l, trans_l = self.loading_bay_pd.get_values()
+        rot_p, trans_p = self.power_port_pd.get_values()
+
+        string = "S"
+
+        for num in rot_l:
+            string += format_data(num)
+
+        for num in trans_l:
+            string += format_data(num)
+
+        for num in rot_p:
+            string += format_data(num)
+
+        for num in trans_p:
+            string += format_data(num)
+
+        self.s.write(string + "E")
+
+
+def format_data(num):
+    num = int(num)
+
+    if num < -99:
+        return "-99"
+    if num > 999:
+        return "999"
+    if num < 0:
+        return "-" + ("%02d" % -num)
+    else:
+        return "%03d" % num
+
+
+data_sender = DataSender()
+
+while True:
+    data_sender.send_data()
