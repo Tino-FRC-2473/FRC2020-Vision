@@ -17,7 +17,7 @@ parser.add_argument("dir", help="directory with test photos")
 parser.add_argument("target", help="target to detect pose for", choices=["loading_bay", "power_port"])
 args = parser.parse_args()
 
-with open('vision_output.csv', mode='w') as output_file:
+with open('vision_output.csv', mode='w', newline='') as output_file:
     output_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     sorted_photos = sorted(os.listdir(args.dir))
     output_writer.writerow(["filename", "distance", "angle", "rx", "ry", "rz", "tx", "ty", "tz"])
