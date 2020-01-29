@@ -21,7 +21,7 @@ class PoseDetector:
 
     # initilaze variables
     def __init__(self, detector):
-        
+
         self.detector = detector
         self.generator = detector.get_generator()
 
