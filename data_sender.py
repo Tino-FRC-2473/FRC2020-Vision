@@ -18,11 +18,13 @@ class DataSender:
     def convert_data(self):
         rot, trans = self.pose_detector.get_values()
 
-        dx = abs(trans[2]) * 2.54
+        camera_tilt = trans[2]
+
+        dx = abs(trans[2] * math.cos(camera_tilt)) * 2.54
         dy = abs(trans[0]) * 2.54
         angle = rot[1]
 
-        if math.isnan(trans[0]) is True:
+        if math.isnan(trans[0]):
             return 9999, 9999, 9999
 
         return int(100 * dx), int(100 * dy), 10 * round(angle, 1)
