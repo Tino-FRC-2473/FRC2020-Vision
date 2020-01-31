@@ -21,7 +21,7 @@ class DataSender:
         dy = trans[0]
         angle = rot[1]
 
-        if trans[0] is -1.0 and rot[0] is 360.0:
+        if trans[0] == -1.0 and rot[0] == 360.0:
             return 9999, 9999, 9999
 
         return int(100*dx), int(100*dy), 10*round(angle, 1)
