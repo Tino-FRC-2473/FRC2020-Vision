@@ -1,17 +1,52 @@
 import numpy as np
 import cv2 as cv
-img = cv.imread('test.jpg')
-output = img.copy()
-hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-hsv = cv.medianBlur(hsv, 5)
-cv.imshow("hsv", hsv[:,:,1])
-circles = cv.HoughCircles(hsv[:,:,1], cv.HOUGH_GRADIENT, 0.5, 300, param1=50, param2=100, minRadius=0, maxRadius=0)
-detected_circles = np.uint16(np.around(circles))
-for (x, y ,r) in detected_circles[0, :]:
-    cv.circle(output, (x, y), r, (0, 255, 0), 3)
-    cv.circle(output, (x, y), 2, (255, 0, 0), 3)
 
 
-cv.imshow('output',output)
-cv.waitKey(0)
+vidcap = cv.VideoCapture('test_photos_balls/yellowcheck.mp4')
+
+while True:
+    low_yellow = np.array([17, 120, 120])
+    high_yellow = np.array([33, 255, 255])
+
+    # img = cv.imread('./test_photos_balls/realfield4.png')
+
+    _, img = vidcap.read()
+    HEIGHT = img.shape[0]
+
+    output = img.copy()
+    hsv = cv.cvtColor(img, cv.COLOR_BGR2HSV)
+    hsv = cv.medianBlur(hsv, 5)
+
+
+    mask = cv.inRange(hsv, low_yellow, high_yellow)
+    print(mask.dtype)
+    print(hsv[:,:,1].dtype)
+    print(hsv[:,:,1].shape)
+    print(mask.shape)
+    print(type(mask))
+
+    output = cv.bitwise_and(hsv, hsv, mask = mask)
+    cv.imshow("hsv", output[:,:,2])
+
+    th2 = cv.adaptiveThreshold(output[:,:,2], 255,cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY,15,10)
+
+    circles = cv.HoughCircles(th2, cv.HOUGH_GRADIENT, 1.8, 20, param1=70, param2=50, minRadius=20, maxRadius=60)
+
+    if(circles is None):
+        print("found no circles")
+        cv.imshow('output',output)
+        continue
+
+
+
+    detected_circles = np.uint16(np.around(circles))
+    for (x, y ,r) in detected_circles[0, :]:
+        if(y < HEIGHT/2):
+            continue
+        cv.circle(img, (x, y), r, (0, 0, 255), 3)
+        cv.circle(img, (x, y), 2, (255, 0, 0), 1)
+
+
+    cv.imshow('output',img)
+    cv.waitKey(1)
 cv.destroyAllWindows()
