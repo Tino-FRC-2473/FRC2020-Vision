@@ -17,15 +17,18 @@ class DataSender:
     def convert_data(self):
         rot, trans = self.pose_detector.get_values()
 
-        x = 0  # example:   296   cm      296
-        y = 0  # example:  1324   cm     1324
-        z = 0  # example: -  23.4 deg    -234
+        dx = trans[2]
+        dy = trans[0]
+        angle = rot[1]
 
-        return x, y, z
+        if trans[0] is -1.0 and rot[0] is 360.0:
+            return 9999, 9999, 9999
+
+        return int(100*dx), int(100*dy), 10*round(angle, 1)
 
     def send_data(self):
         x, y, z = self.convert_data()
-        self.s.write("S %04d %04d %.1s%04d E\n" % (x, y, "+" if z >= 0 else "-", abs(z)))  # example: S 0296 1324 -0234 E
+        self.s.write("S %04d %04d %.1s%04d E\n" % (x, y, "+" if z >= 0 else "-", abs(z)))
 
 
 data_sender = DataSender()
