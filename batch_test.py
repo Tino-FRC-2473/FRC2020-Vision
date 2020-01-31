@@ -2,7 +2,7 @@ import os
 import csv
 import cv2
 import argparse
-from pose_detector import PoseDetector
+from pose_calculator import PoseCalculator
 from image_generator import ImageGenerator
 from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
@@ -27,7 +27,7 @@ with open('vision_output.csv', mode='w', newline='') as output_file:
         elif args.target == "power_port":
             target_detector = PowerPortDetector(generator)
 
-        with PoseDetector(target_detector) as pd:
+        with PoseCalculator(target_detector) as pd:
             r, t = pd.get_values(display=False)
             # example filename: 0degrees_18inches.png
             output_writer.writerow([filename, int(filename[filename.index('_')+1:-10]), int(filename[:filename.index('d')]),

@@ -12,7 +12,7 @@ from power_port_detector import PowerPortDetector
 
 
 # finds rotation and translation of vision targets
-class PoseDetector:
+class PoseCalculator:
 
     # initilaze variables
     def __init__(self, detector):

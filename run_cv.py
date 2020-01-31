@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import cv2
-from pose_detector import PoseDetector
+from pose_calculator import PoseCalculator
 # from depth_data_generator import DepthDataGenerator
 # from depth_live_generator import DepthLiveGenerator
 from image_generator import ImageGenerator
@@ -45,11 +45,9 @@ if args.target == "loading_bay":
 elif args.target == "power_port":
     target_detector = PowerPortDetector(generator)
 
-pd = PoseDetector(target_detector)
-
-with pd as p:
+with PoseCalculator(target_detector) as pc:
     while True:
-        p.get_values()
+        pc.get_values()
         key = cv2.waitKey(wait_time)
         if key == ord('q'):
             break
