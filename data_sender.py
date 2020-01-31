@@ -1,6 +1,6 @@
 import math
 import serial
-from pose_detector import PoseDetector
+from pose_calculator import PoseCalculator
 from power_port_detector import PowerPortDetector
 from video_live_generator import VideoLiveGenerator
 
@@ -13,10 +13,10 @@ class DataSender:
 
         self.s = serial.Serial("/dev/" + name, rate)
 
-        self.pose_detector = PoseDetector(PowerPortDetector(VideoLiveGenerator(port)))
+        self.pose_calculator = PoseCalculator(PowerPortDetector(VideoLiveGenerator(port)))
 
     def convert_data(self):
-        rot, trans = self.pose_detector.get_values()
+        rot, trans = self.pose_calculator.get_values()
 
         camera_tilt = trans[2]
 
