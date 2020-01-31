@@ -6,12 +6,14 @@ Handles image, video, and camera input and generates arrays of RGB or depth data
 - Handle multiple cameras
 - Synchronization
 ## Class structure
-4 ImageGenerator classes
+5 ImageGenerator classes
 - `DepthDataGenerator (single frame depth filename, still image filename)`
 - `DepthLiveGenerator (Realsense camera port int)`
 - `ImageGenerator (single image frame filename)`
 - `VideoFileGenerator(filename)`
 - `VideoLiveGenerator(camera port input int)`
+1 DataSender classes
+-  `data_sender()`
 ## API
 ### get_horizontal_fov()
 Returns float degrees
@@ -24,6 +26,12 @@ Gets data for one frame
 
 Returns: `tuple(rgb ndarray shape (y, x, 3), depth ndarray shape(y,x))`
 For sources with no depth data, return `tuple(ndarray, None)`
+
+### send_data()
+Send translational vector x and z values, and rotational vector y value
+
+Returns: `String("S "+ x + " " + y + " " + z + " E")`
+If robot does not detect target return: `String("S 9999 9999 -999 E")`
 
 # Detection Team:
 Accurately detect any required target on the field
@@ -63,10 +71,11 @@ Constructor takes in a \*Detector object
 ### get_values()
 Call Detector.run_detection()
 
-Return: `tuple(Euler Rotation: (yaw, pitch, roll) in degrees, Position (x, y, z) in meters)`
-- Ex. ((10º, 0º, 3º), (2m, 3m, 4m))
+Return: `tuple(Euler Rotation: (yaw, pitch, roll) in degrees, Position (x, y, z) in inches)`
+- Ex. ((10º, 0º, 3º), (2", 3", 4"))
 - These coordinates and rotations are defined in the camera coordinate system (the camera is at the origin).
-- To go from object coordinate to camera coordinate, apply Rotation first, then translate by Position.
+- To go from object coordinate to camera coordinate, apply Rotation first, then translate by Position.x`
+
 
 # Driver/Testing file
 Common script for running any configuration of the CV pipeline.  
