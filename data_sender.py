@@ -29,6 +29,8 @@ class DataSender:
         targetx = math.cos(rot[1])trans[0] + math.sin(rot[1])trans[2]
         targetz =  math.sin(rot[2])trans[1] + math.cos(rot[2])(-math.sin(rot[1])trans[2]+math.cos(rot[1])trans[2]))
 
+        angle = math.degrees(math.acos(targety))
+
         if trans[0] is None:
             return 9999, 9999, 9999
 
