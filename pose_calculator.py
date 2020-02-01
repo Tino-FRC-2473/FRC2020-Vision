@@ -38,7 +38,8 @@ class PoseCalculator:
 
         frame, _ = self.generator.generate()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
-        self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(self.generator.get_horizontal_fov() / 2)
+        fov_radians = self.generator.get_horizontal_fov() * math.pi / 180
+        self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
 
         # experimentally determined distance constant
         self.DISTANCE_CONSTANT = 1.359624061
