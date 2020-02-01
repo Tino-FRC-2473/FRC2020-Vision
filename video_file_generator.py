@@ -39,4 +39,3 @@ class VideoFileGenerator:
 
     def is_capturing(self):
         return self.capturing
-

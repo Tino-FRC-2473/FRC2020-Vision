@@ -25,7 +25,7 @@ parser.add_argument("target", help="target to detect pose for", choices=["loadin
 args = parser.parse_args()
 
 generator = None
-wait_time = 1  
+wait_time = 1
 
 if args.generator == "depth_data":
     generator = DepthDataGenerator(args.depth, args.image)
