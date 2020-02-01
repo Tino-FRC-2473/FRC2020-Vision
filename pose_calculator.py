@@ -153,7 +153,7 @@ class PoseCalculator:
 
         corners = self.get_corners(c)
         area = cv2.contourArea(c)
-        cv2.drawContours(frame, [corners], -1, (0, 0, 255), 6)
+        cv2.drawContours(frame, [corners], -1, (0, 0, 255), 2)
 
         r, t = self.get_angle_dist(Target(corners, area))
         rmat, _ = cv2.Rodrigues(r)  # convert rotation vector to matrix
