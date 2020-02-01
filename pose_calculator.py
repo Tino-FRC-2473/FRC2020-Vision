@@ -38,7 +38,7 @@ class PoseCalculator:
 
         frame, _ = self.generator.generate()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
-        fov_radians = self.generator.get_horizontal_fov() * math.pi / 180
+        fov_radians = math.radians(self.generator.get_horizontal_fov())
         self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
 
         # experimentally determined distance constant
@@ -138,7 +138,7 @@ class PoseCalculator:
 
         if len(contours) < 1:
             self.display_windows(frame, mask)
-            return [float('nan'), float('nan'), float('nan')], [float('nan'), float('nan'), float('nan')]
+            return [None, None, None], [None, None, None]
 
         # sort contours by area in descending order
         contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
@@ -146,7 +146,7 @@ class PoseCalculator:
 
         if cv2.contourArea(c) < 100:
             self.display_windows(frame, mask)
-            return [float('nan'), float('nan'), float('nan')], [float('nan'), float('nan'), float('nan')]
+            return [None, None, None], [None, None, None]
 
         corners = self.get_corners(c)
         area = cv2.contourArea(c)
