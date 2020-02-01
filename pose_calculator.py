@@ -138,7 +138,7 @@ class PoseCalculator:
 
         if len(contours) < 1:
             self.display_windows(frame, mask)
-            return [360, 360, 360], -1
+            return [float('nan'), float('nan'), float('nan')], [float('nan'), float('nan'), float('nan')]
 
         # sort contours by area in descending order
         contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
@@ -146,7 +146,7 @@ class PoseCalculator:
 
         if cv2.contourArea(c) < 100:
             self.display_windows(frame, mask)
-            return [360, 360, 360], -1
+            return [float('nan'), float('nan'), float('nan')], [float('nan'), float('nan'), float('nan')]
 
         corners = self.get_corners(c)
         area = cv2.contourArea(c)
