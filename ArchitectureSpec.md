@@ -73,8 +73,8 @@ Constructor takes in a \*Detector object
 ### get_values()
 Call Detector.run_detection()
 
-Return: `tuple(Euler Rotation: [yaw, pitch, roll] in degrees, Position [x, y, z] in inches)`
-- Ex. ([10º, 0º, 3º], [2", 3", 4"])
+Return: `tuple(Euler Rotation: [yaw, pitch, roll] in degrees, Position [x, y, z] in meters)`
+- Ex. ([10º, 0º, 3º], [2m, 3m, 4m])
 - These coordinates and rotations are defined in the camera coordinate system (the camera is at the origin).
 - To go from object coordinate to camera coordinate, apply Rotation first, then translate by Position.
 - if the target is not seen by camera, returns _`None`_ for all six values
