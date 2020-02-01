@@ -24,7 +24,7 @@ class DataSender:
         dy = abs(trans[0]) * 2.54
         angle = rot[1]
 
-        if math.isnan(trans[0]):
+        if trans[0] is not None:
             return 9999, 9999, 9999
 
         return int(100 * dx), int(100 * dy), 10 * round(angle, 1)
