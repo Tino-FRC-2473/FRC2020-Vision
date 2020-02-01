@@ -164,6 +164,7 @@ class PoseCalculator:
 
         self.update_values([rx, ry, rz], [tx, ty, tz])
         r, t = self.get_avg_values()
+        t = [x / (12 * 3.281) for x in t]  # convert inches to meters
 
         # display values in the frame
         font = cv2.FONT_HERSHEY_SIMPLEX
