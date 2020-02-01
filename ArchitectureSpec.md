@@ -77,6 +77,7 @@ Return: `tuple(Euler Rotation: [yaw, pitch, roll] in degrees, Position [x, y, z]
 - Ex. ([10º, 0º, 3º], [2", 3", 4"])
 - These coordinates and rotations are defined in the camera coordinate system (the camera is at the origin).
 - To go from object coordinate to camera coordinate, apply Rotation first, then translate by Position.
+- if the target is not seen by camera, returns _`None`_ for all six values
 
 
 # Data Sending
