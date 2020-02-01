@@ -88,17 +88,17 @@ Sends data from PoseCalculator over serial for use by robot code.
 - Sending data over serial
 
 ## Class structure
-- One DataSender class
+1 Data sender class
+- `DataSender` ()
 
 ## API
 ### send_data()
-Send translational vector x and z values, and rotational vector y value over serial in the string format `"S 00DX 00DY [+/-]0DEG E\n"`.
+Send distance from the robot to the target along the x and z axis, and the angle to the target over serial in the string format `"S x_distance z_distance [+/-]angle E\n"`
 
-DX is in cm, DY is in cm, and DEG is in degrees, with the last digit sent being after the decimal place.
 
 Examples:
-- dx = 296 cm, dy = 1324 cm, angle = 123.4 degrees. Sends `"S 0296 1324 +1234 E\n"`
-- dx = 907 cm, dy = 89 cm, angle = -4.2 degrees. Sends `"S 0907 0089 -0042 E\n"`
+- robotx = 296 cm, robotz = 1324 cm, angle = 123.4 degrees. Sends `"S 0296 1324 +1234 E\n"`
+- robotx = 907 cm, robotz = 89 cm, angle = -4.2 degrees. Sends `"S 0907 0089 -0042 E\n"`
 
 If robot does not detect target, sends `"S 9999 9999 +9999 E\n"`
 
