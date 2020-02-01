@@ -136,6 +136,9 @@ class PoseCalculator:
         frame, _ = self.generator.generate()
         contours, mask = self.detector.run_detector()
 
+        if contours is None:
+            return [None, None, None], [None, None, None]
+
         if len(contours) < 1:
             self.display_windows(frame, mask)
             return [None, None, None], [None, None, None]

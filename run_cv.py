@@ -48,9 +48,8 @@ elif args.target == "power_port":
     target_detector = PowerPortDetector(generator)
 
 with PoseCalculator(target_detector) as pc:
-    while True:
+    while (generator.is_capturing() if args.generator == "video_file" else True):
         pc.get_values()
         key = cv2.waitKey(wait_time)
         if key == ord('q'):
             break
-

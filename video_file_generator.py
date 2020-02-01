@@ -14,6 +14,8 @@ class VideoFileGenerator:
         self.H_FIELD_OF_VIEW = 70.42
         self.V_FIELD_OF_VIEW = 43.3
 
+        self.capturing = True
+
     def __enter__(self):
         return self
 
@@ -21,7 +23,9 @@ class VideoFileGenerator:
         success, frame = self.input.read()
         if(success):
             return frame
-        return None
+        else:
+            self.capturing = False
+            return None
 
     def get_horizontal_fov(self):
         return self.H_FIELD_OF_VIEW
@@ -32,3 +36,7 @@ class VideoFileGenerator:
     def generate(self):
         frame = self.get_frame()
         return frame, None
+
+    def is_capturing(self):
+        return self.capturing
+
