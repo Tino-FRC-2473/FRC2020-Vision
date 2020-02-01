@@ -2,15 +2,18 @@ import numpy as np
 import cv2 as cv
 
 
-vidcap = cv.VideoCapture('test_photos_balls/yellowcheck.mp4')
+#vidcap = cv.VideoCapture('test_photos_balls/yellowcheck.mp4')
+#vidcap = cv.VideoCapture(1)
+#vidcap.set(cv.CAP_PROP_FRAME_WIDTH, 640)
+#vidcap.set(cv.CAP_PROP_FRAME_HEIGHT, 480)
 
 while True:
     low_yellow = np.array([17, 120, 120])
     high_yellow = np.array([33, 255, 255])
 
-    # img = cv.imread('./test_photos_balls/realfield4.png')
+    img = cv.imread('./test_photos_balls/realfield3.png')
 
-    _, img = vidcap.read()
+    #_, img = vidcap.read()
     HEIGHT = img.shape[0]
 
     output = img.copy()
@@ -19,6 +22,9 @@ while True:
 
 
     mask = cv.inRange(hsv, low_yellow, high_yellow)
+    mask = cv.erode(mask,None, iterations=7)
+    mask = cv.dilate(mask,None, iterations=10)
+
     print(mask.dtype)
     print(hsv[:,:,1].dtype)
     print(hsv[:,:,1].shape)
@@ -30,7 +36,7 @@ while True:
 
     th2 = cv.adaptiveThreshold(output[:,:,2], 255,cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY,15,10)
 
-    circles = cv.HoughCircles(th2, cv.HOUGH_GRADIENT, 1.8, 20, param1=70, param2=50, minRadius=20, maxRadius=60)
+    circles = cv.HoughCircles(th2, cv.HOUGH_GRADIENT, 1.8, 40, param1=70, param2=50, minRadius=20, maxRadius=60)
 
     if(circles is None):
         print("found no circles")
@@ -50,3 +56,4 @@ while True:
     cv.imshow('output',img)
     cv.waitKey(1)
 cv.destroyAllWindows()
+
