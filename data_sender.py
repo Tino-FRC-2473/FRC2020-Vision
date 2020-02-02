@@ -6,11 +6,12 @@ from video_live_generator import VideoLiveGenerator
 
 
 class DataSender:
-    CAMERA_TILT = 9999
+
+    CAMERA_TILT = 9999  # update with the correct camera tilt angle
 
     def __init__(self):
         name = "ttyTHS2"
-        rate = 9600
+        rate = 9600  # update with the correct baudrate
         port = 1
 
         self.s = serial.Serial("/dev/" + name, rate)
@@ -20,23 +21,24 @@ class DataSender:
     def convert_data(self):
         rot, trans = self.pose_calculator.get_values()
 
-        robotx = trans[0]
-        roboty = math.cos(self.CAMERA_TILT)*trans[1]-math.sin(self.CAMERA_TILT)*trans[2]
-        robotz = math.sin(self.CAMERA_TILT)*trans[1]+math.sin(self.CAMERA_TILT)*trans[2]
+        robot_x = trans[0]
+        robot_y = math.cos(self.CAMERA_TILT) * trans[1] - math.sin(self.CAMERA_TILT) * trans[2]
+        robot_z = math.sin(self.CAMERA_TILT) * trans[1] + math.sin(self.CAMERA_TILT) * trans[2]
 
-        targety = math.cos(rot[2])trans[1]-math.sin(rot[2])(math.cos(rot[1])trans[2])-math.sin(rot[1])trans[2])
-        targetx = math.cos(rot[1])trans[0]+math.sin(rot[1])trans[2]
-        targetz =  math.sin(rot[2])trans[1] + math.cos(rot[2])(math.cos(rot[1])trans[2])-math.sin(rot[1])trans[2]))
-        angle = math.degrees(math.acos(targety))
+        target_y = math.cos(rot[2]) * trans[1] - math.sin(rot[2]) * (math.cos(rot[1]) * trans[2]) - math.sin(rot[1]) * trans[2]
+        target_x = math.cos(rot[1]) * trans[0] + math.sin(rot[1]) * trans[2]
+        target_z = math.sin(rot[2]) * trans[1] + math.cos(rot[2]) * (math.cos(rot[1]) * trans[2]) - math.sin(rot[1]) * trans[2]
+
+        angle = math.degrees(math.acos(target_y))
 
         if trans[0] is None:
             return 9999, 9999, 9999
 
-        return int(100*robotx), int(100*robotz), 10*round(angle, 1)
+        return int(100 * robot_x), int(100 * robot_z), 10 * round(angle, 1)
 
     def send_data(self):
-        x, y, z = self.convert_data()
-        self.s.write('S {:04d} {:04d} {:+04d} E\n'.format(x, y, z))
+        x, y, angle = self.convert_data()
+        self.s.write('S {:04d} {:04d} {:+05d} E\n'.format(x, y, angle))
 
 
 data_sender = DataSender()
