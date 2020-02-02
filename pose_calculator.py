@@ -1,8 +1,3 @@
-import depth_data_generator
-import depth_live_generator
-import image_generator
-import video_file_generator
-import video_live_generator
 import math
 import cv2
 import numpy as np
@@ -12,6 +7,8 @@ import traceback
 import os
 from math import sin, cos
 from operator import add
+from loading_bay_detector import LoadingBayDetector
+from power_port_detector import PowerPortDetector
 
 
 # finds rotation and translation of vision targets
@@ -28,18 +25,21 @@ class PoseCalculator:
 
         self.obj_points = []
 
-        if target == "lb":
+        if type(detector) is LoadingBayDetector:
             self.obj_points = [[3.5,   5.5, 0],
                                [-3.5,  5.5, 0],
                                [-3.5, -5.5, 0],
                                [3.5,  -5.5, 0]]
-        elif target == "pp":
+        elif type(detector) is PowerPortDetector:
             self.obj_points = [[9.8125,  17, 0],
                                [-9.8125, 17, 0],
                                [-19.625,  0, 0],
                                [19.625,   0, 0]]
 
-        self.FOCAL_LENGTH_PIXELS = (self.generator.SCREEN_WIDTH / 2.0) / math.tan(self.generator.get_horizontal_fov())
+        frame, _ = self.generator.generate()
+        self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
+        fov_radians = math.radians(self.generator.get_horizontal_fov())
+        self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
 
         # experimentally determined distance constant
         self.DISTANCE_CONSTANT = 1.359624061
@@ -56,9 +56,9 @@ class PoseCalculator:
 
     # convert rotation matrix to euler angles
     def get_euler_from_rodrigues(self, rmat):
-        rx = 180*math.atan2(-rmat[2][1], rmat[2][2])/math.pi
-        ry = 180*math.asin(rmat[2][0])/math.pi
-        rz = 180*math.atan2(-rmat[1][0], rmat[0][0])/math.pi
+        rx = 180 * math.atan2(-rmat[2][1], rmat[2][2]) / math.pi
+        ry = 180 * math.asin(rmat[2][0]) / math.pi
+        rz = 180 * math.atan2(-rmat[1][0], rmat[0][0]) / math.pi
         return rx, ry, rz
 
     # calculate rotation and translation vectors
@@ -72,8 +72,8 @@ class PoseCalculator:
         obj_points = np.float64(self.obj_points)
         img_points = np.float64(img_points)
 
-        camera_matrix = np.float64([[self.FOCAL_LENGTH_PIXELS, 0,                        self.generator.SCREEN_WIDTH/2],
-                                    [0,                        self.FOCAL_LENGTH_PIXELS, self.generator.SCREEN_HEIGHT/2],
+        camera_matrix = np.float64([[self.FOCAL_LENGTH_PIXELS, 0,                        self.SCREEN_WIDTH/2],
+                                    [0,                        self.FOCAL_LENGTH_PIXELS, self.SCREEN_HEIGHT/2],
                                     [0,                        0,                        1]])
 
         _, rvec, tvec = cv2.solvePnP(obj_points, img_points, camera_matrix, None)
@@ -85,7 +85,7 @@ class PoseCalculator:
         hull = cv2.convexHull(contour)
         hull_changed = []
         for i in range(len(hull)):
-            hull_changed.append([hull[i][0][0], hull[i][0][1]])
+            hull_changed.append(Point(hull[i][0][0], hull[i][0][1]))
 
         max = 0
         max_arr = []
@@ -93,18 +93,17 @@ class PoseCalculator:
             for j in range(i):
                 for k in range(j):
                     for m in range(k):
-                        total = 0
-                        total += math.hypot(hull_changed[i][0] - hull_changed[j][0], hull_changed[i][1] - hull_changed[j][1])
-                        total += math.hypot(hull_changed[j][0] - hull_changed[k][0], hull_changed[j][1] - hull_changed[k][1])
-                        total += math.hypot(hull_changed[k][0] - hull_changed[m][0], hull_changed[k][1] - hull_changed[m][1])
-                        total += math.hypot(hull_changed[m][0] - hull_changed[i][0], hull_changed[m][1] - hull_changed[i][1])
+                        total = hull_changed[i].get_dist(hull_changed[j])
+                        total += hull_changed[j].get_dist(hull_changed[k])
+                        total += hull_changed[k].get_dist(hull_changed[m])
+                        total += hull_changed[m].get_dist(hull_changed[i])
                         if(total > max):
                             max = total
                             max_arr = [hull_changed[i], hull_changed[j], hull_changed[k], hull_changed[m]]
 
         arrmax_changed = []
-        for i in range(len(max_arr)):
-            arrmax_changed.append([max_arr[i]])
+        for i in max_arr:
+            arrmax_changed.append([i.x, i.y])
         return np.int0(arrmax_changed)
 
     def display_windows(self, frame, mask):
@@ -134,19 +133,12 @@ class PoseCalculator:
     # runs pose detection code and returns rotation and translation
     def get_values(self, display=True):
 
-        return [1, 1, 1], [1, 1, 1]
-
         frame, _ = self.generator.generate()
+        contours, mask = self.detector.run_detector()
 
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        low_green = np.array([65, 145, 65])
-        high_green = np.array([87, 255, 229])
-
-        # isolate the desired shades of green
-        mask = cv2.inRange(hsv, low_green, high_green)
-
-        # temporary fix until the Jetson is updated to opencv version 4
-        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        if len(contours) < 1:
+            self.display_windows(frame, mask)
+            return [None, None, None], [None, None, None]
 
         # sort contours by area in descending order
         contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
@@ -154,11 +146,11 @@ class PoseCalculator:
 
         if cv2.contourArea(c) < 100:
             self.display_windows(frame, mask)
-            return [360, 360, 360], -1
+            return [None, None, None], [None, None, None]
 
         corners = self.get_corners(c)
         area = cv2.contourArea(c)
-        cv2.drawContours(frame, corners, -1, (0, 0, 255), 6)
+        cv2.drawContours(frame, [corners], -1, (0, 0, 255), 6)
 
         r, t = self.get_angle_dist(Target(corners, area))
         rmat, _ = cv2.Rodrigues(r)  # convert rotation vector to matrix
@@ -194,7 +186,7 @@ class Target:
         self.area = area
         self.points = []
         for coordinates in box:
-            self.points.append(Point(coordinates[0][0], coordinates[0][1]))
+            self.points.append(Point(coordinates[0], coordinates[1]))
 
     # return center of target as a Point object
     def get_center(self):
@@ -205,7 +197,7 @@ class Target:
     # returns a sorted list of points
     def get_points(self):
         points = self.points
-        center = self.get_center
+        center = self.get_center()
 
         # sort points clockwise, starting with the upper right point
         def sort_clockwise(p):
@@ -224,3 +216,6 @@ class Point:
 
     def get_coordinate(self):
         return [self.x, self.y]
+
+    def get_dist(self, other):
+        return math.hypot(self.x - other.x, self.y - other.y)
