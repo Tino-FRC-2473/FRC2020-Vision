@@ -15,10 +15,10 @@ from operator import add
 
 
 # finds rotation and translation of vision targets
-class PoseDetector:
+class PoseCalculator:
 
     # initilaze variables
-    def __init__(self, detector, target):
+    def __init__(self, detector):
 
         self.detector = detector
         self.generator = detector.get_generator()
@@ -133,6 +133,8 @@ class PoseDetector:
 
     # runs pose detection code and returns rotation and translation
     def get_values(self, display=True):
+
+        return [1, 1, 1], [1, 1, 1]
 
         frame, _ = self.generator.generate()
 
