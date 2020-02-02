@@ -133,8 +133,6 @@ class PoseCalculator:
     # runs pose detection code and returns rotation and translation
     def get_values(self, display=True):
 
-        return [1, 1, 1], [1, 1, 1]
-
         frame, _ = self.generator.generate()
         contours, mask = self.detector.run_detector()
 
