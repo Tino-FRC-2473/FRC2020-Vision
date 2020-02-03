@@ -104,9 +104,9 @@ If robot does not detect target, sends `"S 9999 9999 +9999 E\n"`
 
 
 # Driver/Testing file
-Common script for running any configuration of the CV pipeline.  
+Common script for running any configuration of the CV pipeline. Stops running upon pressing the 'q' key or when the frame returned from the generator is None (for video files).
 
 ## Usage (WIP)
-`cv_runner.py --run_sitaware  [target_type] [generator_type] [generator params...]`
+`run_cv.py [generator_type] [generator params...] [target_type]`
 
-`python3 cv_runner.py VideoGenerator Ball`
+`python3 run_cv.py image -i test_photos_loading_bay/0degrees_18inches.png loading_bay`

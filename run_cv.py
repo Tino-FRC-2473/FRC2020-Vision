@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import time
 import argparse
 import cv2
 from pose_calculator import PoseCalculator
@@ -24,7 +25,7 @@ parser.add_argument("target", help="target to detect pose for", choices=["loadin
 args = parser.parse_args()
 
 generator = None
-wait_time = 0  # wait time of 0 will wait indefinitely for next key press
+wait_time = 1
 
 if args.generator == "depth_data":
     generator = DepthDataGenerator(args.depth, args.image)
@@ -38,6 +39,7 @@ elif args.generator == "video_live":
     wait_time = 3
 elif args.generator == "video_file":
     generator = VideoFileGenerator(args.video)
+    wait_time = int(1000./30) + 1
 
 target_detector = None
 if args.target == "loading_bay":
@@ -46,7 +48,7 @@ elif args.target == "power_port":
     target_detector = PowerPortDetector(generator)
 
 with PoseCalculator(target_detector) as pc:
-    while True:
+    while (generator.is_capturing() if args.generator == "video_file" else True):
         pc.get_values()
         key = cv2.waitKey(wait_time)
         if key == ord('q'):

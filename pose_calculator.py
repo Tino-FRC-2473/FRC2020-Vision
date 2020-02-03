@@ -136,6 +136,9 @@ class PoseCalculator:
         frame, _ = self.generator.generate()
         contours, mask = self.detector.run_detector()
 
+        if contours is None:
+            return [None, None, None], [None, None, None]
+
         if len(contours) < 1:
             self.display_windows(frame, mask)
             return [None, None, None], [None, None, None]
@@ -150,7 +153,7 @@ class PoseCalculator:
 
         corners = self.get_corners(c)
         area = cv2.contourArea(c)
-        cv2.drawContours(frame, [corners], -1, (0, 0, 255), 6)
+        cv2.drawContours(frame, [corners], -1, (0, 0, 255), 2)
 
         r, t = self.get_angle_dist(Target(corners, area))
         rmat, _ = cv2.Rodrigues(r)  # convert rotation vector to matrix
@@ -161,6 +164,7 @@ class PoseCalculator:
 
         self.update_values([rx, ry, rz], [tx, ty, tz])
         r, t = self.get_avg_values()
+        t = [x / (12 * 3.281) for x in t]  # convert inches to meters
 
         # display values in the frame
         font = cv2.FONT_HERSHEY_SIMPLEX
