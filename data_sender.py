@@ -7,7 +7,7 @@ from video_live_generator import VideoLiveGenerator
 
 class DataSender:
 
-    CAMERA_TILT = 9999  # update with the correct camera tilt angle
+    CAMERA_TILT = 30  # update with the correct camera tilt angle
 
     def __init__(self):
         name = "ttyTHS2"
@@ -25,9 +25,9 @@ class DataSender:
         robot_y = math.cos(self.CAMERA_TILT) * trans[1] - math.sin(self.CAMERA_TILT) * trans[2]
         robot_z = math.sin(self.CAMERA_TILT) * trans[1] + math.sin(self.CAMERA_TILT) * trans[2]
 
-        target_y = math.cos(rot[2]) * trans[1] - math.sin(rot[2]) * (math.cos(rot[1]) * trans[2]) - math.sin(rot[1]) * trans[2]
-        target_x = math.cos(rot[1]) * trans[0] + math.sin(rot[1]) * trans[2]
-        target_z = math.sin(rot[2]) * trans[1] + math.cos(rot[2]) * (math.cos(rot[1]) * trans[2]) - math.sin(rot[1]) * trans[2]
+        target_x = trans[0] * math.cos(rot[1]) - trans[0] * math.sin(rot[1])
+        target_y = trans[1] * math.cos(rot[0]) + trans[1] * math.sin(rot[0])
+        target_z = (trans[2] *  (math.sin(rot[1]) + math.sin(rot[1]))) * (math.sin(rot[0]) + math.cos(rot[0]))
 
         angle = math.degrees(math.acos(target_y))
 
