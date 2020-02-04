@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import subprocess
 
 
@@ -31,6 +32,7 @@ class VideoLiveGenerator:
 
     def get_frame(self):
         _, frame = self.input.read()
+        frame = np.rot90(frame).copy()
         return frame
 
     def get_horizontal_fov(self):
