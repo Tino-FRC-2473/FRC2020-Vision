@@ -9,7 +9,7 @@ from math import sin, cos
 from operator import add
 from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
-
+from power_cell_detector import PowerCellDetector
 
 # finds rotation and translation of vision targets
 class PoseCalculator:
@@ -121,6 +121,69 @@ class PoseCalculator:
 
         self.previous_r.append(r)
         self.previous_t.append(t)
+
+
+    def get_distance_center(self, depth_frame, x, y):
+        return depth_frame[x][y]
+
+
+
+    def calc_ang_deg(self, x):
+        dist_to_center = x - self.SCREEN_WIDTH / 2
+        return math.atan(dist_to_center/ self.FOCAL_LENGTH_PIXELS) * (180 / math.pi)
+
+    def get_balls(self):
+        # balls = self.ballDetector.run_detector()
+
+        detected_balls, mask = self.detector.run_detector()
+        if(False): #or type(self.generator) is DepthLiveGenerator):
+            color_frame, depth_image, depth_frame = self.generator.generate()
+
+            # data[2] is the radius which we don't really need --> comes in the form [x, y, r]
+            #sorts balls by distance (using realsense) in descending order
+            detected_balls.sort(key=lambda data: get_distance_center(depth_frame, data[0], data[1]), reverse=True)
+            closest_balls = [None, None, None, None, None]
+
+            for i in range(0, 4):
+                if i < len(detected_balls):
+                    closest_balls[i] = detected_balls[i]
+
+
+            ball_data = []
+            for ball in closest_balls:
+                cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (0, 0, 255), 3)
+                cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (255, 0, 0), 1)
+                dist = get_distance_center(depth_frame, data[0], data[1])
+                angle = calc_ang_deg(ball[0])
+                ball_data.append([dist, angle])
+
+
+            cv2.imshow("colorframe", color_frame)
+            cv2.imshow("mask", mask)
+            print(ball_data)
+
+            return ball_data
+
+
+        else:
+            print("Finding all balls instead of closest ones. (Not running DepthLiveGenerator)")
+            color_frame, _ = self.generator.generate()
+
+            ball_data = []
+            for ball in detected_balls:
+                cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (0, 0, 255), 3)
+                cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (255, 0, 0), 1)
+                # angle = calc_ang_deg(ball[0])
+                # ball_data.append(angle)
+
+            cv2.imshow("colorframe", color_frame)
+            cv2.imshow("mask", mask)
+
+            print(ball_data)
+
+            return ball_data
+
+
 
     # get average of previous rotation and translation values
     def get_avg_values(self):
