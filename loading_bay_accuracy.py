@@ -6,12 +6,13 @@ from video_live_generator import VideoLiveGenerator
 from image_generator import ImageGenerator
 
 
+# simplify contour into four corner points
 def get_corners(contour):
 
     hull = cv2.convexHull(contour)
     hull_changed = []
     for i in range(len(hull)):
-        hull_changed.append([hull[i][0][0], hull[i][0][1]])
+        hull_changed.append(Point(hull[i][0][0], hull[i][0][1]))
 
     max = 0
     max_arr = []
@@ -19,20 +20,32 @@ def get_corners(contour):
         for j in range(i):
             for k in range(j):
                 for m in range(k):
-                    total = 0
-                    total += math.hypot(hull_changed[i][0] - hull_changed[j][0], hull_changed[i][1] - hull_changed[j][1])
-                    total += math.hypot(hull_changed[j][0] - hull_changed[k][0], hull_changed[j][1] - hull_changed[k][1])
-                    total += math.hypot(hull_changed[k][0] - hull_changed[m][0], hull_changed[k][1] - hull_changed[m][1])
-                    total += math.hypot(hull_changed[m][0] - hull_changed[i][0], hull_changed[m][1] - hull_changed[i][1])
+                    total = hull_changed[i].get_dist(hull_changed[j])
+                    total += hull_changed[j].get_dist(hull_changed[k])
+                    total += hull_changed[k].get_dist(hull_changed[m])
+                    total += hull_changed[m].get_dist(hull_changed[i])
                     if(total > max):
                         max = total
                         max_arr = [hull_changed[i], hull_changed[j], hull_changed[k], hull_changed[m]]
 
     arrmax_changed = []
-    for i in range(len(max_arr)):
-        arrmax_changed.append([max_arr[i]])
+    for i in max_arr:
+        arrmax_changed.append([i.x, i.y])
     return np.int0(arrmax_changed)
 
+
+# this class defines a point
+class Point:
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def get_coordinate(self):
+        return [self.x, self.y]
+
+    def get_dist(self, other):
+        return math.hypot(self.x - other.x, self.y - other.y)
 def sort_x(points):
 	return points[0]
 def sort_y(points):
@@ -69,11 +82,11 @@ for i in range(50):
         approx2 = []
         print(len(approx))
         for i in range(len(approx)):
-        	approx2.append(approx[i][0])
+        	approx2.append(approx[i])
         #print("hi")
         approx2.sort(key=sort_x)
         points.append(approx2)
-        cv2.drawContours(img, approx, -1, (0, 0, 255), 3)
+        cv2.drawContours(img, [approx], -1, (0, 0, 255), 3)
 
     
     cv2.imshow("img", img)
