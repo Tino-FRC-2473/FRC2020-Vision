@@ -1,15 +1,17 @@
 import cv2
 import numpy as np
+# from depth_live_generator import DepthLiveGenerator
 
 
 class PowerCellDetector:
 
-    LOW_YELLOW = np.array([17, 120, 120])
-    HIGH_YELLOW = np.array([33, 255, 255])
+
 
     # Constructor
     def __init__(self, generator):
         self.input = generator
+        self.LOW_YELLOW = np.array([17, 50, 100])
+        self.HIGH_YELLOW = np.array([33, 255, 255])
 
     # Runs the detector. This means that it'll actually detect the loading bay
     # and then it'll calibrate to the loading bay green color. This method returns
@@ -21,13 +23,13 @@ class PowerCellDetector:
         if img is None:
             return None, None
 
-            
 
-        
+
+
         output = img.copy()
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         hsv = cv2.medianBlur(hsv, 5)
-        mask = cv2.inRange(hsv, LOW_YELLOW, HIGH_YELLOW)
+        mask = cv2.inRange(hsv, self.LOW_YELLOW, self.HIGH_YELLOW)
         mask = cv2.erode(mask,None, iterations=7)
         mask = cv2.dilate(mask,None, iterations=10)
 
