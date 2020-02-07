@@ -6,6 +6,8 @@ import imghdr
 import traceback
 import os
 from math import sin, cos
+from depth_live_generator import DepthLiveGenerator
+
 from operator import add
 from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
@@ -124,6 +126,16 @@ class PoseCalculator:
 
 
     def get_distance_center(self, depth_frame, x, y):
+        if(x >= 480):
+            x=479
+        if(y >= 480):
+            y=479
+
+        print("X", x)
+        print("Y", y)
+        # depth_frame = depth_frame.tolist()
+        x = int(x)
+        y= int(y)
         return depth_frame[x][y]
 
 
@@ -135,13 +147,19 @@ class PoseCalculator:
     def get_balls(self):
         # balls = self.ballDetector.run_detector()
 
-        detected_balls, mask = self.detector.run_detector()
-        if(False): #or type(self.generator) is DepthLiveGenerator):
-            color_frame, depth_image, depth_frame = self.generator.generate()
+        detected_balls, mask, color_frame, depth_frame = self.detector.run_detector()
+        if(type(self.generator) is DepthLiveGenerator):
+            # color_frame, depth_frame = self.generator.generate()
+            print(detected_balls)
+            if(detected_balls is None):
+                cv2.imshow("colorframe", color_frame)
+                cv2.imshow("mask", mask)
+                return
 
             # data[2] is the radius which we don't really need --> comes in the form [x, y, r]
             #sorts balls by distance (using realsense) in descending order
-            detected_balls.sort(key=lambda data: get_distance_center(depth_frame, data[0], data[1]), reverse=True)
+            # detected_balls = detected_balls.tolist()
+            detected_balls.sort(key=lambda data: self.get_distance_center(depth_frame, data[0], data[1]), reverse=True)
             closest_balls = [None, None, None, None, None]
 
             for i in range(0, 4):
@@ -151,10 +169,12 @@ class PoseCalculator:
 
             ball_data = []
             for ball in closest_balls:
-                cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (0, 0, 255), 3)
-                cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (255, 0, 0), 1)
-                dist = get_distance_center(depth_frame, data[0], data[1])
-                angle = calc_ang_deg(ball[0])
+                if(ball is None):
+                    continue
+                cv2.circle(color_frame, (int(ball[0]), int(ball[1])), int(ball[2]), (0, 0, 255), 3)
+                cv2.circle(color_frame, (int(ball[0]), int(ball[1])), 0, (255, 0, 0), 6)
+                dist = self.get_distance_center(depth_frame, ball[0], ball[1])
+                angle = self.calc_ang_deg(ball[0])
                 ball_data.append([dist, angle])
 
 
@@ -173,7 +193,7 @@ class PoseCalculator:
                 cv2.imshow("colorframe", color_frame)
                 # cv2.imshow("mask", mask)
                 return
-                
+
 
 
             ball_data = []
