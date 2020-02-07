@@ -13,11 +13,9 @@ from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
 from power_cell_detector import PowerCellDetector
 
-# finds rotation and translation of vision targets
+
 class PoseCalculator:
 
-
-    # initilaze variables
     def __init__(self, detector):
 
         self.detector = detector
