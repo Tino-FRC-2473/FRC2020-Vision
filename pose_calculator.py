@@ -39,7 +39,10 @@ class PoseCalculator:
         frame, _ = self.generator.generate()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
         fov_radians = math.radians(self.generator.get_horizontal_fov())
-        self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
+        self.FOCAL_LENGTH_PIXELS = ((self.SCREEN_WIDTH if self.SCREEN_WIDTH < self.SCREEN_HEIGHT else self.SCREEN_HEIGHT)/ 2.0) / math.tan(fov_radians / 2)
+        
+        # constant to scale down display windows
+        self.DISPLAY_CONSTANT = 0.8 if self.SCREEN_HEIGHT > 1000 else 1.0
 
         # experimentally determined distance constant
         self.DISTANCE_CONSTANT = 1.70541793097
@@ -107,6 +110,15 @@ class PoseCalculator:
         return np.int0(arrmax_changed)
 
     def display_windows(self, frame, mask):
+        cv2.namedWindow("contours", cv2.WINDOW_NORMAL)
+        cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
+
+        cv2.resizeWindow("contours", (int(self.DISPLAY_CONSTANT * self.SCREEN_WIDTH), int(self.DISPLAY_CONSTANT * self.SCREEN_HEIGHT)))
+        cv2.resizeWindow("frame", (int(self.DISPLAY_CONSTANT * self.SCREEN_WIDTH), int(self.DISPLAY_CONSTANT * self.SCREEN_HEIGHT)))
+
+        cv2.moveWindow("contours", 350, 30)
+        cv2.moveWindow("frame", 1000, 30)
+        
         cv2.imshow("contours", mask)
         cv2.imshow("frame", frame)
 
