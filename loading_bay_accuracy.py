@@ -33,6 +33,7 @@ def get_corners(contour):
         arrmax_changed.append([i.x, i.y])
     return np.int0(arrmax_changed)
 
+
 # this class defines a point
 class Point:
 
@@ -45,6 +46,7 @@ class Point:
 
     def get_dist(self, other):
         return math.hypot(self.x - other.x, self.y - other.y)
+
 
 def sort_x(points):
     return points[0]

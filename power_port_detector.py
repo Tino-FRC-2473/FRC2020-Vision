@@ -15,7 +15,7 @@ class PowerPortDetector:
     # the contours of the actual power port.
 
     def run_detector(self):
-        img, _  = self.input.generate()
+        img, _ = self.input.generate()
         img = cv2.GaussianBlur(img, (3, 3), cv2.BORDER_DEFAULT)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, self.calibrator.low_green, self.calibrator.high_green)
