@@ -10,8 +10,8 @@ class DataSender:
     CAMERA_TILT = 30  # update with the correct camera tilt angle
 
     def __init__(self):
-        name = "ttyTHS2"
-        rate = 9600  # update with the correct baudrate
+        name = "ttyS0"
+        rate = 9600
         port = 1
 
         self.s = serial.Serial("/dev/" + name, rate)
@@ -20,6 +20,9 @@ class DataSender:
 
     def convert_data(self):
         rot, trans = self.pose_calculator.get_values()
+
+        if trans[0] is None:
+            return 9999, 9999, 9999
 
         robot_x = trans[0]
         robot_y = math.cos(math.radians(self.CAMERA_TILT)) * trans[1] - math.sin(math.radians(self.CAMERA_TILT)) * trans[2]
@@ -31,14 +34,11 @@ class DataSender:
 
         angle = math.degrees(math.acos(target_y))
 
-        if trans[0] is None:
-            return 9999, 9999, 9999
-
         return int(100 * robot_x), int(100 * robot_z), 10 * round(angle, 1)
 
     def send_data(self):
         x, y, angle = self.convert_data()
-        self.s.write('S {:04d} {:04d} {:+05d} E\n'.format(x, y, angle))
+        self.s.write(bytes('S {:04d} {:04d} {:+05d} E'.format(x, y, angle), "utf-8"))
 
 
 data_sender = DataSender()
