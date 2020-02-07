@@ -135,14 +135,12 @@ class PoseCalculator:
         print("Y", y)
         # depth_frame = depth_frame.tolist()
         x = int(x)
-        y= int(y)
+        y = int(y)
         return depth_frame[x][y]
-
-
 
     def calc_ang_deg(self, x):
         dist_to_center = x - self.SCREEN_WIDTH / 2
-        return math.atan(dist_to_center/ self.FOCAL_LENGTH_PIXELS) * (180 / math.pi)
+        return math.atan(dist_to_center / self.FOCAL_LENGTH_PIXELS) * (180 / math.pi)
 
     def get_balls(self):
         # balls = self.ballDetector.run_detector()
@@ -157,7 +155,7 @@ class PoseCalculator:
                 return
 
             # data[2] is the radius which we don't really need --> comes in the form [x, y, r]
-            #sorts balls by distance (using realsense) in descending order
+            # sorts balls by distance (using realsense) in descending order
             # detected_balls = detected_balls.tolist()
             detected_balls.sort(key=lambda data: self.get_distance_center(depth_frame, data[0], data[1]), reverse=True)
             closest_balls = [None, None, None, None, None]
@@ -165,7 +163,6 @@ class PoseCalculator:
             for i in range(0, 4):
                 if i < len(detected_balls):
                     closest_balls[i] = detected_balls[i]
-
 
             ball_data = []
             for ball in closest_balls:
@@ -177,13 +174,11 @@ class PoseCalculator:
                 angle = self.calc_ang_deg(ball[0])
                 ball_data.append([dist, angle])
 
-
             cv2.imshow("colorframe", color_frame)
             cv2.imshow("mask", mask)
             print(ball_data)
 
             return ball_data
-
 
         else:
             print("Finding all balls instead of closest ones. (Not running DepthLiveGenerator)")
@@ -193,8 +188,6 @@ class PoseCalculator:
                 cv2.imshow("colorframe", color_frame)
                 # cv2.imshow("mask", mask)
                 return
-
-
 
             ball_data = []
             for ball in detected_balls:
@@ -209,8 +202,6 @@ class PoseCalculator:
             print(ball_data)
 
             return ball_data
-
-
 
     # get average of previous rotation and translation values
     def get_avg_values(self):

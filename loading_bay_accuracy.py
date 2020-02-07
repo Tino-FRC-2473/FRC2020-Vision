@@ -7,7 +7,7 @@ calibrator = GreenCalibration()
 
 while True:
     img = cv2.imread("test_photos/0degrees_18inches.png")
-    img = cv2.GaussianBlur(img, (5,5), cv2.BORDER_DEFAULT) #blurs image
+    img = cv2.GaussianBlur(img, (5, 5), cv2.BORDER_DEFAULT)  
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, calibrator.LOW_GREEN, calibrator.HIGH_GREEN)
     _, contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
