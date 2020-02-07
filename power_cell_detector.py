@@ -10,7 +10,7 @@ class PowerCellDetector:
     # Constructor
     def __init__(self, generator):
         self.input = generator
-        self.LOW_YELLOW = np.array([17, 50, 100])
+        self.LOW_YELLOW = np.array([17, 120, 120])
         self.HIGH_YELLOW = np.array([33, 255, 255])
 
     # Runs the detector. This means that it'll actually detect the loading bay
@@ -38,7 +38,7 @@ class PowerCellDetector:
 
         circles = cv2.HoughCircles(th2, cv2.HOUGH_GRADIENT, 1.8, 40, param1=70, param2=50, minRadius=20, maxRadius=60)
 
-
+        
         if(circles is None):
              return _, _
 
@@ -47,8 +47,8 @@ class PowerCellDetector:
         bottom_half_circles = []
 
         for (x, y ,r) in detected_circles[0, :]:
-            if(y < img.shape[0]/2):
-                 continue
+            # if(y < img.shape[0]/2):
+            #      continue
 
             bottom_half_circles.append([x, y, r])
             #  cv2.circle(img, (x, y), r, (0, 0, 255), 3)

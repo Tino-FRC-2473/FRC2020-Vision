@@ -43,7 +43,8 @@ while True:
         cv.imshow('output',output)
         continue
 
-
+    
+    cv.imshow("hsv", mask)
 
     detected_circles = np.uint16(np.around(circles))
     for (x, y ,r) in detected_circles[0, :]:

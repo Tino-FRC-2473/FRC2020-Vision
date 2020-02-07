@@ -169,6 +169,13 @@ class PoseCalculator:
             print("Finding all balls instead of closest ones. (Not running DepthLiveGenerator)")
             color_frame, _ = self.generator.generate()
 
+            if(detected_balls is None):
+                cv2.imshow("colorframe", color_frame)
+                # cv2.imshow("mask", mask)
+                return
+                
+
+
             ball_data = []
             for ball in detected_balls:
                 cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (0, 0, 255), 3)
