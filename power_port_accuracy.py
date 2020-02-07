@@ -10,6 +10,7 @@ from loading_bay_detector import LoadingBayDetector
 def sort_x(points):
     return points[0]
 
+
 def sort_y(points):
     return points[1]
 
@@ -71,7 +72,7 @@ while True:
     # img = cv2.GaussianBlur(img, (5,5), cv2.BORDER_DEFAULT) #blurs image
     contour = detector.run_detector()
     contour.sort(key=lambda c: cv2.contourArea(c), reverse=True)
-    if len(contour)<1:
+    if len(contour ) <1:
         print("failed")
         continue
 
@@ -92,7 +93,7 @@ while True:
     
     margin_error = 0.15
 
-    if len(points)<4:
+    if len(points) < 4:
         print("fail")
         continue
 
@@ -103,10 +104,10 @@ while True:
     points.sort(key=sort_y)
 
     bottom_left = (0,0)
-    
+
     bottom_right = (0,0)
-    
-    if points[2][0]<points[3][0]:
+
+    if points[2][0] < points[3][0]:
         bottom_left = points[2]
         bottom_right = points[3]
     else:
@@ -115,60 +116,56 @@ while True:
 
 
     print("testing sides...")
-    left = dist(top_left[0],top_left[1],bottom_left[0],bottom_left[1])
-    right = dist(top_right[0],top_right[1],bottom_right[0],bottom_right[1])
+    left = dist(top_left[0], top_left[1], bottom_left[0], bottom_left[1])
+    right = dist(top_right[0], top_right[1], bottom_right[0], bottom_right[1])
     ratio_sides = left/right
 
-    if direction=="front":
-        if abs(ratio_sides-1)<margin_error:
-            successes+=1
+    if direction == "front":
+        if abs(ratio_sides-1) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
-    elif direction=="right":
-        if abs(ratio_sides-188.8/312.2)<margin_error:
-           successes+=1
+    elif direction == "right":
+        if abs(ratio_sides-188.8/312.2) < margin_error:
+           successes += 1
            print("success!")
         else:
            print("fail")
-    elif direction=="left":
-        if abs(ratio_sides-312.2/188.8)<margin_error:
-            successes+=1
+    elif direction == "left":
+        if abs(ratio_sides-312.2/188.8) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
 
     print("side ratio: "+str(ratio_sides)+"\n")
 
-   
     print("testing top and bottom...")
-    top = dist(top_left[0],top_left[1],top_right[0],top_right[1])
-    bottom = dist(bottom_left[0],bottom_left[1],bottom_right[0],bottom_right[1])
+    top = dist(top_left[0], top_left[1], top_right[0], top_right[1])
+    bottom = dist(bottom_left[0], bottom_left[1], bottom_right[0], bottom_right[1])
     ratio_tb = top/bottom
-    if direction=="front":
-        if abs(ratio_tb-258/228)<margin_error:
-            successes+=1
+    if direction == "front":
+        if abs(ratio_tb-258/228) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
-    elif direction=="right":
-        if abs(ratio_tb-425.15/207.63)<margin_error:
-            successes+=1
+    elif direction == "right":
+        if abs(ratio_tb-425.15/207.63) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
     elif direction=="left":
-        if abs(ratio_tb-425.15/207.63)<margin_error:
-            successes+=1
+        if abs(ratio_tb-425.15/207.63) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
     print("bottom ratio: "+str(ratio_tb)+"\n")
 
-    
-
-    print(str(successes)+" successes out of 2\n\n") 
-    if successes==2:
-        total_successes+=1
+    print(str(successes)+" successes out of 2\n\n")
+    if successes == 2:
+        total_successes += 1
 print(total_successes)
-

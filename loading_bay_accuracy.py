@@ -46,31 +46,31 @@ class Point:
 
     def get_dist(self, other):
         return math.hypot(self.x - other.x, self.y - other.y)
+
 def sort_x(points):
-	return points[0]
+    return points[0]
+
+
 def sort_y(points):
-	return points[1]
+    return points[1]
 
 
-def dist(x1,y1,x2,y2):
-	return math.sqrt(math.pow(x1-x2,2)+math.pow(y1-y2,2))
+def dist(x1, y1, x2, y2):
+    return math.sqrt(math.pow(x1-x2, 2)+math.pow(y1-y2, 2))
+
 
 img = cv2.imread("test_photos_loading_bay/0degrees_18inches.png")
 
 
 detector = LoadingBayDetector(ImageGenerator("test_photos_loading_bay/0degrees_18inches.png"))
-total_successes = 0;
+total_successes = 0
 for i in range(50):
     direction = "front"
-    
-    #_, img = vid.read()
-    #img = img[:][::-1]
-    
-    
+
+    # _, img = vid.read()
+    # img = img[:][::-1]
     contours = detector.run_detector()
     contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
-    
-
     cv2.waitKey(1)
     successes = 0
 
@@ -82,45 +82,41 @@ for i in range(50):
         approx2 = []
         print(len(approx))
         for i in range(len(approx)):
-        	approx2.append(approx[i])
-        #print("hi")
+            approx2.append(approx[i])
+        # print("hi")
         approx2.sort(key=sort_x)
         points.append(approx2)
         cv2.drawContours(img, [approx], -1, (0, 0, 255), 3)
-
-    
     cv2.imshow("img", img)
-    #cv2.imshow("mask", mask)
+    # cv2.imshow("mask", mask)
 
-    if len(contours)<2:
+    if len(contours) < 2:
         print("fail")
         continue
     margin_error = 0.15
-    if len(points[0])<4 or len(points[1])<4:
+    if len(points[0]) < 4 or len(points[1]) < 4:
         print("fail")
         continue
-
-
     print("testing left...")
-    outer_left = dist(points[0][0][0],points[0][0][1],points[0][1][0],points[0][1][1])
-    inner_left = dist(points[1][0][0],points[1][0][1],points[1][1][0],points[1][1][1])
+    outer_left = dist(points[0][0][0], points[0][0][1], points[0][1][0], points[0][1][1])
+    inner_left = dist(points[1][0][0], points[1][0][1], points[1][1][0], points[1][1][1])
     ratio_left = outer_left/inner_left
 
-    if direction=="front":
-        if abs(ratio_left-11/7)<margin_error:
-            successes+=1
+    if direction == "front":
+        if abs(ratio_left-11/7) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
-    elif direction=="right":
-        if abs(ratio_left-445/262)<margin_error:
-           successes+=1
-           print("success!")
+    elif direction == "right":
+        if abs(ratio_left-445/262) < margin_error:
+            successes += 1
+            print("success!")
         else:
-           print("fail")
-    elif direction=="left":
-        if abs(ratio_left-344/234)<margin_error:
-            successes+=1
+            print("fail")
+    elif direction == "left":
+        if abs(ratio_left-344/234) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
@@ -128,8 +124,8 @@ for i in range(50):
     print("left ratio: "+str(ratio_left)+"\n")
 
     print("testing right...")
-    outer_right = dist(points[0][2][0],points[0][2][1],points[0][3][0],points[0][3][1])
-    inner_right = dist(points[1][2][0],points[1][2][1],points[1][3][0],points[1][3][1])
+    outer_right = dist(points[0][2][0], points[0][2][1], points[0][3][0], points[0][3][1])
+    inner_right = dist(points[1][2][0], points[1][2][1], points[1][3][0], points[1][3][1])
     ratio_right = outer_right/inner_right
 
     if direction=="front":
@@ -138,75 +134,71 @@ for i in range(50):
             print("success!")
         else:
             print("fail")
-    elif direction=="right":
-        if abs(ratio_right-344/234)<margin_error:
-            successes+=1
+    elif direction == "right":
+        if abs(ratio_right-344/234) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
-    elif direction=="left":
-        if abs(ratio_right-445/262)<margin_error:
-           successes+=1
-           print("success!")
+    elif direction == "left":
+        if abs(ratio_right-445/262) < margin_error:
+            successes += 1
+            print("success!")
         else:
-           print("fail")
+            print("fail")
     print("right ratio: "+str(ratio_right)+"\n")
 
     for i in points:
-    	i.sort(key=sort_y)
+        i.sort(key=sort_y)
 
     print("testing top...")
-    outer_top = dist(points[0][0][0],points[0][0][1],points[0][1][0],points[0][1][1])
-    inner_top = dist(points[1][0][0],points[1][0][1],points[1][1][0],points[1][1][1])
+    outer_top = dist(points[0][0][0], points[0][0][1], points[0][1][0], points[0][1][1])
+    inner_top = dist(points[1][0][0], points[1][0][1], points[1][1][0], points[1][1][1])
     ratio_top = outer_top/inner_top
-    if direction=="front":
-        if abs(ratio_top-7/3)<margin_error:
-            successes+=1
+    if direction == "front":
+        if abs(ratio_top-7/3) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
-    elif direction=="right":
-        if abs(ratio_top-2.35)<margin_error:
-            successes+=1
+    elif direction == "right":
+        if abs(ratio_top-2.35) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
-    elif direction=="left":
-        if abs(ratio_top-2.35)<margin_error:
-            successes+=1
+    elif direction == "left":
+        if abs(ratio_top-2.35) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
     print("top ratio: "+str(ratio_top)+"\n")
 
     print("testing bottom...")
-    outer_bottom = dist(points[0][2][0],points[0][2][1],points[0][3][0],points[0][3][1])
-    inner_bottom = dist(points[1][2][0],points[1][2][1],points[1][3][0],points[1][3][1])
+    outer_bottom = dist(points[0][2][0], points[0][2][1], points[0][3][0], points[0][3][1])
+    inner_bottom = dist(points[1][2][0], points[1][2][1], points[1][3][0], points[1][3][1])
     ratio_bottom = outer_bottom/inner_bottom
-    if direction=="front":
-        if abs(ratio_bottom-7/3)<margin_error:
-            successes+=1
+    if direction == "front":
+        if abs(ratio_bottom-7/3) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
-    elif direction=="right":
-        if abs(ratio_bottom-2.35)<margin_error:
-            successes+=1
+    elif direction == "right":
+        if abs(ratio_bottom-2.35) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
-    elif direction=="left":
-        if abs(ratio_bottom-2.35)<margin_error:
-            successes+=1
+    elif direction == "left":
+        if abs(ratio_bottom-2.35) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
     print("bottom ratio: "+str(ratio_bottom)+"\n")
-    
-
     print(str(successes)+" successes out of 4\n\n")
     if successes==4:
         total_successes+=1
 print(total_successes)
-    
-     
