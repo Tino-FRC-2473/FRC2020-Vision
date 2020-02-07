@@ -1,16 +1,23 @@
+import math
 import cv2
+import numpy as np
 import subprocess
 import imghdr
+import traceback
 import os
+from math import sin, cos
+from operator import add
 
-# finds angle between robot's heading and the perpendicular to the targets
-class ImageCapture:
+
+# finds rotation and translation of vision targets
+class CaptureImage:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
 =======
 >>>>>>> Add test images
     # initilaze variables
+<<<<<<< HEAD
     def __init__(self, input, angle, distance):
 
         self.input_path = input
@@ -48,43 +55,50 @@ class ImageCapture:
 =======
         print(self.SCREEN_HEIGHT)
 >>>>>>> Manually set frame dimensions and add test images
+=======
+    def __init__(self, detector):
+
+        self.detector = detector
+        self.generator = detector.get_generator()
+
+        frame, _ = self.generator.generate()
+        self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
+        
+        # constant to scale down display windows
+        self.DISPLAY_CONSTANT = 0.8 if self.SCREEN_HEIGHT > 1000 else 1.0
+
+>>>>>>> Integrate capture code with Generator and Detector classes
 
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, tb):
-        self.input.release()
         cv2.destroyAllWindows()
-        print("\nexited")
+        print("exited")
 
-    # sets exposure of the camera (will only work on Linux systems)
-    def set_camera_settings(self, camera_port):
+    def display_windows(self, frame, ref_frame):
+        cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
+        cv2.namedWindow("ref_frame", cv2.WINDOW_NORMAL)
 
-        camera_path = "/dev/video" + camera_port
+        cv2.resizeWindow("frame", (int(self.DISPLAY_CONSTANT * self.SCREEN_WIDTH), int(self.DISPLAY_CONSTANT * self.SCREEN_HEIGHT)))
+        cv2.resizeWindow("ref_frame", (int(self.DISPLAY_CONSTANT * self.SCREEN_WIDTH), int(self.DISPLAY_CONSTANT * self.SCREEN_HEIGHT)))
 
-        try:
-            subprocess.call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_auto=1"])
-            subprocess.call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_absolute=1"])
-        except:
-            print("exposure adjustment not completed")
+        cv2.moveWindow("frame", 350, 30)
+        cv2.moveWindow("ref_frame", 1000, 30)
 
-    # returns a frame corresponding to the input type
-    def get_frame(self):
+        cv2.imshow("frame", frame)
+        cv2.imshow("ref_frame", ref_frame)
 
-        frame = None
+    def update_frame(self):
+        frame, _ = self.generator.generate()
 
-        # if input is a camera port, use VideoCapture()
-        if self.input_path.isdigit():
-            _, frame = self.input.read()
-        # if input is an image, use cv2.imread()
-        elif imghdr.what(self.input_path) is not None:
-            frame = cv2.imread(self.input_path)
-        # if input is a video, use VideoCapture()
-        else:
-            _, frame = self.input.read()
+        ref_frame, _ = self.generator.generate()
+        cv2.circle(ref_frame, (int(self.SCREEN_WIDTH/2), int(self.SCREEN_HEIGHT/2 - 200)), 2, (255, 255, 255), 2)
+        cv2.circle(ref_frame, (int(self.SCREEN_WIDTH/2), int(self.SCREEN_HEIGHT/2 + 200)), 2, (255, 255, 255), 2)
 
-        return frame
+        self.display_windows(frame, ref_frame)
 
+<<<<<<< HEAD
     def update_frame(self):
         frame = self.get_frame()
         cv2.imshow("frame: " + str(self.input_path), frame)
@@ -190,3 +204,9 @@ class ImageCapture:
 >>>>>>> Add code to capture images
 =======
 >>>>>>> Add test images
+=======
+    def capture(self, dir_name, angle, distance):
+        filename = dir_name + "/" + str(angle) + "degrees_" + str(distance) + "inches.png"
+        frame, _ = self.generator.generate()
+        cv2.imwrite(filename, frame)
+>>>>>>> Integrate capture code with Generator and Detector classes
