@@ -16,6 +16,7 @@ from power_cell_detector import PowerCellDetector
 # finds rotation and translation of vision targets
 class PoseCalculator:
 
+
     # initilaze variables
     def __init__(self, detector):
 
@@ -124,12 +125,11 @@ class PoseCalculator:
         self.previous_r.append(r)
         self.previous_t.append(t)
 
-
     def get_distance_center(self, depth_frame, x, y):
         if(x >= 480):
-            x=479
+            x = 479
         if(y >= 480):
-            y=479
+            y = 479
 
         print("X", x)
         print("Y", y)
