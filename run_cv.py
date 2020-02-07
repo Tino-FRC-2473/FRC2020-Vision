@@ -51,11 +51,6 @@ elif args.target == "power_cell":
     print(generator)
     target_detector = PowerCellDetector(generator)
 
-
-
-
-print("hello")
-
 with PoseCalculator(target_detector) as pc:
     while (generator.is_capturing() if args.generator == "video_file" else True):
         if(type(target_detector) is PowerCellDetector):
