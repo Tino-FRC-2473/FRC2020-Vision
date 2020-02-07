@@ -33,7 +33,6 @@ def get_corners(contour):
         arrmax_changed.append([i.x, i.y])
     return np.int0(arrmax_changed)
 
-
 # this class defines a point
 class Point:
 
@@ -128,9 +127,9 @@ for i in range(50):
     inner_right = dist(points[1][2][0], points[1][2][1], points[1][3][0], points[1][3][1])
     ratio_right = outer_right/inner_right
 
-    if direction=="front":
-        if abs(ratio_right-11/7)<margin_error:
-            successes+=1
+    if direction == "front":
+        if abs(ratio_right-11/7) < margin_error:
+            successes += 1
             print("success!")
         else:
             print("fail")
@@ -197,8 +196,8 @@ for i in range(50):
             print("success!")
         else:
             print("fail")
-    print("bottom ratio: "+str(ratio_bottom)+"\n")
-    print(str(successes)+" successes out of 4\n\n")
-    if successes==4:
-        total_successes+=1
+    print("bottom ratio: " + str(ratio_bottom) + "\n")
+    print(str(successes) + " successes out of 4\n\n")
+    if successes == 4:
+        total_successes += 1
 print(total_successes)

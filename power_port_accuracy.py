@@ -14,6 +14,7 @@ def sort_x(points):
 def sort_y(points):
     return points[1]
 
+
 # this class defines a point
 class Point:
 
@@ -26,6 +27,7 @@ class Point:
 
     def get_dist(self, other):
         return math.hypot(self.x - other.x, self.y - other.y)
+
 
 # simplify contour into four corner points
 def get_corners(contour):
@@ -55,24 +57,25 @@ def get_corners(contour):
     return np.int0(arrmax_changed)
 
 
-def dist(x1,y1,x2,y2):
-	return math.sqrt(math.pow(x1-x2,2)+math.pow(y1-y2,2))
+def dist(x1, y1, x2, y2):
+    return math.sqrt(math.pow(x1-x2, 2)+math.pow(y1-y2, 2))
+
 
 detector = LoadingBayDetector(ImageGenerator("test_photos_power_port/0degrees_60inches.png"))
 # starting_val = 0.01
-#vid = cv2.VideoCapture(1)
+# vid = cv2.VideoCapture(1)
 total_successes = 0
 while True:
     direction = "front"
     img = cv2.imread("test_photos_power_port/0degrees_60inches.png")
 
-    #_, img = vid.read()
-    #img = img[:][::-1]
-    
+    # _, img = vid.read()
+    # img = img[:][::-1]
+
     # img = cv2.GaussianBlur(img, (5,5), cv2.BORDER_DEFAULT) #blurs image
     contour = detector.run_detector()
     contour.sort(key=lambda c: cv2.contourArea(c), reverse=True)
-    if len(contour ) <1:
+    if len(contour) < 1:
         print("failed")
         continue
 
@@ -86,11 +89,10 @@ while True:
     cv2.imshow("img", img)
 
     for i in range(len(approx)):
-    	points.append(approx[i])
-    #print("hi")
+        points.append(approx[i])
+    # print("hi")
     points.sort(key=sort_x)
 
-    
     margin_error = 0.15
 
     if len(points) < 4:
@@ -99,13 +101,12 @@ while True:
 
     top_left = points[0]
     top_right = points[3]
-    
 
     points.sort(key=sort_y)
 
-    bottom_left = (0,0)
+    bottom_left = (0, 0)
 
-    bottom_right = (0,0)
+    bottom_right = (0, 0)
 
     if points[2][0] < points[3][0]:
         bottom_left = points[2]
@@ -113,8 +114,6 @@ while True:
     else:
         bottom_left = points[3]
         bottom_right = points[2]
-
-
     print("testing sides...")
     left = dist(top_left[0], top_left[1], bottom_left[0], bottom_left[1])
     right = dist(top_right[0], top_right[1], bottom_right[0], bottom_right[1])
@@ -128,10 +127,10 @@ while True:
             print("fail")
     elif direction == "right":
         if abs(ratio_sides-188.8/312.2) < margin_error:
-           successes += 1
-           print("success!")
+            successes += 1
+            print("success!")
         else:
-           print("fail")
+            print("fail")
     elif direction == "left":
         if abs(ratio_sides-312.2/188.8) < margin_error:
             successes += 1
@@ -157,7 +156,7 @@ while True:
             print("success!")
         else:
             print("fail")
-    elif direction=="left":
+    elif direction == "left":
         if abs(ratio_tb-425.15/207.63) < margin_error:
             successes += 1
             print("success!")
