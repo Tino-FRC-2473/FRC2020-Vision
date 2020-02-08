@@ -106,8 +106,6 @@ class PoseCalculator:
         return np.int0(arrmax_changed)
 
     def display_windows(self, frame, mask):
-        cv2.namedWindow("contours", cv2.WINDOW_NORMAL)
-        cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
 
         cv2.imshow("contours", mask)
         cv2.imshow("frame", frame)
@@ -133,7 +131,7 @@ class PoseCalculator:
         return r_sum.tolist(), t_sum.tolist()
 
     # runs pose detection code and returns rotation and translation
-    def get_values(self, display=True):
+    def get_values(self, units="m", display=True):
 
         frame, _ = self.generator.generate()
         contours, mask = self.detector.run_detector()
@@ -167,6 +165,11 @@ class PoseCalculator:
         self.update_values([rx, ry, rz], [tx, ty, tz])
         r, t = self.get_avg_values()
 
+        if units == "m":
+            t = [x / (12 * 3.281) for x in t]  # convert inches to meters
+        elif units == "ft":
+            t = [x / 12 for x in t]  # convert inches to feet
+
         # display values in the frame
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(frame, "rx: " + str(round(r[0], 2)), (20, self.SCREEN_HEIGHT - 90), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
@@ -175,8 +178,6 @@ class PoseCalculator:
         cv2.putText(frame, "tx: " + str(round(t[0], 2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 90), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
         cv2.putText(frame, "ty: " + str(round(t[1], 2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 60), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
         cv2.putText(frame, "tz: " + str(round(t[2], 2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 30), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
-
-        t = [x / (12 * 3.281) for x in t]  # convert inches to meters
 
         # show windows
         if display:
