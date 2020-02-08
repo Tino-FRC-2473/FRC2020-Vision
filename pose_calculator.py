@@ -42,7 +42,7 @@ class PoseCalculator:
         self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
 
         # experimentally determined distance constant
-        self.DISTANCE_CONSTANT = 1.642136009
+        self.DISTANCE_CONSTANT = 1.26973017
 
         # number of previous values to keep for average
         self.NUM_VALS = 10
@@ -110,12 +110,6 @@ class PoseCalculator:
         cv2.namedWindow("contours", cv2.WINDOW_NORMAL)
         cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
 
-        cv2.resizeWindow("contours", (int(self.DISPLAY_CONSTANT * self.SCREEN_WIDTH), int(self.DISPLAY_CONSTANT * self.SCREEN_HEIGHT)))
-        cv2.resizeWindow("frame", (int(self.DISPLAY_CONSTANT * self.SCREEN_WIDTH), int(self.DISPLAY_CONSTANT * self.SCREEN_HEIGHT)))
-
-        cv2.moveWindow("contours", 350, 30)
-        cv2.moveWindow("frame", 1000, 30)
-
         cv2.imshow("contours", mask)
         cv2.imshow("frame", frame)
 
@@ -173,7 +167,6 @@ class PoseCalculator:
 
         self.update_values([rx, ry, rz], [tx, ty, tz])
         r, t = self.get_avg_values()
-        t = [x / (12 * 3.281) for x in t]  # convert inches to meters
 
         # display values in the frame
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -183,6 +176,8 @@ class PoseCalculator:
         cv2.putText(frame, "tx: " + str(round(t[0], 2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 90), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
         cv2.putText(frame, "ty: " + str(round(t[1], 2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 60), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
         cv2.putText(frame, "tz: " + str(round(t[2], 2)), (int(self.SCREEN_WIDTH/2) + 20, self.SCREEN_HEIGHT - 30), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+
+        t = [x / (12 * 3.281) for x in t]  # convert inches to meters
 
         # show windows
         if display:
