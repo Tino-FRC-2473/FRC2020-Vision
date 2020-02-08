@@ -6,7 +6,6 @@ import imghdr
 import traceback
 import os
 from math import sin, cos
-# from depth_live_generator import DepthLiveGenerator
 
 from operator import add
 from loading_bay_detector import LoadingBayDetector
@@ -146,8 +145,9 @@ class PoseCalculator:
     def get_balls(self):
         # balls = self.ballDetector.run_detector()
 
-        detected_balls, mask, color_frame, depth_frame = self.detector.run_detector()
-        if(type(self.generator) is DepthLiveGenerator):
+        detected_balls, mask, depth_frame = self.detector.run_detector()
+        color_frame, depth_frame = self.generator.generate()
+        if(depth_frame is not None):
             # color_frame, depth_frame = self.generator.generate()
             print(detected_balls)
             if(detected_balls is None):
@@ -183,7 +183,7 @@ class PoseCalculator:
 
         else:
             print("Finding all balls instead of closest ones. (Not running DepthLiveGenerator)")
-            color_frame, _ = self.generator.generate()
+            
 
             if(detected_balls is None):
                 cv2.imshow("colorframe", color_frame)
