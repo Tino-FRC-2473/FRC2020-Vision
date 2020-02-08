@@ -37,6 +37,8 @@ class PowerCellDetector:
         mask_copy = mask.copy()
         mask_copy[mask_copy > 1] = 1
         output = np.multiply(mask_copy, hsv[:, :, 2])
+        # the two numbers at the end are the blockSize, which is basically how many pixels do we use to calculate the value of one of them
+        # the last number is the number to subtract from the current weighted mean
         th2 = cv2.adaptiveThreshold(output, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 10)
         circles = cv2.HoughCircles(th2, cv2.HOUGH_GRADIENT, 1.8, 40, param1=70, param2=50, minRadius=20, maxRadius=60)
 
@@ -46,17 +48,17 @@ class PowerCellDetector:
         detected_circles = np.uint16(np.around(circles))
         print(detected_circles)
 
-        bottom_half_circles = []
+        circles = []
 
         for (x, y, r) in detected_circles[0, :]:
             # if(y < img.shape[0]/2):
             #      continue
 
-            bottom_half_circles.append([x, y, r])
+            circles.append([x, y, r])
             #  cv2.circle(img, (x, y), r, (0, 0, 255), 3)
             #  cv2.circle(img, (x, y), 2, (255, 0, 0), 1)
 
-        return bottom_half_circles, mask, depth_frame
+        return circles, mask, depth_frame
 
     def get_generator(self):
         return self.input
