@@ -52,7 +52,6 @@ class PoseCalculator:
 
     def __exit__(self, type, value, tb):
         cv2.destroyAllWindows()
-        print("exited")
 
     # convert rotation matrix to euler angles
     def get_euler_from_rodrigues(self, rmat):
