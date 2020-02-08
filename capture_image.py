@@ -24,24 +24,14 @@ class CaptureImage:
         # constant to scale down display windows
         self.DISPLAY_CONSTANT = 0.8 if self.SCREEN_HEIGHT > 1000 else 1.0
 
-
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, tb):
         cv2.destroyAllWindows()
-        print("exited")
 
     def display_windows(self, frame, ref_frame):
-        cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
-        cv2.namedWindow("ref_frame", cv2.WINDOW_NORMAL)
-
-        cv2.resizeWindow("frame", (int(self.DISPLAY_CONSTANT * self.SCREEN_WIDTH), int(self.DISPLAY_CONSTANT * self.SCREEN_HEIGHT)))
-        cv2.resizeWindow("ref_frame", (int(self.DISPLAY_CONSTANT * self.SCREEN_WIDTH), int(self.DISPLAY_CONSTANT * self.SCREEN_HEIGHT)))
-
-        cv2.moveWindow("frame", 350, 30)
-        cv2.moveWindow("ref_frame", 1000, 30)
-
+        
         cv2.imshow("frame", frame)
         cv2.imshow("ref_frame", ref_frame)
 
