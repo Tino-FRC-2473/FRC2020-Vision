@@ -31,9 +31,9 @@ class PowerCellDetector:
 
         # dilation increases the overall area of the object to accentuate the contours.
         mask = cv2.dilate(mask, None, iterations=10)
-        
+
         # output = cv2.bitwise_and(hsv, hsv, mask=mask)
-        print(hsv[:,:,1])
+        # print(hsv[:,:,1])
         mask_copy = mask.copy()
         mask_copy[mask_copy > 1] = 1
         output = np.multiply(mask_copy, hsv[:, :, 2])
