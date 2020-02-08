@@ -6,7 +6,7 @@ import imghdr
 import traceback
 import os
 from math import sin, cos
-from depth_live_generator import DepthLiveGenerator
+# from depth_live_generator import DepthLiveGenerator
 
 from operator import add
 from loading_bay_detector import LoadingBayDetector
@@ -123,11 +123,12 @@ class PoseCalculator:
         self.previous_r.append(r)
         self.previous_t.append(t)
 
+    # uses "depth_frame" identify distance to (x, y)
     def get_distance_center(self, depth_frame, x, y):
-        if(x >= 480):
-            x = 479
-        if(y >= 480):
-            y = 479
+        if(x >= self.SCREEN_WIDTH):
+            x = self.SCREEN_WIDTH - 1
+        if(y >= self.SCREEN_HEIGHT):
+            y = self.SCREEN_HEIGHT - 1
 
         print("X", x)
         print("Y", y)
@@ -136,10 +137,12 @@ class PoseCalculator:
         y = int(y)
         return depth_frame[x][y]
 
+    # returns angle(in degrees) between center of camera to center of ball
     def calc_ang_deg(self, x):
         dist_to_center = x - self.SCREEN_WIDTH / 2
         return math.atan(dist_to_center / self.FOCAL_LENGTH_PIXELS) * (180 / math.pi)
 
+    # returns distance and angle to the ball
     def get_balls(self):
         # balls = self.ballDetector.run_detector()
 
