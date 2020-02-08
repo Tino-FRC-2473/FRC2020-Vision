@@ -34,6 +34,6 @@ with CaptureImage(target_detector) as c:
             c.capture(args.dir_name, angle, distance)
             if input("continue? (y/n) ") == "n":
                 break
-            
+
             angle = input("angle: ")
             distance = input("distance: ")

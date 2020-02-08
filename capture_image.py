@@ -63,7 +63,7 @@ class CaptureImage:
 
         frame, _ = self.generator.generate()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
-        
+
         # constant to scale down display windows
         self.DISPLAY_CONSTANT = 0.8 if self.SCREEN_HEIGHT > 1000 else 1.0
 
@@ -77,6 +77,7 @@ class CaptureImage:
         print("exited")
 
     def display_windows(self, frame, ref_frame):
+<<<<<<< HEAD
         cv2.namedWindow("frame", cv2.WINDOW_NORMAL)
         cv2.namedWindow("ref_frame", cv2.WINDOW_NORMAL)
 
@@ -85,6 +86,8 @@ class CaptureImage:
 
         cv2.moveWindow("frame", 350, 30)
         cv2.moveWindow("ref_frame", 1000, 30)
+=======
+>>>>>>> Fix style
 
         cv2.imshow("frame", frame)
         cv2.imshow("ref_frame", ref_frame)
