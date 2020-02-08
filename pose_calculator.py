@@ -183,7 +183,6 @@ class PoseCalculator:
 
         else:
             print("Finding all balls instead of closest ones. (Not running DepthLiveGenerator)")
-            
 
             if(detected_balls is None):
                 cv2.imshow("colorframe", color_frame)
