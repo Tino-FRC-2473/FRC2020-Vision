@@ -20,7 +20,7 @@ class CaptureImage:
 
         frame, _ = self.generator.generate()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
-        
+
         # constant to scale down display windows
         self.DISPLAY_CONSTANT = 0.8 if self.SCREEN_HEIGHT > 1000 else 1.0
 
@@ -31,7 +31,7 @@ class CaptureImage:
         cv2.destroyAllWindows()
 
     def display_windows(self, frame, ref_frame):
-        
+
         cv2.imshow("frame", frame)
         cv2.imshow("ref_frame", ref_frame)
 
