@@ -15,8 +15,8 @@ class VideoLiveGenerator:
         frame = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
 
-        self.H_FIELD_OF_VIEW = 70.42
-        self.V_FIELD_OF_VIEW = 43.3
+        self.H_FIELD_OF_VIEW = 68.37
+        self.V_FIELD_OF_VIEW = 41.21
 
     def __enter__(self):
         return self
