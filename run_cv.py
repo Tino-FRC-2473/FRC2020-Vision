@@ -21,6 +21,7 @@ parser.add_argument("--depth", "-d", nargs="?", help="path of the CSV file to re
 parser.add_argument("--image", "-i", nargs="?", help="path of the image file to read")
 parser.add_argument("--video", "-v", nargs="?", help="path of the video file to read")
 parser.add_argument("--port", "-p", nargs="?", help="camera port to read from")
+parser.add_argument("--units", "-u", nargs="?", help="units to return distance in", choices=["in", "ft", "m"], default="m")
 parser.add_argument("target", help="target to detect pose for", choices=["loading_bay", "power_port"])
 args = parser.parse_args()
 
@@ -49,7 +50,7 @@ elif args.target == "power_port":
 
 with PoseCalculator(target_detector) as pc:
     while (generator.is_capturing() if args.generator == "video_file" else True):
-        pc.get_values()
+        pc.get_values(units=args.units)
         key = cv2.waitKey(wait_time)
         if key == ord('q'):
             break
