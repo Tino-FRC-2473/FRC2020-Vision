@@ -42,7 +42,7 @@ class PoseCalculator:
         self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
 
         # experimentally determined distance constant
-        self.DISTANCE_CONSTANT = 1.359624061
+        self.DISTANCE_CONSTANT = 1.26973017
 
         # number of previous values to keep for average
         self.NUM_VALS = 10
@@ -52,7 +52,6 @@ class PoseCalculator:
 
     def __exit__(self, type, value, tb):
         cv2.destroyAllWindows()
-        print("exited")
 
     # convert rotation matrix to euler angles
     def get_euler_from_rodrigues(self, rmat):
@@ -107,6 +106,7 @@ class PoseCalculator:
         return np.int0(arrmax_changed)
 
     def display_windows(self, frame, mask):
+
         cv2.imshow("contours", mask)
         cv2.imshow("frame", frame)
 
@@ -212,7 +212,7 @@ class PoseCalculator:
         return r_sum.tolist(), t_sum.tolist()
 
     # runs pose detection code and returns rotation and translation
-    def get_values(self, display=True):
+    def get_values(self, units="m", display=True):
 
         frame, _ = self.generator.generate()
         contours, mask = self.detector.run_detector()
@@ -245,7 +245,11 @@ class PoseCalculator:
 
         self.update_values([rx, ry, rz], [tx, ty, tz])
         r, t = self.get_avg_values()
-        t = [x / (12 * 3.281) for x in t]  # convert inches to meters
+
+        if units == "m":
+            t = [x / (12 * 3.281) for x in t]  # convert inches to meters
+        elif units == "ft":
+            t = [x / 12 for x in t]  # convert inches to feet
 
         # display values in the frame
         font = cv2.FONT_HERSHEY_SIMPLEX
