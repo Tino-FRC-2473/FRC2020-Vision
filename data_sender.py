@@ -27,7 +27,7 @@ class DataSender:
         # robot_x = trans[0]
         # robot_y = math.cos(math.radians(self.CAMERA_TILT)) * trans[1] - math.sin(math.radians(self.CAMERA_TILT)) * trans[2]
         # robot_z = math.sin(math.radians(self.CAMERA_TILT)) * trans[1] + math.sin(math.radians(self.CAMERA_TILT)) * trans[2]
-        # 
+        #
         # target_x = trans[0] * math.cos(math.radians(rot[1])) - trans[0] * math.sin(math.radians(rot[1]))
         # target_y = trans[1] * math.cos(math.radians(rot[0])) + trans[1] * math.sin(math.radians(rot[0]))
         # target_z = trans[2] * (math.sin(math.radians(rot[1])) + math.sin(math.radians(rot[1]))) * (math.sin(math.radians(rot[0])) + math.cos(math.radians(rot[0])))
