@@ -45,7 +45,6 @@ class DataSender:
 
         angle = new_rotations[1]
 
-
         return int(100 * dx), int(100 * dy), 10 * round(angle, 1)
 
     def send_data(self):
