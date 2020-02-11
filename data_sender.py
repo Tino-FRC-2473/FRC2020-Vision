@@ -1,7 +1,6 @@
 import math
-import serial
 import numpy as np
-import cv2
+import serial
 from scipy.spatial.transform import Rotation as R
 from pose_calculator import PoseCalculator
 from power_port_detector import PowerPortDetector
@@ -10,7 +9,7 @@ from video_live_generator import VideoLiveGenerator
 
 class DataSender:
 
-    CAMERA_TILT = 30  # update with the correct camera tilt angle
+    CAMERA_TILT = math.radians(30)  # update with the correct camera tilt angle
 
     def __init__(self, name="ttyS0", rate=9600, port=1):
         self.name = name
@@ -30,19 +29,25 @@ class DataSender:
         dx = trans[2] * math.cos(math.radians(self.CAMERA_TILT))
         dy = trans[0]
 
-        # calculate angle and compensate for camera tilt
-        camera_tilt_rad = math.radians(self.CAMERA_TILT)
-        rot_x = numpy.array([[1, 0, 0], [0, math.cos(math.radians(rot[0])), -math.sin(math.radians(rot[0]))], [0, math.sin(math.radians(rot[0])), math.cos(math.radians(rot[0]))]])
-        rot_y = numpy.array([[math.cos(math.radians(rot[1])), 0, math.sin(math.radians(rot[1]))], [0, 1, 0], [-math.sin(math.radians(rot[1])), 0, math.cos(math.radians(rot[1]))]])
-        rot_z = numpy.array([[math.cos(math.radians(rot[2])), math.sin(math.radians(rot[2])), 0], [-math.sin(math.radians(rot[2])), math.cos(math.radians(rot[2])), 0], [0, 0, 1]])
+        rot_x = np.array([[1, 0, 0],
+                          [0, math.cos(math.radians(rot[0])), -math.sin(math.radians(rot[0]))],
+                          [0, math.sin(math.radians(rot[0])), math.cos(math.radians(rot[0]))]])
 
-        rot_camera = numpy.array([[math.cos(camera_tilt_rad), 0, math.sin(camera_tilt_rad)], [0, 1, 0], [-math.sin(camera_tilt_rad), 0, math.cos(camera_tilt_rad)]])
+        rot_y = np.array([[math.cos(math.radians(rot[1])), 0, math.sin(math.radians(rot[1]))],
+                          [0, 1, 0],
+                          [-math.sin(math.radians(rot[1])), 0, math.cos(math.radians(rot[1]))]])
+
+        rot_z = np.array([[math.cos(math.radians(rot[2])), math.sin(math.radians(rot[2])), 0],
+                          [-math.sin(math.radians(rot[2])), math.cos(math.radians(rot[2])), 0],
+                          [0, 0, 1]])
+
+        rot_c = np.array([[math.cos(self.CAMERA_TILT), 0, math.sin(self.CAMERA_TILT)],
+                          [0, 1, 0],
+                          [-math.sin(self.CAMERA_TILT), 0, math.cos(self.CAMERA_TILT)]])
 
         r_target = np.linalg.inv(rot_c) @ rot_z @ rot_y @ rot_x
-
         r = R.from_matrix(r_target)
         new_rotations = r.as_euler('zyx', degrees=True)
-
         angle = new_rotations[1]
 
         return int(100 * dx), int(100 * dy), 10 * round(angle, 1)
@@ -56,8 +61,3 @@ data_sender = DataSender()
 
 while True:
     data_sender.send_data()
-
-    # show target visualization
-    key = cv2.waitKey(1)
-    if key == ord('q'):
-        break
