@@ -97,10 +97,10 @@ Send distance from the robot to the target along the x and z axis, and the angle
 
 
 Examples:
-- robotx = 296 cm, robotz = 1324 cm, angle = 123.4 degrees. Sends `"S 0296 1324 +1234 E\n"`
-- robotx = 907 cm, robotz = 89 cm, angle = -4.2 degrees. Sends `"S 0907 0089 -0042 E\n"`
+- robotx = 296 cm, robotz = 1324 cm, angle = 123.4 degrees. Sends `"S 0296 1324 +1234 E"`
+- robotx = 907 cm, robotz = 89 cm, angle = -4.2 degrees. Sends `"S 0907 0089 -0042 E"`
 
-If robot does not detect target, sends `"S 9999 9999 +9999 E\n"`
+If robot does not detect target, sends `"S 9999 9999 +9999 E"`
 
 
 # Driver/Testing file
