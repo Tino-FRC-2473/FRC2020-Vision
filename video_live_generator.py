@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import subprocess
 
 
@@ -8,11 +9,14 @@ class VideoLiveGenerator:
         self.input = cv2.VideoCapture(int(input_port))
         self.set_camera_settings(str(input_port))
 
+        self.input.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.input.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
         frame = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
 
-        self.H_FIELD_OF_VIEW = 70.42
-        self.V_FIELD_OF_VIEW = 43.3
+        self.H_FIELD_OF_VIEW = 68.37
+        self.V_FIELD_OF_VIEW = 41.21
 
     def __enter__(self):
         return self
@@ -28,6 +32,7 @@ class VideoLiveGenerator:
 
     def get_frame(self):
         _, frame = self.input.read()
+        frame = np.rot90(frame).copy()
         return frame
 
     def get_horizontal_fov(self):
@@ -38,4 +43,4 @@ class VideoLiveGenerator:
 
     def generate(self):
         frame = self.get_frame()
-        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), None
+        return frame, None

@@ -16,6 +16,9 @@ class PowerPortDetector:
 
     def run_detector(self):
         img, _ = self.input.generate()
+
+        if img is None:
+            return None, None
         img = cv2.GaussianBlur(img, (3, 3), cv2.BORDER_DEFAULT)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, self.calibrator.low_green, self.calibrator.high_green)
@@ -31,7 +34,7 @@ class PowerPortDetector:
 
         self.calibrator.get_new_hsv(greens)
 
-        return contours
+        return contours, mask
 
-    def get_generator():
+    def get_generator(self):
         return self.input

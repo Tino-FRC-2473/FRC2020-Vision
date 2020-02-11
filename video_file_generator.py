@@ -5,12 +5,16 @@ class VideoFileGenerator:
     def __init__(self, input_path):
         self.input_path = input_path
         self.input = cv2.VideoCapture(input_path)
+        self.input.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.input.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
         frame = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
 
-        self.H_FIELD_OF_VIEW = 70.42
-        self.V_FIELD_OF_VIEW = 43.3
+        self.H_FIELD_OF_VIEW = 68.37
+        self.V_FIELD_OF_VIEW = 41.21
+
+        self.capturing = True
 
     def __enter__(self):
         return self
@@ -19,7 +23,9 @@ class VideoFileGenerator:
         success, frame = self.input.read()
         if(success):
             return frame
-        return None
+        else:
+            self.capturing = False
+            return None
 
     def get_horizontal_fov(self):
         return self.H_FIELD_OF_VIEW
@@ -29,4 +35,7 @@ class VideoFileGenerator:
 
     def generate(self):
         frame = self.get_frame()
-        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), None
+        return frame, None
+
+    def is_capturing(self):
+        return self.capturing

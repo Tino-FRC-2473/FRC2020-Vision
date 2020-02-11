@@ -20,6 +20,8 @@ class DepthLiveGenerator:
 
         self.input = cv2.VideoCapture(int(input_port))
         self.set_camera_settings(str(input_port))
+        self.input.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        self.input.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
         frame, _, _ = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
@@ -58,4 +60,4 @@ class DepthLiveGenerator:
 
     def generate(self):
         image, depth, _ = self.get_frame()
-        return np.asanyarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), self.scale*np.asanyarray(depth)
+        return image, self.scale*np.asanyarray(depth)
