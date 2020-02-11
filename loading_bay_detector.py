@@ -24,12 +24,19 @@ class LoadingBayDetector:
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, self.calibrator.low_green, self.calibrator.high_green)
         contours_return = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
         contours = None
         if len(contours_return) == 3:
             contours = contours_return[1]
         else:
             contours = contours_return[0]
-        contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
+
+        final_contours = []
+
+        for c in contours:
+            if(cv2.contourArea(c) > 50):
+                final_contours.append(c)
+        final_contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
 
         greens = hsv[np.where((mask == 255))]
 
