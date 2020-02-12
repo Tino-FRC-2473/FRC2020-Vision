@@ -43,22 +43,16 @@ class PowerCellDetector:
         circles = cv2.HoughCircles(th2, cv2.HOUGH_GRADIENT, 1.8, 40, param1=70, param2=50, minRadius=20, maxRadius=60)
 
         if(circles is None):
-            return None, mask, depth_frame
+            return None, mask, img, depth_frame
 
         detected_circles = np.uint16(np.around(circles))
-        print(detected_circles)
 
         circles = []
 
         for (x, y, r) in detected_circles[0, :]:
-            # if(y < img.shape[0]/2):
-            #      continue
-
             circles.append([x, y, r])
-            #  cv2.circle(img, (x, y), r, (0, 0, 255), 3)
-            #  cv2.circle(img, (x, y), 2, (255, 0, 0), 1)
 
-        return circles, mask, depth_frame
+        return circles, mask, img, depth_frame
 
     def get_generator(self):
         return self.input

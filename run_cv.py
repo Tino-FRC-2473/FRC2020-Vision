@@ -4,7 +4,7 @@ import argparse
 import cv2
 from pose_calculator import PoseCalculator
 # from depth_data_generator import DepthDataGenerator
-# from depth_live_generator import DepthLiveGenerator
+from depth_live_generator import DepthLiveGenerator
 from image_generator import ImageGenerator
 from video_file_generator import VideoFileGenerator
 from video_live_generator import VideoLiveGenerator

@@ -38,6 +38,8 @@ class PoseCalculator:
 
         frame, _ = self.generator.generate()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
+        print(self.SCREEN_HEIGHT, self.SCREEN_WIDTH)
+        print(frame.shape[:2])
         fov_radians = math.radians(self.generator.get_horizontal_fov())
         self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
 
@@ -124,17 +126,19 @@ class PoseCalculator:
 
     # uses "depth_frame" identify distance to (x, y)
     def get_distance_center(self, depth_frame, x, y):
-        if(x >= self.SCREEN_WIDTH):
-            x = self.SCREEN_WIDTH - 1
-        if(y >= self.SCREEN_HEIGHT):
-            y = self.SCREEN_HEIGHT - 1
+        # if(x >= self.SCREEN_WIDTH):
+        #     x = self.SCREEN_WIDTH - 1
+        # if(y >= self.SCREEN_HEIGHT):
+        #     y = self.SCREEN_HEIGHT - 1
 
-        print("X", x)
-        print("Y", y)
-        # depth_frame = depth_frame.tolist()
+        print("y", x)
+        print("x", y)
         x = int(x)
         y = int(y)
-        return depth_frame[x][y]
+        cv2.imshow("depth", depth_frame)
+        print("depth at point:", depth_frame[146, 162])
+        # print(depth_frame.shape())
+        return depth_frame[y][x]
 
     # returns angle(in degrees) between center of camera to center of ball
     def calc_ang_deg(self, x):
@@ -145,10 +149,9 @@ class PoseCalculator:
     def get_balls(self):
         # balls = self.ballDetector.run_detector()
 
-        detected_balls, mask, depth_frame = self.detector.run_detector()
-        color_frame, depth_frame = self.generator.generate()
+        detected_balls, mask, color_frame, depth_frame = self.detector.run_detector()
+        # color_frame, _ = self.generator.generate()
         if(depth_frame is not None):
-            # color_frame, depth_frame = self.generator.generate()
             print(detected_balls)
             if(detected_balls is None):
                 cv2.imshow("colorframe", color_frame)
@@ -172,8 +175,12 @@ class PoseCalculator:
                 cv2.circle(color_frame, (int(ball[0]), int(ball[1])), int(ball[2]), (0, 0, 255), 3)
                 cv2.circle(color_frame, (int(ball[0]), int(ball[1])), 0, (255, 0, 0), 6)
                 dist = self.get_distance_center(depth_frame, ball[0], ball[1])
+                # print(dist)
                 angle = self.calc_ang_deg(ball[0])
                 ball_data.append([dist, angle])
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                cv2.putText(color_frame, "Distance: " + str(39.97*dist), (int(ball[0]), int(ball[1]) + int(ball[2])), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                cv2.putText(color_frame, "Angle: " + str(round(angle, 2)), (int(ball[0]), int(ball[1]) + int(ball[2]) + 40), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
             cv2.imshow("colorframe", color_frame)
             cv2.imshow("mask", mask)
