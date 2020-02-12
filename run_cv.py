@@ -4,7 +4,7 @@ import argparse
 import cv2
 from pose_calculator import PoseCalculator
 # from depth_data_generator import DepthDataGenerator
-from depth_live_generator import DepthLiveGenerator
+# from depth_live_generator import DepthLiveGenerator
 from image_generator import ImageGenerator
 from video_file_generator import VideoFileGenerator
 from video_live_generator import VideoLiveGenerator
@@ -54,15 +54,11 @@ elif args.target == "power_cell":
 
 with PoseCalculator(target_detector) as pc:
     while (generator.is_capturing() if args.generator == "video_file" else True):
-<<<<<<< HEAD
-        pc.get_values(units=args.units)
-=======
+
         if(type(target_detector) is PowerCellDetector):
             pc.get_balls()
         else:
-            print("hello")
             pc.get_values()
->>>>>>> Added power cell detection into own class and integrated
         key = cv2.waitKey(wait_time)
         if key == ord('q'):
             break
