@@ -211,9 +211,6 @@ class PoseCalculator:
                 # angle = calc_ang_deg(ball[0])
                 # ball_data.append(angle)
 
-
-
-
             cv2.imshow("colorframe", color_frame)
             cv2.imshow("mask", mask)
 
