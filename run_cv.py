@@ -25,11 +25,10 @@ parser.add_argument("--port", "-p", nargs="?", help="camera port to read from")
 
 parser.add_argument("--units", "-u", nargs="?", help="units to return distance in", choices=["in", "ft", "m"], default="m")
 parser.add_argument("target", help="target to detect pose for", choices=["loading_bay", "power_port", "power_cell"])
-
 args = parser.parse_args()
 
 generator = None
-wait_time = 1
+wait_time = 5
 
 if args.generator == "depth_data":
     generator = DepthDataGenerator(args.depth, args.image)
@@ -60,6 +59,7 @@ with PoseCalculator(target_detector) as pc:
             pc.get_balls()
         else:
             pc.get_values(units=args.units)
+
 
         key = cv2.waitKey(wait_time)
         if key == ord('q'):

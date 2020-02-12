@@ -1,5 +1,7 @@
 import math
+import numpy as np
 import serial
+from scipy.spatial.transform import Rotation as R
 from pose_calculator import PoseCalculator
 from power_port_detector import PowerPortDetector
 from video_live_generator import VideoLiveGenerator
@@ -7,12 +9,12 @@ from video_live_generator import VideoLiveGenerator
 
 class DataSender:
 
-    CAMERA_TILT = 9999  # update with the correct camera tilt angle
+    CAMERA_TILT = math.radians(30)  # update with the correct camera tilt angle
 
-    def __init__(self):
-        name = "ttyTHS2"
-        rate = 9600  # update with the correct baudrate
-        port = 1
+    def __init__(self, name="ttyS0", rate=9600, port=1):
+        self.name = name
+        self.rate = rate
+        self.port = port
 
         self.s = serial.Serial("/dev/" + name, rate)
 
@@ -21,24 +23,38 @@ class DataSender:
     def convert_data(self):
         rot, trans = self.pose_calculator.get_values()
 
-        robot_x = trans[0]
-        robot_y = math.cos(self.CAMERA_TILT) * trans[1] - math.sin(self.CAMERA_TILT) * trans[2]
-        robot_z = math.sin(self.CAMERA_TILT) * trans[1] + math.sin(self.CAMERA_TILT) * trans[2]
-
-        target_y = math.cos(rot[2]) * trans[1] - math.sin(rot[2]) * (math.cos(rot[1]) * trans[2]) - math.sin(rot[1]) * trans[2]
-        target_x = math.cos(rot[1]) * trans[0] + math.sin(rot[1]) * trans[2]
-        target_z = math.sin(rot[2]) * trans[1] + math.cos(rot[2]) * (math.cos(rot[1]) * trans[2]) - math.sin(rot[1]) * trans[2]
-
-        angle = math.degrees(math.acos(target_y))
-
         if trans[0] is None:
             return 9999, 9999, 9999
 
-        return int(100 * robot_x), int(100 * robot_z), 10 * round(angle, 1)
+        dx = trans[2] * math.cos(math.radians(self.CAMERA_TILT))
+        dy = trans[0]
+
+        rot_x = np.array([[1, 0, 0],
+                          [0, math.cos(math.radians(rot[0])), -math.sin(math.radians(rot[0]))],
+                          [0, math.sin(math.radians(rot[0])), math.cos(math.radians(rot[0]))]])
+
+        rot_y = np.array([[math.cos(math.radians(rot[1])), 0, math.sin(math.radians(rot[1]))],
+                          [0, 1, 0],
+                          [-math.sin(math.radians(rot[1])), 0, math.cos(math.radians(rot[1]))]])
+
+        rot_z = np.array([[math.cos(math.radians(rot[2])), math.sin(math.radians(rot[2])), 0],
+                          [-math.sin(math.radians(rot[2])), math.cos(math.radians(rot[2])), 0],
+                          [0, 0, 1]])
+
+        rot_c = np.array([[math.cos(self.CAMERA_TILT), 0, math.sin(self.CAMERA_TILT)],
+                          [0, 1, 0],
+                          [-math.sin(self.CAMERA_TILT), 0, math.cos(self.CAMERA_TILT)]])
+
+        r_target = np.linalg.inv(rot_c) @ rot_z @ rot_y @ rot_x
+        r = R.from_matrix(r_target)
+        new_rotations = r.as_euler('zyx', degrees=True)
+        angle = new_rotations[1]
+
+        return int(100 * dx), int(100 * dy), 10 * round(angle, 1)
 
     def send_data(self):
         x, y, angle = self.convert_data()
-        self.s.write('S {:04d} {:04d} {:+05d} E\n'.format(x, y, angle))
+        self.s.write(bytes('S {:04d} {:04d} {:+05d} E'.format(x, y, angle), "utf-8"))
 
 
 data_sender = DataSender()
