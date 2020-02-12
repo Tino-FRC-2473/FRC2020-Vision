@@ -6,6 +6,7 @@ import imghdr
 import traceback
 import os
 from math import sin, cos
+import pdb
 
 from operator import add
 from loading_bay_detector import LoadingBayDetector
@@ -131,13 +132,14 @@ class PoseCalculator:
         # if(y >= self.SCREEN_HEIGHT):
         #     y = self.SCREEN_HEIGHT - 1
 
-        print("y", x)
-        print("x", y)
+
         x = int(x)
         y = int(y)
+
         cv2.imshow("depth", depth_frame)
-        print("depth at point:", depth_frame[146, 162])
+        # print("depth at point:", depth_frame[146, 162])
         # print(depth_frame.shape())
+
         return depth_frame[y][x]
 
     # returns angle(in degrees) between center of camera to center of ball
@@ -152,7 +154,7 @@ class PoseCalculator:
         detected_balls, mask, color_frame, depth_frame = self.detector.run_detector()
         # color_frame, _ = self.generator.generate()
         if(depth_frame is not None):
-            print(detected_balls)
+            # print(detected_balls)
             if(detected_balls is None):
                 cv2.imshow("colorframe", color_frame)
                 cv2.imshow("mask", mask)
@@ -174,18 +176,24 @@ class PoseCalculator:
                     continue
                 cv2.circle(color_frame, (int(ball[0]), int(ball[1])), int(ball[2]), (0, 0, 255), 3)
                 cv2.circle(color_frame, (int(ball[0]), int(ball[1])), 0, (255, 0, 0), 6)
-                dist = self.get_distance_center(depth_frame, ball[0], ball[1])
+
+                x_change = -23
+                y_change = 31
+
+                dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
+                print("ball[0]", ball[0], "ball[1]", ball[1],"at dist", dist*39.97)
+                print("ball[0] new", ball[0] + x_change, "ball[1] new", ball[1] + y_change,"at dist", dist*39.97)
                 # print(dist)
                 angle = self.calc_ang_deg(ball[0])
                 ball_data.append([dist, angle])
                 font = cv2.FONT_HERSHEY_SIMPLEX
-                cv2.putText(color_frame, "Distance: " + str(39.97*dist), (int(ball[0]), int(ball[1]) + int(ball[2])), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
-                cv2.putText(color_frame, "Angle: " + str(round(angle, 2)), (int(ball[0]), int(ball[1]) + int(ball[2]) + 40), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                cv2.putText(color_frame, "Distance: " + str(round(39.97*dist, 2)), (int(ball[0]), int(ball[1]) + int(ball[2])), font, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
+                cv2.putText(color_frame, "Angle: " + str(round(angle, 2)), (int(ball[0]), int(ball[1]) + int(ball[2]) + 20), font, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
 
             cv2.imshow("colorframe", color_frame)
             cv2.imshow("mask", mask)
-            print(ball_data)
-
+            # print(ball_data)
+            # pdb.set_trace()
             return ball_data
 
         else:
@@ -202,6 +210,9 @@ class PoseCalculator:
                 cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (255, 0, 0), 1)
                 # angle = calc_ang_deg(ball[0])
                 # ball_data.append(angle)
+
+
+
 
             cv2.imshow("colorframe", color_frame)
             cv2.imshow("mask", mask)
