@@ -32,7 +32,7 @@ class VideoLiveGenerator:
 
     def get_frame(self):
         _, frame = self.input.read()
-        frame = np.rot90(frame).copy()
+        frame = np.rot90(frame, 3).copy()
         return frame
 
     def get_horizontal_fov(self):
