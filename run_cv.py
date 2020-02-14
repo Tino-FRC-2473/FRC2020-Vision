@@ -60,7 +60,6 @@ with PoseCalculator(target_detector) as pc:
         else:
             pc.get_values(units=args.units)
 
-
         key = cv2.waitKey(wait_time)
         if key == ord('q'):
             break

@@ -16,7 +16,6 @@ class DepthLiveGenerator:
         s.set_option(rs.option.exposure, 80)
         self.input_path = input_port
 
-
         self.input = cv2.VideoCapture(int(input_port))
         self.set_camera_settings(str(input_port))
         self.input.set(cv2.CAP_PROP_FRAME_WIDTH, 640)

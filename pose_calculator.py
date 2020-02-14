@@ -132,7 +132,6 @@ class PoseCalculator:
         # if(y >= self.SCREEN_HEIGHT):
         #     y = self.SCREEN_HEIGHT - 1
 
-
         x = int(x)
         y = int(y)
 
@@ -181,8 +180,8 @@ class PoseCalculator:
                 y_change = 31
 
                 dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
-                print("ball[0]", ball[0], "ball[1]", ball[1],"at dist", dist*39.97)
-                print("ball[0] new", ball[0] + x_change, "ball[1] new", ball[1] + y_change,"at dist", dist*39.97)
+                print("ball[0]", ball[0], "ball[1]", ball[1], "at dist", dist*39.97)
+                print("ball[0] new", ball[0] + x_change, "ball[1] new", ball[1] + y_change, "at dist", dist*39.97)
                 # print(dist)
                 angle = self.calc_ang_deg(ball[0])
                 ball_data.append([dist, angle])
