@@ -4,9 +4,6 @@ import pdb
 import matplotlib.pyplot as plt
 
 from image_generator import ImageGenerator
-from video_file_generator import VideoFileGenerator
-from video_live_generator import VideoLiveGenerator
-from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
 
 parser = argparse.ArgumentParser()
@@ -18,6 +15,7 @@ target_detector = PowerPortDetector(generator)
 
 contours, mask = target_detector.run_detector()
 
+plt.figure()
 plt.imshow(mask)
 plt.title("Mask")
 plt.show()
