@@ -10,7 +10,7 @@ args = parser.parse_args()
 generator = VideoLiveGenerator(args.port)
 frame, _ = generator.generate()
 height, width = frame.shape[:2]
-out = cv2.VideoWriter('output.avi', cv2.VideoWriter.fourcc(*'XVID'), 30, (width, height))
+out = cv2.VideoWriter(args.filename, cv2.VideoWriter.fourcc(*'XVID'), 30, (width, height))
 
 while (True):
     frame, _ = generator.generate()
