@@ -41,7 +41,7 @@ class PoseCalculator:
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
         fov_radians = math.radians(self.generator.get_horizontal_fov())
         # self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
-        self.FOCAL_LENGTH_PIXELS = 600
+        self.FOCAL_LENGTH_PIXELS = 657
         # print("focal length", self.FOCAL_LENGTH_PIXELS)
 
         # experimentally determined distance constant
