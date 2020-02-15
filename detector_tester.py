@@ -15,6 +15,8 @@ target_detector = PowerPortDetector(generator)
 
 contours, mask = target_detector.run_detector()
 
+cv2.imshow("img", args.image)
+
 plt.figure()
 plt.imshow(mask)
 plt.title("Mask")

@@ -22,10 +22,15 @@ class GreenCalibration:
 
         bgr_data = np.reshape(bgr_data, (79, 1, 3))
 
-        self.true_green_vals = cv2.cvtColor(bgr_data, cv2.COLOR_BGR2HSV)
+        self.true_green_vals = cv2.cvtColor(bgr_data, cv2.COLOR_BGR2LUV)
 
-        self.low_green = np.array([68, 100, 5])
-        self.high_green = np.array([84, 255, 255])
+        h = self.true_green_vals[:, :, 0]
+        s = self.true_green_vals[:, :, 1]
+        v = self.true_green_vals[:, :, 2]
+        low_h, low_s, low_v = (h.mean() - self.H_STD_TOLERANCE * h.std()), (s.mean() - self.S_STD_TOLERANCE * s.std()), (v.mean() - self.V_STD_TOLERANCE * v.std())
+        high_h, high_s, high_v = (h.mean() + self.H_STD_TOLERANCE * h.std()), (s.mean() + self.S_STD_TOLERANCE * s.std()), (v.mean() + self.V_STD_TOLERANCE * v.std())
+        self.low_green = np.array([int(low_h), int(low_s), int(low_v)])
+        self.high_green = np.array([int(high_h), int(high_s), int(high_v)])
 
     def get_new_hsv(self, mask):
         if (len(mask) == 0):

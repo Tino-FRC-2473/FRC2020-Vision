@@ -21,18 +21,18 @@ class PowerPortDetector:
             return None, None
 
         img = cv2.GaussianBlur(img, (3, 3), cv2.BORDER_DEFAULT)
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        plt.figure(figsize=(12, 6))
-        plt.subplot(1, 3, 1)
-        plt.title("Hue")
-        plt.imshow(hsv[:,:,0])
-        plt.subplot(1, 3, 2)
-        plt.title("Saturation")
-        plt.imshow(hsv[:,:,1])
-        plt.subplot(1, 3, 3)
-        plt.title("Value")
-        plt.imshow(hsv[:,:,2])
-        mask = cv2.inRange(hsv, self.calibrator.low_green, self.calibrator.high_green)
+        luv = cv2.cvtColor(luv, cv2.COLOR_BGR2LUV)
+        # plt.figure(figsize=(12, 6))
+        # plt.subplot(1, 3, 1)
+        # plt.title("Y")
+        # plt.imshow(color[:,:,0])
+        # plt.subplot(1, 3, 2)
+        # plt.title("Cr")
+        # plt.imshow(color[:,:,1])
+        # plt.subplot(1, 3, 3)
+        # plt.title("Cb")
+        # plt.imshow(color[:,:,2])
+        mask = cv2.inRange(luv, self.calibrator.low_green, self.calibrator.high_green)
         contours_return = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours = None
         if len(contours_return) == 3:
@@ -41,9 +41,9 @@ class PowerPortDetector:
             contours = contours_return[0]
         contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
 
-        greens = hsv[np.where((mask == 255))]
+        greens = luv[np.where((mask == 255))]
 
-        self.calibrator.get_new_hsv(greens)
+        self.calibrator.get_new_lab(greens)
 
         return contours, mask
 
