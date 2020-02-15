@@ -7,6 +7,7 @@ import traceback
 import os
 from math import sin, cos
 from operator import add
+from scipy.spatial.transform import Rotation as R
 from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
 
@@ -39,7 +40,9 @@ class PoseCalculator:
         frame, _ = self.generator.generate()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
         fov_radians = math.radians(self.generator.get_horizontal_fov())
-        self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
+        # self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
+        self.FOCAL_LENGTH_PIXELS = 600
+        # print("focal length", self.FOCAL_LENGTH_PIXELS)
 
         # experimentally determined distance constant
         self.DISTANCE_CONSTANT = 1.26973017
@@ -75,7 +78,8 @@ class PoseCalculator:
                                     [0,                        self.FOCAL_LENGTH_PIXELS, self.SCREEN_HEIGHT/2],
                                     [0,                        0,                        1]])
 
-        _, rvec, tvec = cv2.solvePnP(obj_points, img_points, camera_matrix, None)
+        _, rvec, tvec, _ = cv2.solvePnPRansac(obj_points, img_points, camera_matrix, None, flags=cv2.SOLVEPNP_ITERATIVE, iterationsCount=100, reprojectionError=1.0, confidence=0.95)
+
         return rvec, tvec
 
     # simplify contour into four corner points
@@ -155,12 +159,16 @@ class PoseCalculator:
         area = cv2.contourArea(c)
         cv2.drawContours(frame, [corners], -1, (0, 0, 255), 2)
 
-        r, t = self.get_angle_dist(Target(corners, area))
-        rmat, _ = cv2.Rodrigues(r)  # convert rotation vector to matrix
+        rvec, tvec = self.get_angle_dist(Target(corners, area))
+        rmat, _ = cv2.Rodrigues(rvec)  # convert rotation vector to matrix
 
-        rx, ry, rz = self.get_euler_from_rodrigues(rmat)
-        t *= self.DISTANCE_CONSTANT
-        tx, ty, tz = t[0][0], t[1][0], t[2][0]
+        # rx, ry, rz = self.get_euler_from_rodrigues(rmat)
+        r_euler = R.from_rotvec(rvec.flatten()).as_euler('xyz', degrees=True)
+        rx, ry, rz = r_euler[0], r_euler[1], r_euler[2]
+
+        tvec *= self.DISTANCE_CONSTANT
+        tvec = tvec.flatten()
+        tx, ty, tz = tvec[0], tvec[1], tvec[2]
 
         self.update_values([rx, ry, rz], [tx, ty, tz])
         r, t = self.get_avg_values()
