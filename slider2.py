@@ -4,12 +4,7 @@ import math
 import numpy as np
 import cv2
 
-# parser = argparse.ArgumentParser()
-# parser.add_argument("input", default="0 0 0")
-# args = parser.parse_args(input)
-# print(args)
 parser = argparse.ArgumentParser()
-parser.add_argument("input", help="read from the given camera or file", default="0")
 args = parser.parse_args()
 
 slider = Tk()
@@ -34,9 +29,11 @@ def set_r_slider():
     r.set(float(r_input))
 
 def test_values():
-    yaw = math.pi * y.get() / 180.0
+    yaw = math.degrees(math.pi * y.get() / 180.0
     pitch = math.pi * p.get() / 180.0
     roll = math.pi * r.get() / 180.0
+
+
 
     # print("hello:", yaw, pitch, roll)
 
@@ -47,11 +44,10 @@ def test_values():
     pitch_mat = np.matrix([[math.cos(pitch), 0, math.sin(pitch)],
                             [0, 1, 0],
                             [-math.sin(pitch), 0, math.cos(pitch)]
-                            ]) #y
+                            ])
     roll_mat = np.matrix([[1, 0, 0],
-                          [0, math.cos(roll), -math.sin(roll)],
-                          [0, math.sin(roll), math.cos(roll)]
-                          ]) #x
+                         [0, math.cos(roll), -math.sin(roll)],
+                         [0, math.sin(roll), math.cos(roll)]]) #x
 
     rot = yaw_mat * pitch_mat * roll_mat
     # print(rot[2, 0])
@@ -99,19 +95,12 @@ def test_values():
     # calculates focal length based on a right triangle representing the "image" side of a pinhole camera
     # ABC where A is FIELD_OF_VIEW_RAD/2, a is SCREEN_WIDTH/2, and b is the focal length
     FOCAL_LENGTH_PIXELS = (SCREEN_WIDTH / 2.0) / math.tan(FIELD_OF_VIEW_RAD / 2.0)
-    distance_co = []
     camera_matrix = np.float64([[FOCAL_LENGTH_PIXELS, 0,                        SCREEN_WIDTH/2],
                                 [0,                        FOCAL_LENGTH_PIXELS, SCREEN_HEIGHT/2],
-                                [0,                        0,                        1]])
+                                [0,                        0,                   1]])
 
     img_points = np.array(cv2.projectPoints(obj_points, translated, test_tvec, camera_matrix, None))[0]
     print(img_points)
-
-
-    # frame = cv2.imread(args.input)
-    # cv2.drawContours(frame, img_points, -1, (0,255,0), 6)
-
-
 
 y = Scale(slider, from_ = -180, to = 180, orient = HORIZONTAL)
 y.pack()
@@ -138,30 +127,3 @@ test_but = Button(slider, text = "test values", width = 10, command=test_values)
 test_but.pack()
 
 mainloop()
-
-# while (True):
-#     y_input = y_entry.get()
-#     y.set(int(y_input))
-#     # p_input = p_entry.get()
-#     # p.set(int(p_entry))
-#     # r_input = r_entry.get()
-#     # r.set(int(r_entry))
-#     key = cv2.waitKey(3)
-#     if key == word('q'):
-#         break
-# # y.set(sliderVal.integer)
-# def sel():
-#    selection = "Value = " + str(var.get())
-#    label.config(text = selection)
-#
-# root = Tk()
-# var = DoubleVar()
-# scale = Scale( root, variable = var )
-# scale.pack(anchor=CENTER)
-#
-# button = Button(root, text="Get Scale Value", command=sel)
-# button.pack(anchor=CENTER)
-#
-# label = Label(root)
-# label.pack()
-# root.mainloop()
