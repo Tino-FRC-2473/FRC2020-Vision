@@ -1,5 +1,6 @@
 import os
 import csv
+import cv2
 import argparse
 from pose_calculator import PoseCalculator
 from image_generator import ImageGenerator
@@ -11,6 +12,7 @@ parser.add_argument("dir", help="directory with test photos")
 parser.add_argument("target", help="target to detect pose for", choices=["loading_bay", "power_port"])
 parser.add_argument("--output", "-o", nargs="?", help="name of file to write to", default="output.csv")
 parser.add_argument("--units", "-u", nargs="?", help="units to return distance in", choices=["in", "ft", "m"], default="m")
+parser.add_argument("--display", "-d", action="store_true")
 args = parser.parse_args()
 
 with open(args.output, mode='w', newline='') as output_file:
@@ -27,7 +29,16 @@ with open(args.output, mode='w', newline='') as output_file:
             target_detector = PowerPortDetector(generator)
 
         with PoseCalculator(target_detector) as pd:
-            r, t = pd.get_values(units=args.units, display=False)
-            # example filename: 0degrees_18inches.png
-            output_writer.writerow([filename, int(filename[filename.index('_')+1:-10]), int(filename[:filename.index('d')]),
-                                   r[0], r[1], r[2], t[0], t[1], t[2]])
+            if args.display:
+                while True:
+                    r, t = pd.get_values(units=args.units, display=True)
+                    key = cv2.waitKey(1)
+                    if key == ord("n"):
+                        break
+                    elif key == ord("q"):
+                        exit()
+            else:
+                r, t = pd.get_values(units=args.units, display=False)
+                # example filename: 0degrees_18inches.png
+                output_writer.writerow([filename, int(filename[filename.index('_')+1:-10]), int(filename[:filename.index('d')]),
+                                       r[0], r[1], r[2], t[0], t[1], t[2]])
