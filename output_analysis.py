@@ -1,6 +1,7 @@
 import csv
 import numpy as np
 import argparse
+from statistics import variance
 
 parser = argparse.ArgumentParser()
 parser.add_argument("input", help="CSV to read from")
@@ -14,8 +15,8 @@ dist_constants = []
 with open(args.input, newline='') as input_file:
     reader = csv.DictReader(input_file)
     for row in reader:
-        angle, dist = float(row["angle"]), float(math.cos(math.radians(CAMERA_ANGLE)) * row["distance"])
-        ry, tz = float(row["ry"]), float(row["tz"])
+        angle, dist = float(row["angle"]), float(row["distance"])
+        ry, tz = abs(float(row["ry"])), float(row["tz"])
         if angle == 0:
             angle_errors.append(abs(ry - angle))
         else:
