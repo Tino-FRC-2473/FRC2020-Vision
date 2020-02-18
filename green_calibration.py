@@ -27,6 +27,11 @@ class GreenCalibration:
         self.low_green = np.array([68, 100, 50])
         self.high_green = np.array([84, 255, 255])
 
+        # Blender constants
+
+        # self.low_green = np.array([0, 0, 10])
+        # self.high_green = np.array([180, 255, 255])
+
     def get_new_hsv(self, mask):
         if (len(mask) == 0):
             return self.low_green, self.high_green
