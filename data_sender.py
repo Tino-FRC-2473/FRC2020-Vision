@@ -24,29 +24,9 @@ class DataSender:
         if trans[0] is None:
             return 9999, 9999, 9999
 
-        dx = trans[2] * math.cos(math.radians(self.CAMERA_TILT))
         dy = trans[0]
-
-        rot_x = np.array([[1, 0, 0],
-                          [0, math.cos(math.radians(rot[0])), -math.sin(math.radians(rot[0]))],
-                          [0, math.sin(math.radians(rot[0])), math.cos(math.radians(rot[0]))]])
-
-        rot_y = np.array([[math.cos(math.radians(rot[1])), 0, math.sin(math.radians(rot[1]))],
-                          [0, 1, 0],
-                          [-math.sin(math.radians(rot[1])), 0, math.cos(math.radians(rot[1]))]])
-
-        rot_z = np.array([[math.cos(math.radians(rot[2])), math.sin(math.radians(rot[2])), 0],
-                          [-math.sin(math.radians(rot[2])), math.cos(math.radians(rot[2])), 0],
-                          [0, 0, 1]])
-
-        rot_c = np.array([[math.cos(self.CAMERA_TILT), 0, math.sin(self.CAMERA_TILT)],
-                          [0, 1, 0],
-                          [-math.sin(self.CAMERA_TILT), 0, math.cos(self.CAMERA_TILT)]])
-
-        r_target = np.linalg.inv(rot_c) @ rot_z @ rot_y @ rot_x
-        rotation = R.from_matrix(r_target)
-        new_rotations = rotation.as_euler("zyx", degrees=True)
-        angle = new_rotations[1]
+        dx = trans[2]
+        angle = rot[1]
 
         return int(100 * dx), int(100 * dy), int(10 * round(angle, 1))
 
