@@ -78,8 +78,8 @@ class PoseCalculator:
                                     [0,                        self.FOCAL_LENGTH_PIXELS, self.SCREEN_HEIGHT/2],
                                     [0,                        0,                        1]])
 
-        _, rvec, tvec, _ = cv2.solvePnPRansac(obj_points, img_points, camera_matrix, None, flags=cv2.SOLVEPNP_ITERATIVE, iterationsCount=100, reprojectionError=1.0, confidence=0.95)
-
+        # _, rvec, tvec, _ = cv2.solvePnPRansac(obj_points, img_points, camera_matrix, None, flags=cv2.SOLVEPNP_ITERATIVE, iterationsCount=100, reprojectionError=1.0, confidence=0.95)
+        _, rvec, tvec = cv2.solvePnP(obj_points, img_points, camera_matrix, None)
         return rvec, tvec
 
     # simplify contour into four corner points
@@ -166,7 +166,7 @@ class PoseCalculator:
         # rx, ry, rz = r_euler[0], r_euler[1], r_euler[2]
 
         # experimentally determined constant
-        ry += 26.5
+        ry -= 5
 
         rot = [rx, ry, rz]
 
