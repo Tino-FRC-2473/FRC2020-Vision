@@ -16,7 +16,7 @@ from power_port_detector import PowerPortDetector
 class PoseCalculator:
 
     # initilaze variables
-    def __init__(self, detector):
+    def __init__(self, detector, frame_name="frame"):
 
         self.detector = detector
         self.generator = detector.get_generator()
@@ -41,16 +41,19 @@ class PoseCalculator:
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
         fov_radians = math.radians(self.generator.get_horizontal_fov())
         # self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
-        self.FOCAL_LENGTH_PIXELS = 657
+        self.FOCAL_LENGTH_PIXELS = 649
         # print("focal length", self.FOCAL_LENGTH_PIXELS)
 
-        # experimentally determined distance constant
+        # experimentally determined constants
         self.DISTANCE_CONSTANT = 0.97793275673
+        self.ANGLE_CONSTANT = 0
 
         # number of previous values to keep for average
         self.NUM_VALS = 10
 
         self.CAMERA_TILT = math.radians(30)
+
+        self.FRAME_NAME = frame_name
 
     def __enter__(self):
         return self
@@ -77,7 +80,7 @@ class PoseCalculator:
         img_points = np.float64(img_points)
 
         camera_matrix = np.float64([[self.FOCAL_LENGTH_PIXELS, 0,                        self.SCREEN_WIDTH/2],
-                                    [0,                        self.FOCAL_LENGTH_PIXELS, self.SCREEN_HEIGHT/2],
+                                    [0,                        self.FOCAL_LENGTH_PIXELS-3, self.SCREEN_HEIGHT/2],
                                     [0,                        0,                        1]])
 
         # _, rvec, tvec, _ = cv2.solvePnPRansac(obj_points, img_points, camera_matrix, None, flags=cv2.SOLVEPNP_ITERATIVE, iterationsCount=100, reprojectionError=1.0, confidence=0.95)
@@ -114,7 +117,7 @@ class PoseCalculator:
     def display_windows(self, frame, mask):
 
         cv2.imshow("contours", mask)
-        cv2.imshow("frame", frame)
+        cv2.imshow(self.FRAME_NAME, frame)
 
     # update log of previous rotation and translation values
     def update_values(self, r, t):
@@ -162,31 +165,43 @@ class PoseCalculator:
         cv2.drawContours(frame, [corners], -1, (0, 0, 255), 2)
 
         rvec, tvec = self.get_angle_dist(Target(corners, area))
-        rmat, _ = cv2.Rodrigues(rvec)  # convert rotation vector to matrix
 
-        rx, ry, rz = self.get_euler_from_rodrigues(rmat)
-        # r_euler = R.from_rotvec(rvec.flatten()).as_euler('xyz', degrees=True)
-        # rx, ry, rz = r_euler[0], r_euler[1], r_euler[2]
+        rot_c = np.array([[1, 0, 0],
+                          [0, math.cos(self.CAMERA_TILT), -math.sin(self.CAMERA_TILT)],
+                          [0, math.sin(self.CAMERA_TILT), math.cos(self.CAMERA_TILT)]])
+        rmat = np.linalg.inv(rot_c) @ R.from_rotvec(rvec.flatten()).as_matrix()
+        euler = R.from_matrix(rmat).as_euler('zyx', degrees=True)
+        rx, ry, rz = euler[0], euler[1], euler[2]
 
-        # experimentally determined constant
-        ry -= 5
 
-        rot = [rx, ry, rz]
+        # rmat = R.from_rotvec(rvec.flatten()).as_euler('xyz', degrees=True)
+        # euler[1] += self.ANGLE_CONSTANT
+        # print(np.ndarray.tolist(euler))
+        #
+        # rot_c = np.array([[1, 0, 0], [0, math.cos(self.CAMERA_TILT), -math.sin(self.CAMERA_TILT)], [0, math.sin(self.CAMERA_TILT), math.cos(self.CAMERA_TILT)]])
+        # rmat_new = R.from_euler('xyz', euler, degrees=True).as_matrix() @ np.linalg.inv(rot_c)
+        # euler_new = R.from_matrix(rmat_new).as_euler('xyz', degrees=True)
+        #
+        # rx, ry, rz = euler_new[0], euler_new[1], euler_new[2]
 
-        rot_x = np.array([[1, 0, 0], [0, math.cos(math.radians(rot[0])), -math.sin(math.radians(rot[0]))], [0, math.sin(math.radians(rot[0])), math.cos(math.radians(rot[0]))]])
-        rot_y = np.array([[math.cos(math.radians(rot[1])), 0, math.sin(math.radians(rot[1]))], [0, 1, 0], [-math.sin(math.radians(rot[1])), 0, math.cos(math.radians(rot[1]))]])
-        rot_z = np.array([[math.cos(math.radians(rot[2])), math.sin(math.radians(rot[2])), 0], [-math.sin(math.radians(rot[2])), math.cos(math.radians(rot[2])), 0], [0, 0, 1]])
+        ######################
 
-        rot_camera = np.array([[1, 0, 0], [0, math.cos(self.CAMERA_TILT), -math.sin(self.CAMERA_TILT)], [0, math.sin(self.CAMERA_TILT), math.cos(self.CAMERA_TILT)]])
-        r_target = np.linalg.inv(rot_camera) @ rot_z @ rot_y @ rot_x
+        # rot = [rx, ry, rz]
+        #
+        # rot_x = np.array([[1, 0, 0], [0, math.cos(math.radians(rot[0])), -math.sin(math.radians(rot[0]))], [0, math.sin(math.radians(rot[0])), math.cos(math.radians(rot[0]))]])
+        # rot_y = np.array([[math.cos(math.radians(rot[1])), 0, math.sin(math.radians(rot[1]))], [0, 1, 0], [-math.sin(math.radians(rot[1])), 0, math.cos(math.radians(rot[1]))]])
+        # rot_z = np.array([[math.cos(math.radians(rot[2])), math.sin(math.radians(rot[2])), 0], [-math.sin(math.radians(rot[2])), math.cos(math.radians(rot[2])), 0], [0, 0, 1]])
 
-        r = R.from_matrix(r_target)
-        new_rotations = r.as_euler('zyx', degrees=True)
+        # rot_camera = np.array([[1, 0, 0], [0, math.cos(self.CAMERA_TILT), -math.sin(self.CAMERA_TILT)], [0, math.sin(self.CAMERA_TILT), math.cos(self.CAMERA_TILT)]])
+        # r_target = np.linalg.inv(rot_camera) @ rot_z @ rot_y @ rot_x
 
-        rx, ry, rz = new_rotations[0], new_rotations[1], new_rotations[2]
+        # r = R.from_matrix(r_target)
+        # new_rotations = r.as_euler('zyx', degrees=True)
+        #
+        # rx, ry, rz = new_rotations[0], new_rotations[1], new_rotations[2]
 
         tvec = tvec.flatten()
-        tvec = rot_camera @ tvec
+        tvec = rot_c @ tvec
         tvec *= self.DISTANCE_CONSTANT
         tx, ty, tz = tvec[0], tvec[1], tvec[2]
 
