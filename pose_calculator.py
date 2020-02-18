@@ -45,7 +45,7 @@ class PoseCalculator:
         # print("focal length", self.FOCAL_LENGTH_PIXELS)
 
         # experimentally determined distance constant
-        self.DISTANCE_CONSTANT = 1.26973017
+        self.DISTANCE_CONSTANT = 0.97793275673
 
         # number of previous values to keep for average
         self.NUM_VALS = 10
@@ -174,8 +174,7 @@ class PoseCalculator:
         rot_y = np.array([[math.cos(math.radians(rot[1])), 0, math.sin(math.radians(rot[1]))], [0, 1, 0], [-math.sin(math.radians(rot[1])), 0, math.cos(math.radians(rot[1]))]])
         rot_z = np.array([[math.cos(math.radians(rot[2])), math.sin(math.radians(rot[2])), 0], [-math.sin(math.radians(rot[2])), math.cos(math.radians(rot[2])), 0], [0, 0, 1]])
 
-        rot_camera = np.array([[math.cos(self.CAMERA_TILT), 0, math.sin(self.CAMERA_TILT)], [0, 1, 0], [-math.sin(self.CAMERA_TILT), 0, math.cos(self.CAMERA_TILT)]])
-
+        rot_camera = np.array([[1, 0, 0], [0, math.cos(self.CAMERA_TILT), -math.sin(self.CAMERA_TILT)], [0, math.sin(self.CAMERA_TILT), math.cos(self.CAMERA_TILT)]])
         r_target = np.linalg.inv(rot_camera) @ rot_z @ rot_y @ rot_x
 
         r = R.from_matrix(r_target)
@@ -183,8 +182,9 @@ class PoseCalculator:
 
         rx, ry, rz = new_rotations[0], new_rotations[1], new_rotations[2]
 
-        tvec *= self.DISTANCE_CONSTANT
         tvec = tvec.flatten()
+        tvec = rot_camera @ tvec
+        tvec *= self.DISTANCE_CONSTANT
         tx, ty, tz = tvec[0], tvec[1], tvec[2]
 
         self.update_values([rx, ry, rz], [tx, ty, tz])
