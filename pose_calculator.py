@@ -38,20 +38,12 @@ class PoseCalculator:
                                [19.625,   0, 0]]
 
         frame, _ = self.generator.generate()
+
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
-        fov_radians = math.radians(self.generator.get_horizontal_fov())
-        # self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
-        self.FOCAL_LENGTH_PIXELS = 649
-        # print("focal length", self.FOCAL_LENGTH_PIXELS)
+        self.FOCAL_LENGTH_PIXELS = 657
+        self.DISTANCE_CONSTANT = 0.9469335944
+        self.NUM_VALS = 10  # number of previous values to keep for average
 
-        # experimentally determined constants
-        self.DISTANCE_CONSTANT = 0.97793275673
-        self.ANGLE_CONSTANT = 0
-
-        # number of previous values to keep for average
-        self.NUM_VALS = 10
-
-        self.CAMERA_TILT = math.radians(30)
 
         self.FRAME_NAME = frame_name
 
@@ -60,13 +52,6 @@ class PoseCalculator:
 
     def __exit__(self, type, value, tb):
         cv2.destroyAllWindows()
-
-    # convert rotation matrix to euler angles
-    def get_euler_from_rodrigues(self, rmat):
-        rx = 180 * math.atan2(-rmat[2][1], rmat[2][2]) / math.pi
-        ry = 180 * math.asin(rmat[2][0]) / math.pi
-        rz = 180 * math.atan2(-rmat[1][0], rmat[0][0]) / math.pi
-        return rx, ry, rz
 
     # calculate rotation and translation vectors
     def get_angle_dist(self, rectangle):
@@ -79,8 +64,13 @@ class PoseCalculator:
         obj_points = np.float64(self.obj_points)
         img_points = np.float64(img_points)
 
+        # img_points = np.array([[403, 406],
+        #                        [247, 385],
+        #                        [183, 240],
+        #                        [499, 240]])
+
         camera_matrix = np.float64([[self.FOCAL_LENGTH_PIXELS, 0,                        self.SCREEN_WIDTH/2],
-                                    [0,                        self.FOCAL_LENGTH_PIXELS-3, self.SCREEN_HEIGHT/2],
+                                    [0,                        self.FOCAL_LENGTH_PIXELS, self.SCREEN_HEIGHT/2],
                                     [0,                        0,                        1]])
 
         # _, rvec, tvec, _ = cv2.solvePnPRansac(obj_points, img_points, camera_matrix, None, flags=cv2.SOLVEPNP_ITERATIVE, iterationsCount=100, reprojectionError=1.0, confidence=0.95)
@@ -167,41 +157,13 @@ class PoseCalculator:
         rvec, tvec = self.get_angle_dist(Target(corners, area))
 
         rot_c = np.array([[1, 0, 0],
-                          [0, math.cos(self.CAMERA_TILT), -math.sin(self.CAMERA_TILT)],
-                          [0, math.sin(self.CAMERA_TILT), math.cos(self.CAMERA_TILT)]])
+                          [0, math.cos(self.generator.CAMERA_TILT), -math.sin(self.generator.CAMERA_TILT)],
+                          [0, math.sin(self.generator.CAMERA_TILT), math.cos(self.generator.CAMERA_TILT)]])
         rmat = np.linalg.inv(rot_c) @ R.from_rotvec(rvec.flatten()).as_matrix()
         euler = R.from_matrix(rmat).as_euler('zyx', degrees=True)
         rx, ry, rz = euler[0], euler[1], euler[2]
 
-
-        # rmat = R.from_rotvec(rvec.flatten()).as_euler('xyz', degrees=True)
-        # euler[1] += self.ANGLE_CONSTANT
-        # print(np.ndarray.tolist(euler))
-        #
-        # rot_c = np.array([[1, 0, 0], [0, math.cos(self.CAMERA_TILT), -math.sin(self.CAMERA_TILT)], [0, math.sin(self.CAMERA_TILT), math.cos(self.CAMERA_TILT)]])
-        # rmat_new = R.from_euler('xyz', euler, degrees=True).as_matrix() @ np.linalg.inv(rot_c)
-        # euler_new = R.from_matrix(rmat_new).as_euler('xyz', degrees=True)
-        #
-        # rx, ry, rz = euler_new[0], euler_new[1], euler_new[2]
-
-        ######################
-
-        # rot = [rx, ry, rz]
-        #
-        # rot_x = np.array([[1, 0, 0], [0, math.cos(math.radians(rot[0])), -math.sin(math.radians(rot[0]))], [0, math.sin(math.radians(rot[0])), math.cos(math.radians(rot[0]))]])
-        # rot_y = np.array([[math.cos(math.radians(rot[1])), 0, math.sin(math.radians(rot[1]))], [0, 1, 0], [-math.sin(math.radians(rot[1])), 0, math.cos(math.radians(rot[1]))]])
-        # rot_z = np.array([[math.cos(math.radians(rot[2])), math.sin(math.radians(rot[2])), 0], [-math.sin(math.radians(rot[2])), math.cos(math.radians(rot[2])), 0], [0, 0, 1]])
-
-        # rot_camera = np.array([[1, 0, 0], [0, math.cos(self.CAMERA_TILT), -math.sin(self.CAMERA_TILT)], [0, math.sin(self.CAMERA_TILT), math.cos(self.CAMERA_TILT)]])
-        # r_target = np.linalg.inv(rot_camera) @ rot_z @ rot_y @ rot_x
-
-        # r = R.from_matrix(r_target)
-        # new_rotations = r.as_euler('zyx', degrees=True)
-        #
-        # rx, ry, rz = new_rotations[0], new_rotations[1], new_rotations[2]
-
-        tvec = tvec.flatten()
-        tvec = rot_c @ tvec
+        tvec = rot_c @ tvec.flatten()
         tvec *= self.DISTANCE_CONSTANT
         tx, ty, tz = tvec[0], tvec[1], tvec[2]
 
