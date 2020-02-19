@@ -16,7 +16,7 @@ with open(args.input, newline='') as input_file:
     reader = csv.DictReader(input_file)
     for row in reader:
         angle, dist = float(row["angle"]), float(row["distance"])
-        ry, tz = abs(float(row["ry"])), float(row["tz"])
+        ry, tz = float(row["ry"]), float(row["tz"])
         if angle == 0:
             angle_errors.append(abs(ry - angle))
         else:
