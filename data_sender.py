@@ -11,8 +11,6 @@ from video_live_generator import VideoLiveGenerator
 
 class DataSender:
 
-    CAMERA_TILT = math.radians(30)  # update with the correct camera tilt angle
-
     def __init__(self, name="ttyS0", rate=9600, video_port=1, depth_port=2):
         self.s = serial.Serial("/dev/" + name, rate)
         self.pose_power_port = PoseCalculator(PowerPortDetector(VideoLiveGenerator(video_port)))
@@ -48,6 +46,7 @@ class DataSender:
         data_to_send += " " + str(int(obstacle_present))
 
         self.s.write(bytes("S " + data_to_send + " E", "utf-8"))
+        print("S " + data_to_send + " E")
 
 
 data_sender = DataSender()
