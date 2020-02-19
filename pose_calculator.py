@@ -44,7 +44,6 @@ class PoseCalculator:
         self.DISTANCE_CONSTANT = 0.9469335944
         self.NUM_VALS = 10  # number of previous values to keep for average
 
-
         self.FRAME_NAME = frame_name
 
     def __enter__(self):
