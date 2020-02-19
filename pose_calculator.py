@@ -45,8 +45,7 @@ class PoseCalculator:
         # print("focal length", self.FOCAL_LENGTH_PIXELS)
 
         # experimentally determined distance constant
-        self.DISTANCE_CONSTANT = 0.97793275673
-
+        self.DISTANCE_CONSTANT = 0.960144584
         # number of previous values to keep for average
         self.NUM_VALS = 10
 
@@ -143,7 +142,8 @@ class PoseCalculator:
             return [None, None, None], [None, None, None]
 
         if len(contours) < 1:
-            self.display_windows(frame, mask)
+            if display:
+                self.display_windows(frame, mask)
             return [None, None, None], [None, None, None]
 
         # sort contours by area in descending order
@@ -151,7 +151,8 @@ class PoseCalculator:
         c = contours[0]  # use the largest contour
 
         if cv2.contourArea(c) < 100:
-            self.display_windows(frame, mask)
+            if display:
+                self.display_windows(frame, mask)
             return [None, None, None], [None, None, None]
 
         corners = self.get_corners(c)
@@ -166,7 +167,7 @@ class PoseCalculator:
         # rx, ry, rz = r_euler[0], r_euler[1], r_euler[2]
 
         # experimentally determined constant
-        ry -= 5
+        ry -= 3.5
 
         rot = [rx, ry, rz]
 
@@ -186,7 +187,7 @@ class PoseCalculator:
         tvec = rot_camera @ tvec
         tvec *= self.DISTANCE_CONSTANT
         tx, ty, tz = tvec[0], tvec[1], tvec[2]
-
+        
         self.update_values([rx, ry, rz], [tx, ty, tz])
         r, t = self.get_avg_values()
 
