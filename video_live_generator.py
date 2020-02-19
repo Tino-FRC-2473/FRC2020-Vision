@@ -25,6 +25,8 @@ class VideoLiveGenerator:
         camera_path = "/dev/video" + camera_port
 
         try:
+            subprocess.check_call(["v4l2-ctl", "-d", camera_path, "-c", "white_balance_temperature_auto=0"])
+            subprocess.check_call(["v4l2-ctl", "-d", camera_path, "-c", "white_balance_temperature=5400"])
             subprocess.check_call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_auto=1"])
             subprocess.check_call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_absolute=250"])
             print(subprocess.check_output(["v4l2-ctl", "-d", camera_path, "-C", "exposure_absolute"]))
