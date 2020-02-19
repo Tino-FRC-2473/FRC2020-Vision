@@ -25,8 +25,10 @@ class VideoLiveGenerator:
         camera_path = "/dev/video" + camera_port
 
         try:
-            subprocess.call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_auto=1"])
-            subprocess.call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_absolute=1"])
+            subprocess.check_call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_auto=1"])
+            subprocess.check_call(["v4l2-ctl", "-d", camera_path, "-c", "exposure_absolute=250"])
+            print(subprocess.check_output(["v4l2-ctl", "-d", camera_path, "-C", "exposure_absolute"]))
+            print("working")
         except FileNotFoundError:
             print("exposure adjustment not completed")
 
