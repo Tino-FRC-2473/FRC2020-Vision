@@ -1,6 +1,5 @@
-import numpy as np
 import cv2
-import subprocess
+import numpy as np
 import pyrealsense2 as rs
 
 
@@ -21,8 +20,6 @@ class DepthLiveGenerator:
         self.input.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
         self.scale = prof.get_device().first_depth_sensor().get_depth_scale()
-        print(self.scale)
-        # self.scale = float(1/1186)
 
         frame, _, _ = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
@@ -37,8 +34,10 @@ class DepthLiveGenerator:
         frames = self.pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
+
         if not depth_frame or not color_frame:
-            return
+            return None, None, None
+
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
 
@@ -56,4 +55,7 @@ class DepthLiveGenerator:
 
     def generate(self):
         image, depth, _ = self.get_frame()
-        return image, self.scale*depth
+        if image is None:
+            return None, None
+
+        return image, self.scale * depth
