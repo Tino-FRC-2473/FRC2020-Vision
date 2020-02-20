@@ -22,6 +22,7 @@ class LoadingBayDetector:
 
         img = cv2.GaussianBlur(img, (3, 3), cv2.BORDER_DEFAULT)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        hsv[...,1] = hsv[:,:,1]*3
         mask = cv2.inRange(hsv, self.calibrator.low_green, self.calibrator.high_green)
         contours_return = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours = None

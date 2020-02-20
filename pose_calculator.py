@@ -110,9 +110,9 @@ class PoseCalculator:
         return np.int0(arrmax_changed)
 
     def display_windows(self, frame, mask):
-
-        cv2.imshow("contours", mask)
         cv2.imshow("frame", frame)
+        cv2.imshow("contours", mask)
+        
 
     # update log of previous rotation and translation values
     def update_values(self, r, t):
