@@ -189,20 +189,21 @@ class PoseCalculator:
                 angle = self.calc_ang_deg(ball[0])
                 ball_data.append([dist, angle])
 
-                for obstacle in obstacles:
-                    # Gets the center of mass of the obstacle contour
-                    M = cv2.moments(obstacle)
-                    cx = int(M['m10'] / M['m00'])
-                    cy = int(M['m01'] / M['m00'])
+                if not obstacle_present:
+                    for obstacle in obstacles:
+                        # Gets the center of mass of the obstacle contour
+                        M = cv2.moments(obstacle)
+                        cx = int(M['m10'] / M['m00'])
+                        cy = int(M['m01'] / M['m00'])
 
-                    # Checks if the center of the obstacle is within the ball's bounds
-                    obstacle_is_ball = cx > ball[0] - ball[2] and cx < ball[0] + ball[2]
-                    obstacle_is_ball = obstacle_is_ball and cy > ball[1] - ball[2] and cy < ball[1] + ball[2]
+                        # Checks if the center of the obstacle is within the ball's bounds
+                        obstacle_is_ball = cx > ball[0] - ball[2] and cx < ball[0] + ball[2]
+                        obstacle_is_ball = obstacle_is_ball and cy > ball[1] - ball[2] and cy < ball[1] + ball[2]
 
-                    # If the ball could be an obstacle based on its distance and the obstacle does not coincide with the
-                    # ball, then the obstacle is valid and there is an obstacle to block
-                    if dist > self.low_obstacle_distance and dist < self.high_obstacle_distance and not obstacle_is_ball:
-                        obstacle_present = True
+                        # If the ball could be an obstacle based on its distance and the obstacle does not coincide with
+                        # the ball, then the obstacle is valid and there is an obstacle to block
+                        if dist > self.low_obstacle_distance and dist < self.high_obstacle_distance and not obstacle_is_ball:
+                            obstacle_present = True
 
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 cv2.putText(color_frame, "Distance: " + str(round(39.97 * dist, 2)),
