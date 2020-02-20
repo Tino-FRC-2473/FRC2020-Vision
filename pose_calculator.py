@@ -207,7 +207,10 @@ class PoseCalculator:
             left_ball = balls_left_to_right[0]
             right_ball = balls_left_to_right[len(balls_left_to_right) - 1]
             x_range = left_ball[0] - left_ball[2], right_ball[0] - right_ball[2]
-            obstacles = self.find_obstacles(depth_frame, self.get_distance_center(depth_frame, closest_balls[0][0] + x_change, closest_balls[0][1] + y_change), x_range)
+            max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change, closest_balls[0][1] + y_change)
+            if max_dist == 0:
+                max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change + 10, closest_balls[0][1] + y_change)
+            obstacles = self.find_obstacles(depth_frame, max_dist, x_range)
 
             if obstacles is not None and len(obstacles) > 0:
                 obstacle_present = True
@@ -223,9 +226,7 @@ class PoseCalculator:
 
                 dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
                 if dist == 0:
-                    x_change += 10
-                    y_change += 3
-                    dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
+                    dist = self.get_distance_center(depth_frame, ball[0] + x_change + 10, ball[1] + y_change)
 
                 x_change = -23
                 y_change = 31
