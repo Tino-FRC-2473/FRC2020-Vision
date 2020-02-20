@@ -130,22 +130,49 @@ class PoseCalculator:
         self.previous_r.append(r)
         self.previous_t.append(t)
 
-    def find_obstacles(self):
-        img, depth = self.generator.generate()
+    def get_contour_center(self, contour):
+        x, y, w, h = cv2.boundingRect(contour)
+        cx = x + w / 2
+        cy = y + h / 2
+        return cx, cy
 
-        if img is None:
+    def obstacle_in_range(self, contour, x_range):
+        x, y, w, h = cv2.boundingRect(contour)
+        if x + w > x_range[0] or x < x_range[1]:
+            return False
+        return True
+
+    def find_obstacles(self, depth, max_distance, x_range):
+        if depth is None:
             return None
 
-        self.low_obstacle_distance = 0.5
-        self.high_obstacle_distance = 0.7
+        self.low_obstacle_distance = 0.56
+        self.high_obstacle_distance = float(max_distance)
+
+        print("  min ", self.low_obstacle_distance, "  max ", self.high_obstacle_distance)
+
         mask = cv2.inRange(depth, self.low_obstacle_distance, self.high_obstacle_distance)
-        contours = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        return contours
+        kernel = np.ones((5, 5), np.uint8)
+        cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        cv2.imshow("Obstacles", mask)
+
+        if len(depth[np.where((mask[:, :] == 255))]) < 4000:
+            return None
+
+        obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        obstacle_contours.sort(key=lambda obstacle: self.get_distance_center(depth, self.get_contour_center(obstacle)[0], self.get_contour_center(obstacle)[1]))
+        obstacles_in_path = []
+        for obstacle in obstacle_contours:
+            if self.obstacle_in_range(obstacle, x_range):
+                obstacles_in_path.append(obstacle)
+
+        return obstacles_in_path
 
     # uses depth_frame to identify distance to (x, y)
     def get_distance_center(self, depth_frame, x, y):
-        cv2.imshow("depth", depth_frame)
-        return depth_frame[int(y)][int(x)]
+        x = min(639, int(x))
+        y = min(479, int(y))
+        return depth_frame[y, x]
 
     # returns angle (in degrees) between center of camera to center of ball
     def calc_ang_deg(self, x):
@@ -155,24 +182,36 @@ class PoseCalculator:
     # returns distance and angle to the ball
     def get_balls(self):
         obstacle_present = False
-        obstacles = self.find_obstacles()
-
         detected_balls, mask, color_frame, depth_frame = self.detector.run_detector()
 
         if depth_frame is not None:
             if detected_balls is None:
                 cv2.imshow("color frame", color_frame)
                 cv2.imshow("mask", mask)
-                return
+                return None, False
 
             # data[2] is the radius which we don't really need --> comes in the form [x, y, r]
             # sorts balls by distance (from RealSense depth data) in descending order
-            detected_balls.sort(key=lambda data: self.get_distance_center(depth_frame, data[0], data[1]), reverse=True)
-            closest_balls = [None, None, None, None, None]
+            detected_balls.sort(key=lambda data: self.get_distance_center(depth_frame, data[0], data[1]))
+            closest_balls = [None, None, None, None]
 
             for i in range(0, 4):
                 if i < len(detected_balls):
                     closest_balls[i] = detected_balls[i]
+
+            x_change = -23
+            y_change = 31
+
+            balls_left_to_right = list(filter(None, closest_balls))
+            balls_left_to_right.sort(key=lambda data: data[0])
+            left_ball = balls_left_to_right[0]
+            right_ball = balls_left_to_right[len(balls_left_to_right) - 1]
+            x_range = left_ball[0] - left_ball[2], right_ball[0] - right_ball[2]
+            obstacles = self.find_obstacles(depth_frame, self.get_distance_center(depth_frame, closest_balls[0][0] + x_change, closest_balls[0][1] + y_change), x_range)
+
+            if obstacles is not None and len(obstacles) > 0:
+                obstacle_present = True
+                color_frame = cv2.drawContours(color_frame, obstacles, -1, (0, 255, 0), 3)
 
             ball_data = []
             for ball in closest_balls:
@@ -182,28 +221,17 @@ class PoseCalculator:
                 cv2.circle(color_frame, (int(ball[0]), int(ball[1])), int(ball[2]), (0, 0, 255), 3)
                 cv2.circle(color_frame, (int(ball[0]), int(ball[1])), 0, (255, 0, 0), 6)
 
+                dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
+                if dist == 0:
+                    x_change += 10
+                    y_change += 3
+                    dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
+
                 x_change = -23
                 y_change = 31
 
-                dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
                 angle = self.calc_ang_deg(ball[0])
                 ball_data.append([dist, angle])
-
-                if not obstacle_present:
-                    for obstacle in obstacles:
-                        # Gets the center of mass of the obstacle contour
-                        M = cv2.moments(obstacle)
-                        cx = int(M['m10'] / M['m00'])
-                        cy = int(M['m01'] / M['m00'])
-
-                        # Checks if the center of the obstacle is within the ball's bounds
-                        obstacle_is_ball = cx > ball[0] - ball[2] and cx < ball[0] + ball[2]
-                        obstacle_is_ball = obstacle_is_ball and cy > ball[1] - ball[2] and cy < ball[1] + ball[2]
-
-                        # If the ball could be an obstacle based on its distance and the obstacle does not coincide with
-                        # the ball, then the obstacle is valid and there is an obstacle to block
-                        if dist > self.low_obstacle_distance and dist < self.high_obstacle_distance and not obstacle_is_ball:
-                            obstacle_present = True
 
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 cv2.putText(color_frame, "Distance: " + str(round(39.97 * dist, 2)),
@@ -216,7 +244,7 @@ class PoseCalculator:
 
             if detected_balls is None:
                 cv2.imshow("color frame", color_frame)
-                return
+                return None, False
 
             ball_data = []
             for ball in detected_balls:
