@@ -35,8 +35,9 @@ elif args.generator == "DepthLiveGenerator":
     else:
         print("Playing camera feed. Press \'q\' to quit")
         while True:
-            rgb, depth = depth_live_generator.generate()
-            cv2.imshow("Video", cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR))
+            bgr, depth = depth_live_generator.generate()
+            cv2.imshow("Video", bgr)
+            cv2.imshow("Depth", depth)
             key = cv2.waitKey(1)
             if key == ord('c') and args.destination is not None:
                 np.savetxt(args.destination, depth, delimiter=",", fmt="%s")
