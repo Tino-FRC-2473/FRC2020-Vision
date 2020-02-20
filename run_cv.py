@@ -10,6 +10,7 @@ from video_file_generator import VideoFileGenerator
 from video_live_generator import VideoLiveGenerator
 from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
+from power_cell_detector import PowerCellDetector
 
 # "python test.py 0" to run from camera in port 0
 # "python test.py video.mp4" to run from the video recording video.mp4
@@ -21,12 +22,13 @@ parser.add_argument("--depth", "-d", nargs="?", help="path of the CSV file to re
 parser.add_argument("--image", "-i", nargs="?", help="path of the image file to read")
 parser.add_argument("--video", "-v", nargs="?", help="path of the video file to read")
 parser.add_argument("--port", "-p", nargs="?", help="camera port to read from")
+
 parser.add_argument("--units", "-u", nargs="?", help="units to return distance in", choices=["in", "ft", "m"], default="m")
-parser.add_argument("target", help="target to detect pose for", choices=["loading_bay", "power_port"])
+parser.add_argument("target", help="target to detect pose for", choices=["loading_bay", "power_port", "power_cell"])
 args = parser.parse_args()
 
 generator = None
-wait_time = 1
+wait_time = 5
 
 if args.generator == "depth_data":
     generator = DepthDataGenerator(args.depth, args.image)
@@ -47,10 +49,17 @@ if args.target == "loading_bay":
     target_detector = LoadingBayDetector(generator)
 elif args.target == "power_port":
     target_detector = PowerPortDetector(generator)
+elif args.target == "power_cell":
+    print(generator)
+    target_detector = PowerCellDetector(generator)
 
 with PoseCalculator(target_detector) as pc:
     while (generator.is_capturing() if args.generator == "video_file" else True):
-        pc.get_values(units=args.units)
+        if(type(target_detector) is PowerCellDetector):
+            pc.get_balls()
+        else:
+            pc.get_values(units=args.units)
+
         key = cv2.waitKey(wait_time)
         if key == ord('q'):
             break

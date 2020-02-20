@@ -20,7 +20,7 @@ class GreenCalibration:
 
         self.true_green_vals = cv2.cvtColor(bgr_data, cv2.COLOR_BGR2HSV)
 
-        self.low_green = np.array([68, 100, 50])
+        self.low_green = np.array([68, 50, 0])
         self.high_green = np.array([84, 255, 255])
 
     def get_new_hsv(self, hsv, contours):
