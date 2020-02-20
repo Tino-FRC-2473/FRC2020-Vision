@@ -47,8 +47,12 @@ class GreenCalibration:
         s = self.true_green_vals[:, :, 1]
         v = self.true_green_vals[:, :, 2]
 
-        low_h, low_s, low_v = (h.mean() - self.H_STD_TOLERANCE * h.std()), (s.mean() - self.S_STD_TOLERANCE * s.std()), (v.mean() - self.V_STD_TOLERANCE * v.std())
-        high_h, high_s, high_v = (h.mean() + self.H_STD_TOLERANCE * h.std()), (s.mean() + self.S_STD_TOLERANCE * s.std()), (v.mean() + self.V_STD_TOLERANCE * v.std())
+        low_h = h.mean() - self.H_STD_TOLERANCE * h.std()
+        low_s = s.mean() - self.S_STD_TOLERANCE * s.std()
+        low_v = v.mean() - self.V_STD_TOLERANCE * v.std()
+        high_h = h.mean() + self.H_STD_TOLERANCE * h.std()
+        high_s = s.mean() + self.S_STD_TOLERANCE * s.std()
+        high_v = v.mean() + self.V_STD_TOLERANCE * v.std()
 
         self.low_green = np.array([int(low_h), int(low_s), int(low_v)])
         self.high_green = np.array([int(high_h), int(high_s), int(high_v)])

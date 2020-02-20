@@ -19,7 +19,12 @@ class PowerPortDetector:
 
         mask = cv2.inRange(hsv, self.calibrator.low_green, self.calibrator.high_green)
         contours_return = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        contours = contours_return[len(contours_return) == 3]
+
+        if len(contours_return) == 3:
+            contours = contours_return[1]
+        else:
+            contours = contours_return[0]
+
         contours.sort(key=lambda c: cv2.contourArea(c), reverse=True)
 
         self.calibrator.get_new_hsv(hsv, contours)
