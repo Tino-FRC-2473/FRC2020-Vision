@@ -130,6 +130,99 @@ class PoseCalculator:
         self.previous_r.append(r)
         self.previous_t.append(t)
 
+    def find_obstacles(self):
+        img, depth = self.generator.generate()
+
+        if img is None:
+            return None
+
+        self.low_obstacle_distance = 0.5
+        self.high_obstacle_distance = 0.7
+        mask = cv2.inRange(depth, self.low_obstacle_distance, self.high_obstacle_distance)
+        contours = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        return contours
+
+    # uses depth_frame to identify distance to (x, y)
+    def get_distance_center(self, depth_frame, x, y):
+        cv2.imshow("depth", depth_frame)
+        return depth_frame[int(y)][int(x)]
+
+    # returns angle (in degrees) between center of camera to center of ball
+    def calc_ang_deg(self, x):
+        dist_to_center = x - self.SCREEN_WIDTH / 2
+        return math.atan(dist_to_center / self.FOCAL_LENGTH_PIXELS) * (180 / math.pi)
+
+    # returns distance and angle to the ball
+    def get_balls(self):
+        obstacle_present = False
+        obstacles = self.find_obstacles()
+
+        detected_balls, mask, color_frame, depth_frame = self.detector.run_detector()
+
+        if depth_frame is not None:
+            if detected_balls is None:
+                cv2.imshow("color frame", color_frame)
+                cv2.imshow("mask", mask)
+                return
+
+            # data[2] is the radius which we don't really need --> comes in the form [x, y, r]
+            # sorts balls by distance (from RealSense depth data) in descending order
+            detected_balls.sort(key=lambda data: self.get_distance_center(depth_frame, data[0], data[1]), reverse=True)
+            closest_balls = [None, None, None, None, None]
+
+            for i in range(0, 4):
+                if i < len(detected_balls):
+                    closest_balls[i] = detected_balls[i]
+
+            ball_data = []
+            for ball in closest_balls:
+                if ball is None:
+                    continue
+
+                cv2.circle(color_frame, (int(ball[0]), int(ball[1])), int(ball[2]), (0, 0, 255), 3)
+                cv2.circle(color_frame, (int(ball[0]), int(ball[1])), 0, (255, 0, 0), 6)
+
+                x_change = -23
+                y_change = 31
+
+                dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
+                angle = self.calc_ang_deg(ball[0])
+                ball_data.append([dist, angle])
+
+                for obstacle in obstacles:
+                    M = cv2.moments(obstacle)
+                    cx = int(M['m10'] / M['m00'])
+                    cy = int(M['m01'] / M['m00'])
+
+                    obstacle_is_ball = cx > ball[0] - ball[2] and cx < ball[0] + ball[2]
+                    obstacle_is_ball = obstacle_is_ball and cy > ball[1] - ball[2] and cy < ball[1] + ball[2]
+
+                    if dist > self.low_obstacle_distance and dist < self.high_obstacle_distance and obstacle_is_ball:
+                        obstacle_present = True
+
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                cv2.putText(color_frame, "Distance: " + str(round(39.97 * dist, 2)),
+                            (int(ball[0]), int(ball[1]) + int(ball[2])), font, 0.4, (255, 255, 255), 1, cv2.LINE_AA)
+                cv2.putText(color_frame, "Angle: " + str(round(angle, 2)),
+                            (int(ball[0]), int(ball[1]) + int(ball[2]) + 20), font, 0.4, (255, 255, 255), 1,
+                            cv2.LINE_AA)
+        else:
+            print("Finding all balls instead of closest ones. (Not running DepthLiveGenerator)")
+
+            if detected_balls is None:
+                cv2.imshow("color frame", color_frame)
+                return
+
+            ball_data = []
+            for ball in detected_balls:
+                cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (0, 0, 255), 3)
+                cv2.circle(color_frame, (ball[0], ball[1]), ball[2], (255, 0, 0), 1)
+
+        cv2.imshow("color frame", color_frame)
+        cv2.imshow("mask", mask)
+
+        return ball_data, obstacle_present
+
     # get average of previous rotation and translation values
     def get_avg_values(self):
 
