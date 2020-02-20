@@ -3,13 +3,14 @@ import time
 import argparse
 import cv2
 from pose_calculator import PoseCalculator
-# from depth_data_generator import DepthDataGenerator
-# from depth_live_generator import DepthLiveGenerator
+from depth_data_generator import DepthDataGenerator
+from depth_live_generator import DepthLiveGenerator
 from image_generator import ImageGenerator
 from video_file_generator import VideoFileGenerator
 from video_live_generator import VideoLiveGenerator
 from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
+from obstacle_detector import ObstacleDetector
 
 # "python test.py 0" to run from camera in port 0
 # "python test.py video.mp4" to run from the video recording video.mp4
@@ -22,7 +23,7 @@ parser.add_argument("--image", "-i", nargs="?", help="path of the image file to 
 parser.add_argument("--video", "-v", nargs="?", help="path of the video file to read")
 parser.add_argument("--port", "-p", nargs="?", help="camera port to read from")
 parser.add_argument("--units", "-u", nargs="?", help="units to return distance in", choices=["in", "ft", "m"], default="m")
-parser.add_argument("target", help="target to detect pose for", choices=["loading_bay", "power_port"])
+parser.add_argument("target", help="target to detect pose for", choices=["loading_bay", "power_port", "obstacle"])
 args = parser.parse_args()
 
 generator = None
@@ -42,15 +43,23 @@ elif args.generator == "video_file":
     generator = VideoFileGenerator(args.video)
     wait_time = int(1000./30) + 1
 
+
 target_detector = None
 if args.target == "loading_bay":
     target_detector = LoadingBayDetector(generator)
 elif args.target == "power_port":
     target_detector = PowerPortDetector(generator)
+elif args.target == "obstacle":
+    target_detector = ObstacleDetector(generator)
+    wait_time = 3
 
 with PoseCalculator(target_detector) as pc:
     while (generator.is_capturing() if args.generator == "video_file" else True):
-        pc.get_values(units=args.units)
+        if type(target_detector) is ObstacleDetector:
+            pc.find_obstacles()
+        else:
+            pc.get_values(units=args.units)
+
         key = cv2.waitKey(wait_time)
         if key == ord('q'):
             break

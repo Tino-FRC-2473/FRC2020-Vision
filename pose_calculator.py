@@ -134,6 +134,10 @@ class PoseCalculator:
 
         return r_sum.tolist(), t_sum.tolist()
 
+    def find_obstacles(self):
+        contours, mask = self.detector.run_detector()
+        cv2.imshow("mask", mask)
+
     # runs pose detection code and returns rotation and translation
     def get_values(self, units="m", display=True):
 

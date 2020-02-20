@@ -13,15 +13,17 @@ class DepthLiveGenerator:
 
         prof = self.pipeline.start(self.config)
         s = prof.get_device().query_sensors()[1]
-        s.set_option(rs.option.exposure, 50)
+        s.set_option(rs.option.exposure, 80)
         self.input_path = input_port
-
-        self.scale = prof.get_device().first_depth_sensor().get_depth_scale()
 
         self.input = cv2.VideoCapture(int(input_port))
         self.set_camera_settings(str(input_port))
         self.input.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         self.input.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+        self.scale = prof.get_device().first_depth_sensor().get_depth_scale()
+        print(self.scale)
+        # self.scale = float(1/1186)
 
         frame, _, _ = self.get_frame()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
@@ -60,4 +62,4 @@ class DepthLiveGenerator:
 
     def generate(self):
         image, depth, _ = self.get_frame()
-        return image, self.scale*np.asanyarray(depth)
+        return image, self.scale*depth
