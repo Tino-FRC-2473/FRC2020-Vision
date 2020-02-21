@@ -70,7 +70,7 @@ class PoseCalculator:
         ret = True
 
         for p in rectangle.get_points():
-            if (p.x == 0 or p.y == 0) or (p.x == self.SCREEN_WIDTH or p.y == self.SCREEN_HEIGHT):
+            if (p.x <= 0 or p.y <= 0) or (p.x >= self.SCREEN_WIDTH - 1 or p.y >= self.SCREEN_HEIGHT - 1):
                 ret = False
             img_points.append([p.x, p.y])
 
