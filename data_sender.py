@@ -49,7 +49,15 @@ class DataSender:
         print("S " + data_to_send + " E")
 
 
-data_sender = DataSender()
+parser = argparse.ArgumentParser()
+parser.add_argument("--port", "-p", nargs="?", help="camera port to read from")
+args = parser.parse_args()
+data_sender = None
+
+if args.port is not None:
+    data_sender = DataSender(port=args.port)
+else:
+    data_sender = DataSender()
 
 while True:
     data_sender.send_data()
