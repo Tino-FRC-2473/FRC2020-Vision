@@ -66,8 +66,11 @@ class PoseCalculator:
     def get_angle_dist(self, rectangle):
 
         img_points = []
+        ret = True
 
         for p in rectangle.get_points():
+            if (p.x == 0 or p.y == 0) or (p.x == self.SCREEN_WIDTH or p.y == self.SCREEN_HEIGHT):
+                ret = False
             img_points.append([p.x, p.y])
 
         obj_points = np.float64(self.obj_points)
@@ -79,7 +82,7 @@ class PoseCalculator:
 
         # _, rvec, tvec, _ = cv2.solvePnPRansac(obj_points, img_points, camera_matrix, None, flags=cv2.SOLVEPNP_ITERATIVE, iterationsCount=100, reprojectionError=1.0, confidence=0.95)
         _, rvec, tvec = cv2.solvePnP(obj_points, img_points, camera_matrix, None)
-        return rvec, tvec
+        return rvec, tvec, False
 
     # simplify contour into four corner points
     def get_corners(self, contour):
@@ -159,7 +162,11 @@ class PoseCalculator:
         area = cv2.contourArea(c)
         cv2.drawContours(frame, [corners], -1, (0, 0, 255), 2)
 
-        rvec, tvec = self.get_angle_dist(Target(corners, area))
+        rvec, tvec, ret = self.get_angle_dist(Target(corners, area))
+        if not ret:
+            if display:
+                self.display_windows(frame, mask)
+            return [None, None, None], [None, None, None]
         rmat, _ = cv2.Rodrigues(rvec)  # convert rotation vector to matrix
 
         rx, ry, rz = self.get_euler_from_rodrigues(rmat)
@@ -187,7 +194,7 @@ class PoseCalculator:
         tvec = rot_camera @ tvec
         tvec *= self.DISTANCE_CONSTANT
         tx, ty, tz = tvec[0], tvec[1], tvec[2]
-        
+
         self.update_values([rx, ry, rz], [tx, ty, tz])
         r, t = self.get_avg_values()
 
