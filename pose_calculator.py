@@ -138,34 +138,43 @@ class PoseCalculator:
 
     def obstacle_in_range(self, contour, x_range):
         x, y, w, h = cv2.boundingRect(contour)
-        if x + w > x_range[0] or x < x_range[1]:
+        if x + w < x_range[0] or x > x_range[1]:
             return False
         return True
+
+    def subtract_floor(self, depth, path="FLOOR_2.csv"):
+        floor_frame = np.loadtxt(path, dtype=np.float32, delimiter=',')
+        floor = floor_frame.copy()
+        floor[floor > 4] = 0
+        subtracted = np.where(abs(depth - floor) < 0.05, 0, depth)
+        return subtracted
 
     def find_obstacles(self, depth, max_distance, x_range):
         if depth is None:
             return None
 
+        removed_floor = self.subtract_floor(depth)
+
         self.low_obstacle_distance = 0.56
-        self.high_obstacle_distance = float(max_distance)
+        self.high_obstacle_distance = float(max_distance) - 0.05
 
-        print("  min ", self.low_obstacle_distance, "  max ", self.high_obstacle_distance)
-
-        mask = cv2.inRange(depth, self.low_obstacle_distance, self.high_obstacle_distance)
+        mask = cv2.inRange(removed_floor, self.low_obstacle_distance, self.high_obstacle_distance)
         kernel = np.ones((5, 5), np.uint8)
         cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         cv2.imshow("Obstacles", mask)
 
-        if len(depth[np.where((mask[:, :] == 255))]) < 4000:
-            return None
-
         obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         obstacle_contours.sort(key=lambda obstacle: self.get_distance_center(depth, self.get_contour_center(obstacle)[0], self.get_contour_center(obstacle)[1]))
+
+
+
         obstacles_in_path = []
         for obstacle in obstacle_contours:
-            if self.obstacle_in_range(obstacle, x_range):
+            area = cv2.contourArea(obstacle)
+            if self.obstacle_in_range(obstacle, x_range) and area > 1000:
                 obstacles_in_path.append(obstacle)
 
+        print(len(obstacles_in_path))
         return obstacles_in_path
 
     # uses depth_frame to identify distance to (x, y)
@@ -191,7 +200,7 @@ class PoseCalculator:
                 return None, False
 
             # data[2] is the radius which we don't really need --> comes in the form [x, y, r]
-            # sorts balls by distance (from RealSense depth data) in descending order
+            # sorts balls by distance (from RealSense depth data) in ascending order
             detected_balls.sort(key=lambda data: self.get_distance_center(depth_frame, data[0], data[1]))
             closest_balls = [None, None, None, None]
 
@@ -206,7 +215,7 @@ class PoseCalculator:
             balls_left_to_right.sort(key=lambda data: data[0])
             left_ball = balls_left_to_right[0]
             right_ball = balls_left_to_right[len(balls_left_to_right) - 1]
-            x_range = left_ball[0] - left_ball[2], right_ball[0] - right_ball[2]
+            x_range = left_ball[0] - left_ball[2], right_ball[0] + right_ball[2]
             max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change, closest_balls[0][1] + y_change)
             if max_dist == 0:
                 max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change + 10, closest_balls[0][1] + y_change)
