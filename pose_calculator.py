@@ -16,7 +16,7 @@ from power_port_detector import PowerPortDetector
 class PoseCalculator:
 
     # initilaze variables
-    def __init__(self, detector):
+    def __init__(self, detector, frame_name="frame"):
 
         self.detector = detector
         self.generator = detector.get_generator()
@@ -48,6 +48,7 @@ class PoseCalculator:
         self.DISTANCE_CONSTANT = 0.960144584
         # number of previous values to keep for average
         self.NUM_VALS = 10
+        self.FRAME_NAME = frame_name
 
     def __enter__(self):
         return self
@@ -112,8 +113,8 @@ class PoseCalculator:
         return np.int0(arrmax_changed)
 
     def display_windows(self, frame, mask):
-        cv2.imshow("frame", frame)
         cv2.imshow("contours", mask)
+        cv2.imshow(self.FRAME_NAME, frame)
 
     # update log of previous rotation and translation values
     def update_values(self, r, t):
