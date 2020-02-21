@@ -83,7 +83,7 @@ class PoseCalculator:
 
         # _, rvec, tvec, _ = cv2.solvePnPRansac(obj_points, img_points, camera_matrix, None, flags=cv2.SOLVEPNP_ITERATIVE, iterationsCount=100, reprojectionError=1.0, confidence=0.95)
         _, rvec, tvec = cv2.solvePnP(obj_points, img_points, camera_matrix, None)
-        return rvec, tvec, False
+        return rvec, tvec, ret
 
     # simplify contour into four corner points
     def get_corners(self, contour):
