@@ -41,7 +41,7 @@ class PoseCalculator:
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
         fov_radians = math.radians(self.generator.get_horizontal_fov())
         self.FOCAL_LENGTH_PIXELS = 657
-``
+
         # experimentally determined distance constant
         self.DISTANCE_CONSTANT = 0.960144584
         # number of previous values to keep for average
@@ -159,7 +159,6 @@ class PoseCalculator:
 
         obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         obstacle_contours.sort(key=lambda obstacle: self.get_distance_center(depth, self.get_contour_center(obstacle)[0], self.get_contour_center(obstacle)[1]))
-        obstacle_contours = obstacle_contours[:5]
 
         obstacles = []
         for obstacle in obstacle_contours:
@@ -186,7 +185,7 @@ class PoseCalculator:
         detected_balls, mask, color_frame, depth_frame = self.detector.run_detector()
 
         if detected_balls is None:
-            obstacles = self.find_obstacles(depth_frame, 3, (0,640))
+            obstacles = self.find_obstacles(depth_frame, 3)
 
             if obstacles is not None and len(obstacles) > 0:
                 obstacle_present = True
