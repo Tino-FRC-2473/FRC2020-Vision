@@ -42,7 +42,6 @@ class DepthLiveGenerator:
 
         colorizer = rs.colorizer()
         colorized_depth = np.asanyarray(colorizer.colorize(depth_frame).get_data())
-        #cv2.imshow("map", colorized_depth)
 
         return color_image, depth_image, depth_frame
 
