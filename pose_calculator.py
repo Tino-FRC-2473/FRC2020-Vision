@@ -195,6 +195,12 @@ class PoseCalculator:
 
         if depth_frame is not None:
             if detected_balls is None:
+                obstacles = self.find_obstacles(depth_frame, 5, (0,640))
+
+                if obstacles is not None and len(obstacles) > 0:
+                    obstacle_present = True
+                    color_frame = cv2.drawContours(color_frame, obstacles, -1, (0, 255, 0), 3)
+                
                 cv2.imshow("color frame", color_frame)
                # cv2.imshow("mask", mask)
                 return None, False
@@ -258,13 +264,6 @@ class PoseCalculator:
                 cv2.putText(color_frame, "Angle: " + str(round(angle, 2)),
                             (int(ball[0]), int(ball[1]) + int(ball[2]) + 20), font, 0.4, (255, 255, 255), 1,
                             cv2.LINE_AA)
-            else:
-
-                obstacles = self.find_obstacles(depth_frame, 5, (0,640))
-
-                if obstacles is not None and len(obstacles) > 0:
-                    obstacle_present = True
-                    color_frame = cv2.drawContours(color_frame, obstacles, -1, (0, 255, 0), 3)
         else:
             print("Finding all balls instead of closest ones. (Not running DepthLiveGenerator)")
 
