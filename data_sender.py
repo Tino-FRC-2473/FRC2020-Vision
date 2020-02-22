@@ -51,22 +51,21 @@ class DataSender:
         return int(100 * dx), int(100 * dy), int(10 * round(angle, 1))
 
     def get_ball_detection_data(self):
-        ball_data = self.pose_ball_detection.get_balls()
+        ball_data, obstacle_present = self.pose_ball_detection.get_balls()
+
         formatted = []
-
         for ball in ball_data:
-            formatted.append([ball[0], ball[1]])  # add data formatting to this line
+            formatted.append([9999, 9999] if not ball else [int(100 * ball[0]), int(10 * round(ball[1], 1))])
 
-        return formatted
+        return formatted, obstacle_present
 
     def send_data(self):
         x, y, angle = self.get_power_port_data()
         data_to_send = "{:+05d} {:+05d} {:+05d}".format(x, y, angle)
 
-        balls = self.get_ball_detection_data()
-        for ball in balls:
-            data_to_send += " "
-            # add ball data to data_to_send here
+        balls, obstacle_present = self.get_ball_detection_data()
+        data_to_send += ' '.join("{:+05d} {:+05d}".format(ball[0], ball[1]) for ball in balls)
+        data_to_send += int(obstacle_present)
 
         self.s.write(bytes("S " + data_to_send + " E", "utf-8"))
 
