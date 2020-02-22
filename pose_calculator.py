@@ -13,6 +13,7 @@ from power_port_detector import PowerPortDetector
 # finds rotation and translation of vision targets
 class PoseCalculator:
 
+
     # initilaze variables
     def __init__(self, detector, frame_name="frame"):
         self.detector = detector
@@ -218,7 +219,7 @@ class PoseCalculator:
         max_dist = self.get_distance_center(depth_frame, closest_balls[0][0]+x_change, closest_balls[0][1] + y_change)
 
         if max_dist == 0:
-            max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change -5, closest_balls[0][1] + y_change)
+            max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change, closest_balls[0][1] + y_change)
 
         obstacles = self.find_obstacles(depth_frame, max_dist)
 
