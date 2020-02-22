@@ -28,7 +28,7 @@ with open(args.output, mode='w', newline='') as output_file:
         elif args.target == "power_port":
             target_detector = PowerPortDetector(generator)
 
-        with PoseCalculator(target_detector) as pd:
+        with PoseCalculator(target_detector, frame_name=filename) as pd:
             if args.display:
                 while True:
                     r, t = pd.get_values(units=args.units, display=True)

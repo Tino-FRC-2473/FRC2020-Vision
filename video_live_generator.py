@@ -1,4 +1,5 @@
 import cv2
+import math
 import numpy as np
 import subprocess
 
@@ -17,6 +18,7 @@ class VideoLiveGenerator:
 
         self.H_FIELD_OF_VIEW = 68.37
         self.V_FIELD_OF_VIEW = 41.21
+        self.CAMERA_TILT = math.radians(30)
 
     def __enter__(self):
         return self

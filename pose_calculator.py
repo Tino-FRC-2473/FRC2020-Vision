@@ -7,7 +7,6 @@ import traceback
 import os
 from math import sin, cos
 from operator import add
-from scipy.spatial.transform import Rotation as R
 from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
 
@@ -174,25 +173,16 @@ class PoseCalculator:
         rmat, _ = cv2.Rodrigues(rvec)  # convert rotation vector to matrix
 
         rx, ry, rz = self.get_euler_from_rodrigues(rmat)
-        # r_euler = R.from_rotvec(rvec.flatten()).as_euler('xyz', degrees=True)
-        # rx, ry, rz = r_euler[0], r_euler[1], r_euler[2]
-
-        # experimentally determined constant
         ry -= 3.5
-
         rot = [rx, ry, rz]
 
         rot_x = np.array([[1, 0, 0], [0, math.cos(math.radians(rot[0])), -math.sin(math.radians(rot[0]))], [0, math.sin(math.radians(rot[0])), math.cos(math.radians(rot[0]))]])
         rot_y = np.array([[math.cos(math.radians(rot[1])), 0, math.sin(math.radians(rot[1]))], [0, 1, 0], [-math.sin(math.radians(rot[1])), 0, math.cos(math.radians(rot[1]))]])
         rot_z = np.array([[math.cos(math.radians(rot[2])), math.sin(math.radians(rot[2])), 0], [-math.sin(math.radians(rot[2])), math.cos(math.radians(rot[2])), 0], [0, 0, 1]])
+        rot_camera = np.array([[1, 0, 0], [0, math.cos(self.generator.CAMERA_TILT), -math.sin(self.generator.CAMERA_TILT)], [0, math.sin(self.generator.CAMERA_TILT), math.cos(self.generator.CAMERA_TILT)]])
 
-        rot_camera = np.array([[1, 0, 0], [0, math.cos(self.CAMERA_TILT), -math.sin(self.CAMERA_TILT)], [0, math.sin(self.CAMERA_TILT), math.cos(self.CAMERA_TILT)]])
         r_target = np.linalg.inv(rot_camera) @ rot_z @ rot_y @ rot_x
-
-        r = R.from_matrix(r_target)
-        new_rotations = r.as_euler('zyx', degrees=True)
-
-        rx, ry, rz = new_rotations[0], new_rotations[1], new_rotations[2]
+        rx, ry, rz = self.get_euler_from_rodrigues(r_target)
 
         tvec = tvec.flatten()
         tvec = rot_camera @ tvec

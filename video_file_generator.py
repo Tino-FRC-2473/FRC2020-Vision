@@ -1,4 +1,5 @@
 import cv2
+import math
 
 
 class VideoFileGenerator:
@@ -13,6 +14,7 @@ class VideoFileGenerator:
 
         self.H_FIELD_OF_VIEW = 68.37
         self.V_FIELD_OF_VIEW = 41.21
+        self.CAMERA_TILT = math.radians(30)
 
         self.capturing = True
 

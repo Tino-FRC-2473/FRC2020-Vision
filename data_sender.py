@@ -6,7 +6,6 @@ from depth_live_generator import DepthLiveGenerator
 from pose_calculator import PoseCalculator
 from power_cell_detector import PowerCellDetector
 from power_port_detector import PowerPortDetector
-from scipy.spatial.transform import Rotation as R
 from video_live_generator import VideoLiveGenerator
 
 
@@ -25,7 +24,7 @@ class DataSender:
 
         dy = trans[0]
         dx = trans[2]
-        angle = rot[1]
+        angle = -rot[1]
 
         return int(100 * dx), int(100 * dy), int(10 * round(angle, 1))
 
