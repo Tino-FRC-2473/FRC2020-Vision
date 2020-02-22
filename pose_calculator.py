@@ -25,7 +25,7 @@ class PoseCalculator:
 
         self.obj_points = []
 
-        self.floor_frame = np.loadtxt("FLOOR_4.csv", dtype=np.float32, delimiter=',')
+        self.floor_frame = np.loadtxt("FLOOR_5.csv", dtype=np.float32, delimiter=',')
         if type(detector) is LoadingBayDetector:
             self.obj_points = [[3.5,   5.5, 0],
                                [-3.5,  5.5, 0],
@@ -195,7 +195,7 @@ class PoseCalculator:
 
         if depth_frame is not None:
             if detected_balls is None:
-                obstacles = self.find_obstacles(depth_frame, 5, (0,640))
+                obstacles = self.find_obstacles(depth_frame, 3, (0,640))
 
                 if obstacles is not None and len(obstacles) > 0:
                     obstacle_present = True
