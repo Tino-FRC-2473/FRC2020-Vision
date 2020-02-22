@@ -40,9 +40,6 @@ class DepthLiveGenerator:
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
 
-        colorizer = rs.colorizer()
-        colorized_depth = np.asanyarray(colorizer.colorize(depth_frame).get_data())
-
         return color_image, depth_image, depth_frame
 
     def get_horizontal_fov(self):
