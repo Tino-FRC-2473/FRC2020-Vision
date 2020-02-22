@@ -215,15 +215,13 @@ class PoseCalculator:
         ball_data = []
         for ball in closest_balls:
             if ball is None:
+                ball_data.append([None, None])
                 continue
 
             cv2.circle(color_frame, (int(ball[0]), int(ball[1])), int(ball[2]), (0, 0, 255), 3)
             cv2.circle(color_frame, (int(ball[0]), int(ball[1])), 0, (255, 0, 0), 6)
 
             dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
-            if dist == 0:
-                dist = self.get_distance_center(depth_frame, ball[0] + x_change + 10, ball[1] + y_change)
-
             angle = self.calc_ang_deg(ball[0])
             ball_data.append([dist, angle])
 
@@ -235,7 +233,6 @@ class PoseCalculator:
                         cv2.LINE_AA)
 
         cv2.imshow("color frame", color_frame)
-
         return ball_data, obstacle_present
 
     # get average of previous rotation and translation values
