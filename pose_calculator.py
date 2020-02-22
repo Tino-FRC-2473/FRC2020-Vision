@@ -195,10 +195,6 @@ class PoseCalculator:
 
         max_dist = closest_balls[0][0]
         obstacles = self.find_obstacles(depth_frame, max_dist)
-
-        print(closest_balls)
-        print(len(obstacles) > 0)
-
         return closest_balls, len(obstacles) > 0
 
     # get average of previous rotation and translation values
