@@ -24,7 +24,7 @@ if args.generator == "DepthDataGenerator":
 
 elif args.generator == "DepthLiveGenerator":
     from depth_live_generator import DepthLiveGenerator
-    depth_live_generator = DepthLiveGenerator(0)
+    depth_live_generator = DepthLiveGenerator(1)
 
     if not args.play:
         print("The tester will collect data after five seconds")
