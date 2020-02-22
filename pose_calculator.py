@@ -10,9 +10,9 @@ from operator import add
 from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
 
+
 # finds rotation and translation of vision targets
 class PoseCalculator:
-
 
     # initilaze variables
     def __init__(self, detector, frame_name="frame"):
@@ -154,7 +154,6 @@ class PoseCalculator:
         high_obstacle_distance = float(max_distance) - 0.05
 
         mask = cv2.inRange(removed_floor, low_obstacle_distance, high_obstacle_distance)
-        kernel = np.ones((5, 5), np.uint8)
 
         cv2.imshow("Obstacles", mask)
 
