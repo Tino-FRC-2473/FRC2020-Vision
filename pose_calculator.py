@@ -150,11 +150,10 @@ class PoseCalculator:
 
         removed_floor = self.subtract_floor(depth)
         cv2.imshow("subtracted", removed_floor)
+
         low_obstacle_distance = 0.56
         high_obstacle_distance = float(max_distance) - 0.05
-
         mask = cv2.inRange(removed_floor, low_obstacle_distance, high_obstacle_distance)
-
         cv2.imshow("Obstacles", mask)
 
         obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -162,8 +161,7 @@ class PoseCalculator:
 
         obstacles = []
         for obstacle in obstacle_contours:
-            area = cv2.contourArea(obstacle)
-            if area > 1000:
+            if cv2.contourArea(obstacle) > 1000:
                 obstacles.append(obstacle)
 
         return obstacles
@@ -177,7 +175,7 @@ class PoseCalculator:
     # returns angle (in degrees) between center of camera to center of ball
     def calc_ang_deg(self, x):
         dist_to_center = x - self.SCREEN_WIDTH / 2
-        return math.atan(dist_to_center / self.FOCAL_LENGTH_PIXELS) * (180 / math.pi)
+        return math.degrees(math.atan(dist_to_center / self.FOCAL_LENGTH_PIXELS))
 
     # returns distance and angle to the ball
     def get_balls(self):
@@ -192,7 +190,7 @@ class PoseCalculator:
                 color_frame = cv2.drawContours(color_frame, obstacles, -1, (0, 255, 0), 3)
 
             cv2.imshow("color frame", color_frame)
-            return None, False
+            return None, obstacle_present
 
         # data[2] is the radius which we don't really need --> comes in the form [x, y, r]
         # sorts balls by distance (from RealSense depth data) in ascending order
@@ -202,24 +200,12 @@ class PoseCalculator:
         for i in range(0, 4):
             if i < len(detected_balls):
                 closest_balls[i] = detected_balls[i]
-        dist_order = []
-        for i in list(filter(None, closest_balls)):
-            dist_order.append(self.get_distance_center(depth_frame, i[0], i[1]))
 
+        # displacement constants between rgb frame and depth frame
         x_change = -23
         y_change = 31
 
-        balls_left_to_right = list(filter(None, closest_balls))
-
-        balls_left_to_right.sort(key=lambda data: data[0])
-        left_ball = balls_left_to_right[0]
-        right_ball = balls_left_to_right[len(balls_left_to_right) - 1]
-
-        max_dist = self.get_distance_center(depth_frame, closest_balls[0][0]+x_change, closest_balls[0][1] + y_change)
-
-        if max_dist == 0:
-            max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change, closest_balls[0][1] + y_change)
-
+        max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change, closest_balls[0][1] + y_change)
         obstacles = self.find_obstacles(depth_frame, max_dist)
 
         if obstacles is not None and len(obstacles) > 0:
@@ -237,10 +223,6 @@ class PoseCalculator:
             dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
             if dist == 0:
                 dist = self.get_distance_center(depth_frame, ball[0] + x_change + 10, ball[1] + y_change)
-
-            # displacement constants between rgb frame and depth frame
-            x_change = -23
-            y_change = 31
 
             angle = self.calc_ang_deg(ball[0])
             ball_data.append([dist, angle])
