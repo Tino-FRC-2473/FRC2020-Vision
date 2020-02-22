@@ -1,12 +1,4 @@
-import math
 import cv2
-import numpy as np
-import subprocess
-import imghdr
-import traceback
-import os
-from math import sin, cos
-from operator import add
 
 
 # finds rotation and translation of vision targets
