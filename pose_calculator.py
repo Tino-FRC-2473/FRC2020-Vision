@@ -24,7 +24,7 @@ class PoseCalculator:
         self.previous_t = []
 
         self.obj_points = []
-        
+
         self.floor_frame = np.loadtxt("FLOOR_4.csv", dtype=np.float32, delimiter=',')
         if type(detector) is LoadingBayDetector:
             self.obj_points = [[3.5,   5.5, 0],
@@ -220,10 +220,14 @@ class PoseCalculator:
             balls_left_to_right.sort(key=lambda data: data[0])
             left_ball = balls_left_to_right[0]
             right_ball = balls_left_to_right[len(balls_left_to_right) - 1]
+
             x_range = left_ball[0] - left_ball[2], right_ball[0] + right_ball[2]
+
             max_dist = self.get_distance_center(depth_frame, closest_balls[0][0]+x_change, closest_balls[0][1] + y_change)
+
             if max_dist == 0:
                 max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change -5, closest_balls[0][1] + y_change)
+
             obstacles = self.find_obstacles(depth_frame, max_dist, x_range)
 
             if obstacles is not None and len(obstacles) > 0:
@@ -254,6 +258,13 @@ class PoseCalculator:
                 cv2.putText(color_frame, "Angle: " + str(round(angle, 2)),
                             (int(ball[0]), int(ball[1]) + int(ball[2]) + 20), font, 0.4, (255, 255, 255), 1,
                             cv2.LINE_AA)
+            else:
+
+                obstacles = self.find_obstacles(depth_frame, 5, (0,640))
+
+                if obstacles is not None and len(obstacles) > 0:
+                    obstacle_present = True
+                    color_frame = cv2.drawContours(color_frame, obstacles, -1, (0, 255, 0), 3)
         else:
             print("Finding all balls instead of closest ones. (Not running DepthLiveGenerator)")
 
