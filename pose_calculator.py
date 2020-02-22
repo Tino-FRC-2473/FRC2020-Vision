@@ -222,6 +222,10 @@ class PoseCalculator:
             cv2.circle(color_frame, (int(ball[0]), int(ball[1])), 0, (255, 0, 0), 6)
 
             dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
+            if dist == 0:
+                ball_data.append([None, None])
+                continue
+
             angle = self.calc_ang_deg(ball[0])
             ball_data.append([dist, angle])
 
