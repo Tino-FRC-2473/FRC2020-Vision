@@ -50,6 +50,9 @@ class PoseCalculator:
         self.NUM_VALS = 10
         self.FRAME_NAME = frame_name
 
+        self.CAMERA_TILT = math.radians(30)
+        self.FRAME_NAME = frame_name
+
     def __enter__(self):
         return self
 
