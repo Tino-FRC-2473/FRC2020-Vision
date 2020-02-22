@@ -26,6 +26,11 @@ class PoseCalculator:
 
         # Depth csv of empty floor
         self.floor_frame = np.loadtxt("FLOOR.csv", dtype=np.float32, delimiter=',')
+        self.floor_frame[self.floor_frame > 4] = 0
+
+        # displacement constants between rgb frame and depth frame
+        self.DEPTH_X_SHIFT = -23
+        self.DEPTH_Y_SHIFT = 31
 
         if type(detector) is LoadingBayDetector:
             self.obj_points = [[3.5,   5.5, 0],
@@ -138,15 +143,13 @@ class PoseCalculator:
 
     # Subtracts floor from current depth frame, returns new depth frame with removed floor values
     def subtract_floor(self, depth):
-        floor = self.floor_frame.copy()
-        floor[floor > 4] = 0
-        subtracted = np.where(abs(depth - floor) < 0.05, 0, depth)
+        subtracted = np.where(abs(depth - self.floor_frame) < 0.05, 0, depth)
         return subtracted
 
     # Finds obstacles, returns list of obstacle contours with area greater than 1000 pixels
     def find_obstacles(self, depth, max_distance):
         if depth is None:
-            return None
+            return []
 
         removed_floor = self.subtract_floor(depth)
         cv2.imshow("subtracted", removed_floor)
@@ -185,7 +188,7 @@ class PoseCalculator:
         if detected_balls is None:
             obstacles = self.find_obstacles(depth_frame, 3)
 
-            if obstacles is not None and len(obstacles) > 0:
+            if len(obstacles) > 0:
                 obstacle_present = True
                 color_frame = cv2.drawContours(color_frame, obstacles, -1, (0, 255, 0), 3)
 
@@ -201,14 +204,10 @@ class PoseCalculator:
             if i < len(detected_balls):
                 closest_balls[i] = detected_balls[i]
 
-        # displacement constants between rgb frame and depth frame
-        x_change = -23
-        y_change = 31
-
-        max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + x_change, closest_balls[0][1] + y_change)
+        max_dist = self.get_distance_center(depth_frame, closest_balls[0][0] + self.DEPTH_X_SHIFT, closest_balls[0][1] + self.DEPTH_Y_SHIFT)
         obstacles = self.find_obstacles(depth_frame, max_dist)
 
-        if obstacles is not None and len(obstacles) > 0:
+        if len(obstacles) > 0:
             obstacle_present = True
             color_frame = cv2.drawContours(color_frame, obstacles, -1, (0, 255, 0), 3)
 
@@ -221,7 +220,7 @@ class PoseCalculator:
             cv2.circle(color_frame, (int(ball[0]), int(ball[1])), int(ball[2]), (0, 0, 255), 3)
             cv2.circle(color_frame, (int(ball[0]), int(ball[1])), 0, (255, 0, 0), 6)
 
-            dist = self.get_distance_center(depth_frame, ball[0] + x_change, ball[1] + y_change)
+            dist = self.get_distance_center(depth_frame, ball[0] + self.DEPTH_X_SHIFT, ball[1] + self.DEPTH_Y_SHIFT)
             if dist == 0:
                 ball_data.append([None, None])
                 continue
