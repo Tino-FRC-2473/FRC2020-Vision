@@ -21,13 +21,13 @@ Handles image, video, and camera input and generates arrays of RGB or depth data
 - `VideoLiveGenerator` (camera port input int)
 
 ### API
-####`get_horizontal_fov()`
+#### `get_horizontal_fov()`
 Returns float degrees
 
-####`get_vertical_fov()`
+#### `get_vertical_fov()`
 Returns float degrees
 
-####`generate()`
+#### `generate()`
 Gets data for one frame.
 
 Returns: `tuple(rgb ndarray shape (y, x, 3), depth ndarray shape(y,x))`.
@@ -50,10 +50,10 @@ Accurately detect any required target on the field
 - `PowerCellDetector` for ball detection
 
 ### API
-####`get_generator()`
+#### `get_generator()`
 Returns the contained Generator
 
-####`run_detection()`
+#### `run_detection()`
 Calls \*`Generator.generate()`.
 
 Returns tuple with:
@@ -80,7 +80,7 @@ Utilizes contours from detection team to gain actionable data for the robot
 1 `PoseCalculator` class. Constructor takes in a \*Detector object
 
 ### API
-####`get_values()`
+#### `get_values()`
 Calls \*`Detector.run_detection()`, intended for use with `PowerPortDetector` and `VideoLiveGenerator`
 
 Returns: `tuple(Euler Rotation: [yaw, pitch, roll] in degrees, Position [x, y, z] in meters)`
@@ -89,7 +89,7 @@ Returns: `tuple(Euler Rotation: [yaw, pitch, roll] in degrees, Position [x, y, z
 - To go from object coordinate to camera coordinate, apply Rotation first, then translate by Position.
 - if the target is not seen by camera, returns _`None`_ for all six values
 
-####`get_balls()`
+#### `get_balls()`
 Calls \*`Detector.run_detection()`, intended for use with `PowerCellDetector` and `DepthLiveGenerator`
 
 Returns `tuple(closest_balls, obstacle_present)`
