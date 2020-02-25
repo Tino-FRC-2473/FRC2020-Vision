@@ -38,7 +38,9 @@ class PoseCalculator:
         frame, _ = self.generator.generate()
         self.SCREEN_HEIGHT, self.SCREEN_WIDTH = frame.shape[:2]
         fov_radians = math.radians(self.generator.get_horizontal_fov())
+        # self.FOCAL_LENGTH_PIXELS = (self.SCREEN_WIDTH / 2.0) / math.tan(fov_radians / 2)
         self.FOCAL_LENGTH_PIXELS = 657
+        # print("focal length", self.FOCAL_LENGTH_PIXELS)
 
         # experimentally determined distance constant
         self.DISTANCE_CONSTANT = 0.960144584
@@ -129,12 +131,15 @@ class PoseCalculator:
 
     # get average of previous rotation and translation values
     def get_avg_values(self):
+
         r_sum = np.mean(self.previous_r, axis=0)
         t_sum = np.mean(self.previous_t, axis=0)
+
         return r_sum.tolist(), t_sum.tolist()
 
     # runs pose detection code and returns rotation and translation
     def get_values(self, units="m", display=True):
+
         frame, _ = self.generator.generate()
         contours, mask = self.detector.run_detector()
 
