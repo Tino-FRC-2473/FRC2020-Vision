@@ -1,53 +1,28 @@
-import math
-import numpy as np
+import argparse
 import serial
 from ball_finder import BallFinder
 from depth_live_generator import DepthLiveGenerator
 from pose_calculator import PoseCalculator
 from power_cell_detector import PowerCellDetector
 from power_port_detector import PowerPortDetector
-from scipy.spatial.transform import Rotation as R
 from video_live_generator import VideoLiveGenerator
 
 
 class DataSender:
-    def __init__(self, name="ttyS0", rate=9600, video_port=1, depth_port=2):
+    def __init__(self, name="ttyS0", rate=9600, video_port=0, depth_port=1):
         self.s = serial.Serial("/dev/" + name, rate)
-        self.pose_power_port = PoseCalculator(PowerPortDetector(VideoLiveGenerator(video_port)))
+        self.pose_calculator = PoseCalculator(PowerPortDetector(VideoLiveGenerator(video_port)))
         self.ball_finder = BallFinder(PowerCellDetector(DepthLiveGenerator(depth_port)))
 
-        # Update with the correct angle
-        self.CAMERA_TILT = math.radians(30)
-
     def get_power_port_data(self):
-        rot, trans = self.pose_power_port.get_values()
+        rot, trans = self.pose_calculator.get_values()
 
         if trans[0] is None:
             return 9999, 9999, 9999
 
-        dx = trans[2] * math.cos(math.radians(self.CAMERA_TILT))
         dy = trans[0]
-
-        rot_x = np.array([[1, 0, 0],
-                          [0, math.cos(math.radians(rot[0])), -math.sin(math.radians(rot[0]))],
-                          [0, math.sin(math.radians(rot[0])), math.cos(math.radians(rot[0]))]])
-
-        rot_y = np.array([[math.cos(math.radians(rot[1])), 0, math.sin(math.radians(rot[1]))],
-                          [0, 1, 0],
-                          [-math.sin(math.radians(rot[1])), 0, math.cos(math.radians(rot[1]))]])
-
-        rot_z = np.array([[math.cos(math.radians(rot[2])), math.sin(math.radians(rot[2])), 0],
-                          [-math.sin(math.radians(rot[2])), math.cos(math.radians(rot[2])), 0],
-                          [0, 0, 1]])
-
-        rot_c = np.array([[math.cos(self.CAMERA_TILT), 0, math.sin(self.CAMERA_TILT)],
-                          [0, 1, 0],
-                          [-math.sin(self.CAMERA_TILT), 0, math.cos(self.CAMERA_TILT)]])
-
-        r_target = np.linalg.inv(rot_c) @ rot_z @ rot_y @ rot_x
-        rotation = R.from_matrix(r_target)
-        new_rotations = rotation.as_euler("zyx", degrees=True)
-        angle = new_rotations[1]
+        dx = trans[2]
+        angle = -rot[1]
 
         return int(100 * dx), int(100 * dy), int(10 * round(angle, 1))
 
@@ -71,7 +46,12 @@ class DataSender:
         self.s.write(bytes("S " + data_to_send + " E", "utf-8"))
 
 
-data_sender = DataSender()
+parser = argparse.ArgumentParser()
+parser.add_argument("--video_port", "-v", type=int, default=0, help="camera port to read for VideoLiveGenerator")
+parser.add_argument("--depth_port", "-d", type=int, default=1, help="camera port to read for DepthLiveGenerator")
+args = parser.parse_args()
+
+data_sender = DataSender(video_port=args.video_port, depth_port=args.depth_port)
 
 while True:
     data_sender.send_data()
