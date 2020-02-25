@@ -47,15 +47,13 @@ class BallFinder:
 
     # Returns list of obstacle contours with area greater than 1000 pixels.
     def get_obstacles(self, depth, max_distance):
-        if depth is None or not max_distance:
+        if depth is None:
             return []
 
         mask = cv2.inRange(self.remove_floor(depth), self.MIN_OBSTACLE_DIST, float(max_distance) - 0.05)
         obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         obstacle_contours.sort(key=lambda obstacle: self.get_distance(depth, self.get_contour_center(obstacle)))
-        obstacles = list(filter(lambda obstacle: cv2.contourArea(obstacle) > 1000, obstacle_contours))
-        cv2.imshow("Obstacles", mask)
-        return obstacles
+        return list(filter(lambda obstacle: cv2.contourArea(obstacle) > 1000, obstacle_contours))
 
     # Returns a tuple with:
     # - a list of the first four balls, each with [distance in m, angle in degrees]. If there are less than four balls,
@@ -74,10 +72,7 @@ class BallFinder:
             angle = self.get_angle_deg(detected_balls[i])
             closest_balls[i] = [] if dist == 0 else [dist, angle]
 
-        max_dist = 3 if not closest_balls[0] else closest_balls[0][0]
+        max_dist = next((ball[0] for ball in closest_balls if ball), 3)
         obstacles = self.get_obstacles(depth_frame, max_dist)
-
-        for ball in closest_balls:
-            print(ball)
 
         return closest_balls, len(obstacles) > 0
