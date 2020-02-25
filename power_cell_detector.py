@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-# from depth_live_generator import DepthLiveGenerator
 
 
 class PowerCellDetector:
@@ -9,11 +8,9 @@ class PowerCellDetector:
         self.LOW_YELLOW = np.array([17, 120, 50])
         self.HIGH_YELLOW = np.array([33, 255, 255])
 
-    # Returns in the following format:
-    # list of detected circles (with x-coordinate, y-coordinate, and radius),
-    # mask with detected circles,
-    # color image,
-    # depth frame
+    # Returns a tuple with:
+    # - a list of detected circles, each with [x-coordinate, y-coordinate, radius].
+    # - the depth frame
     def run_detector(self):
         img, depth_frame = self.input.generate()
 
