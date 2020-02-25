@@ -11,6 +11,7 @@ from video_live_generator import VideoLiveGenerator
 from loading_bay_detector import LoadingBayDetector
 from power_port_detector import PowerPortDetector
 from power_cell_detector import PowerCellDetector
+from ball_finder import BallFinder
 
 # "python test.py 0" to run from camera in port 0
 # "python test.py video.mp4" to run from the video recording video.mp4
@@ -48,17 +49,18 @@ if args.target == "loading_bay":
     target_detector = LoadingBayDetector(generator)
 elif args.target == "power_port":
     target_detector = PowerPortDetector(generator)
+    pc = PoseCalculator(target_detector)
 elif args.target == "power_cell":
     target_detector = PowerCellDetector(generator)
+    pc = BallFinder(target_detector)
 
-with PoseCalculator(target_detector) as pc:
-    while generator.is_capturing() if args.generator == "video_file" else True:
-        if type(target_detector) is PowerCellDetector:
-            _, obstacle_present = pc.get_balls()
-            print(obstacle_present)
-        else:
-            pc.get_values(units=args.units)
+while generator.is_capturing() if args.generator == "video_file" else True:
+    if type(target_detector) is PowerCellDetector:
+        _, obstacle_present = pc.get_balls()
+        print(obstacle_present)
+    else:
+        pc.get_values(units=args.units)
 
-        key = cv2.waitKey(wait_time)
-        if key == ord('q'):
-            break
+    key = cv2.waitKey(wait_time)
+    if key == ord('q'):
+        break
