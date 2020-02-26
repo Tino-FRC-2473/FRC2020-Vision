@@ -54,8 +54,9 @@ elif args.target == "power_cell":
     target_detector = PowerCellDetector(generator)
     pc = BallFinder(target_detector)
 
+print("Press \'q\' to quit")
 while generator.is_capturing() if args.generator == "video_file" else True:
-    if type(target_detector) is PowerCellDetector:
+    if args.target == "power_cell":
         _, obstacle_present = pc.get_balls()
         print(obstacle_present)
     else:
