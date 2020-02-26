@@ -18,8 +18,8 @@ class PowerCellDetector:
             return None, None
 
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        hsv = cv2.medianBlur(hsv, 5)
         mask = cv2.inRange(hsv, self.LOW_YELLOW, self.HIGH_YELLOW)
+        mask = cv2.medianBlur(mask, 5)
 
         # Erode removes white noise at edges of the contours.
         mask = cv2.erode(mask, None, iterations=7)
