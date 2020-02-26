@@ -77,10 +77,12 @@ Utilizes contours from detection team to gain actionable data for the robot
 - Angle (3D)
 
 ### Class structure
-1 `PoseCalculator` class. Constructor takes in a \*Detector object
+Constructors take in a \*Detector object
+- `PoseCalculator`
+- `BallFinder`
 
 ### API
-#### `get_values()`
+#### `PoseCalculator` `get_values()`
 Calls \*`Detector.run_detection()`, intended for use with `PowerPortDetector` and `VideoLiveGenerator`
 
 Returns: `tuple(Euler Rotation: [yaw, pitch, roll] in degrees, Position [x, y, z] in meters)`
@@ -89,7 +91,7 @@ Returns: `tuple(Euler Rotation: [yaw, pitch, roll] in degrees, Position [x, y, z
 - To go from object coordinate to camera coordinate, apply Rotation first, then translate by Position.
 - if the target is not seen by camera, returns _`None`_ for all six values
 
-#### `get_balls()`
+#### `BallFinder` `get_balls()`
 Calls \*`Detector.run_detection()`, intended for use with `PowerCellDetector` and `DepthLiveGenerator`
 
 Returns `tuple(closest_balls, obstacle_present)`
@@ -101,10 +103,10 @@ Returns `tuple(closest_balls, obstacle_present)`
 &nbsp;
 
 ## Data sending
-Sends data from PoseCalculator over serial for use by robot code.
+Sends data from `PoseCalculator` and `BallFinder` over serial for use by robot code.
 
 ### Responsibilities
-- Using values from `PoseCalculator`'s `get_values()` and `get_balls()` and formatting them to what robot code needs
+- Using values from `PoseCalculator`'s `get_values()` and `BallFinder`'s `get_balls()` and formatting them to what robot code needs
 - Sending data over serial
 
 ### Class structure

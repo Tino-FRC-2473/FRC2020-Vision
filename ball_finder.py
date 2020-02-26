@@ -20,6 +20,9 @@ class BallFinder:
         self.DEPTH_X_SHIFT = -23
         self.DEPTH_Y_SHIFT = 31
 
+        # Height of the camera (in m)
+        self.CAMERA_HEIGHT = 0.7
+
         # Minimum distance (in m) for finding obstacles (the distance from the camera to the front of the robot)
         self.MIN_OBSTACLE_DIST = 0.56
 
@@ -32,13 +35,13 @@ class BallFinder:
         x, y, w, h = cv2.boundingRect(contour)
         return x + w / 2, y + h / 2
 
-    # Returns distance (in m) to a ball or obstacle.
+    # Returns horizontally straight distance (in m) to a ball or obstacle.
     # is_ball is used to determine whether or not to shift the x and y positions the amount needed when using the depth
     # camera.
     def get_distance(self, depth_frame, item, is_ball=False):
         x = min(639, int(item[0] + is_ball * self.DEPTH_X_SHIFT))
         y = min(479, int(item[1] + is_ball * self.DEPTH_Y_SHIFT))
-        return depth_frame[y, x]
+        return math.sqrt(math.pow(depth_frame[y, x], 2) - math.pow(self.CAMERA_HEIGHT, 2))
 
     # Returns angle (in degrees) between center of camera to center of ball.
     def get_angle_deg(self, ball):
