@@ -56,7 +56,8 @@ class BallFinder:
         mask = cv2.inRange(self.remove_floor(depth), self.MIN_OBSTACLE_DIST, float(max_distance) - 0.05)
         obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         obstacle_contours.sort(key=lambda obstacle: self.get_distance(depth, self.get_contour_center(obstacle)))
-        return list(filter(lambda obstacle: cv2.contourArea(obstacle) > 1000, obstacle_contours))
+        obstacle = next((obstacle for obstacle in obstacle_contours if cv2.contourArea(obstacle) > 1000), None)
+        return None if obstacle is None else self.get_distance(depth, self.get_contour_center(obstacle))
 
     # Returns a tuple with:
     # - a list of the first four balls, each with [distance in m, angle in degrees]. If there are less than four balls,
@@ -65,8 +66,8 @@ class BallFinder:
     def get_balls(self):
         detected_balls, depth_frame = self.detector.run_detector()
         if not detected_balls or depth_frame is None:
-            obstacles = self.get_obstacles(depth_frame, 3)
-            return [[]] * 4, len(obstacles) > 0
+            closest_obstacle_dist = self.get_obstacles(depth_frame, 3)
+            return [[]] * 4, closest_obstacle_dist
 
         detected_balls.sort(key=lambda ball: self.get_distance(depth_frame, ball, True))
         closest_balls = [[]] * 4
@@ -76,6 +77,6 @@ class BallFinder:
             closest_balls[i] = [] if dist == 0 else [dist, angle]
 
         max_dist = next((ball[0] for ball in closest_balls if ball), 3)
-        obstacles = self.get_obstacles(depth_frame, max_dist)
+        closest_obstacle_dist = self.get_obstacles(depth_frame, max_dist)
 
-        return closest_balls, len(obstacles) > 0
+        return closest_balls, closest_obstacle_dist

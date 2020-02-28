@@ -28,14 +28,14 @@ class DataSender:
         return "{:+05d} {:+05d} {:+05d}".format(int(100 * dx), int(100 * dy), int(10 * round(angle, 1)))
 
     def get_ball_detection_data(self):
-        ball_data, obstacle_present = self.ball_finder.get_balls()
+        ball_data, closest_obstacle_dist = self.ball_finder.get_balls()
 
         formatted = []
         for ball in ball_data:
             formatted.append([9999, 9999] if not ball else [int(100 * ball[0]), int(10 * round(ball[1], 1))])
 
         data_string = "".join(" {:+05d} {:+05d}".format(ball[0], ball[1]) for ball in formatted)
-        data_string += " " + str(int(obstacle_present))
+        data_string += " " + "{:+05d}".format(int(100 * closest_obstacle_dist))
 
         return data_string
 
