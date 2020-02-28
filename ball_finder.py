@@ -41,7 +41,12 @@ class BallFinder:
     def get_distance(self, depth_frame, item, is_ball=False):
         x = min(639, int(item[0] + is_ball * self.DEPTH_X_SHIFT))
         y = min(479, int(item[1] + is_ball * self.DEPTH_Y_SHIFT))
-        return math.sqrt(math.pow(depth_frame[y, x], 2) - math.pow(self.CAMERA_HEIGHT, 2))
+
+        depth_at_center = depth_frame[y, x]
+        if is_ball and self.CAMERA_HEIGHT < depth_at_center:
+            return math.sqrt(math.pow(depth_at_center, 2) - math.pow(self.CAMERA_HEIGHT, 2))
+
+        return depth_at_center
 
     # Returns angle (in degrees) between center of camera to center of ball.
     def get_angle_deg(self, ball):
@@ -56,8 +61,9 @@ class BallFinder:
         mask = cv2.inRange(self.remove_floor(depth), self.MIN_OBSTACLE_DIST, float(max_distance) - 0.05)
         obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         obstacle_contours.sort(key=lambda obstacle: self.get_distance(depth, self.get_contour_center(obstacle)))
-        obstacle = next((obstacle for obstacle in obstacle_contours if cv2.contourArea(obstacle) > 1000), None)
-        return None if obstacle is None else self.get_distance(depth, self.get_contour_center(obstacle))
+
+        closest = next((obstacle for obstacle in obstacle_contours if cv2.contourArea(obstacle) > 1000), None)
+        return None if closest is None else self.get_distance(depth, self.get_contour_center(closest))
 
     # Returns a tuple with:
     # - a list of the first four balls, each with [distance in m, angle in degrees]. If there are less than four balls,
