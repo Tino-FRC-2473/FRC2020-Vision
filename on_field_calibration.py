@@ -112,8 +112,8 @@ class OnFieldCalibration:
         for i in range(100):
             row = random.randrange(0, len(img))
             row = np.reshape(np.array(img[row]), (1, 1, 3))[0, 0]
-            print(str(row[0]), ",", str(row[1]), ",", str(row[2]))
-            #fout.write(np.reshape(np.array(greens[row]), (1, 1, 3)))
+            row = str(row[2]) + "," + str(row[1]) +  "," + str(row[0]) + "\n"
+            fout.write(row)
             key = cv2.waitKey(1)
             if key == ord('q'):
                 break
