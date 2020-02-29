@@ -104,14 +104,15 @@ class OnFieldCalibration:
 
         low_green, high_green = self.update_greens()
         img, _ = self.video_generator.generate()
-        hsv = cv2.cvtColor(img, cv2.HSV2BGR)
-        mask = cv2.inRange(img, low_green, high_green)
-        greens = img[np.where((mask == 255))]
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(hsv, low_green, high_green)
+        img = img[np.where((mask == 255))]
+        
         fout = open("green_data1.csv","w")
         for i in range(100):
-            row = random.randrange(0, len(greens))
-            row = np.reshape(np.array(greens[row]), (1, 1, 3))[0, 0]
-            print(str(row[0]), ",", str
+            row = random.randrange(0, len(img))
+            row = np.reshape(np.array(img[row]), (1, 1, 3))[0, 0]
+            print(str(row[0]), ",", str(row[1]), ",", str(row[2]))
             #fout.write(np.reshape(np.array(greens[row]), (1, 1, 3)))
             key = cv2.waitKey(1)
             if key == ord('q'):
