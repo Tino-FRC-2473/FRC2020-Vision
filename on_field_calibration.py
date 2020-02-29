@@ -26,10 +26,10 @@ class OnFieldCalibration:
             key = cv2.waitKey(1)
             if key == ord('y'):
                 return
-            if key == ord('n'):
+            elif key == ord('n'):
                 self.update_floor("Press \'s\' to accept the depth frame and save as " + self.floor_destination + ".")
                 return
-            if key == ord('q'):
+            elif key == ord('q'):
                 quit()
 
     def update_floor(self, prompt):
@@ -46,20 +46,61 @@ class OnFieldCalibration:
                 self.floor_frame = depth
                 self.floor_frame[self.floor_frame > 4] = 0
                 return
-            if key == ord('q'):
+            elif key == ord('q'):
                 quit()
 
     def run_greens_test(self):
         pass
 
     def update_greens(self):
-        pass
+        def nothing(x):
+            pass
+
+        cv2.createTrackbar("H-L", "Calibrations", 60, 255, nothing)
+        cv2.createTrackbar("H-H", "Calibrations", 87, 255, nothing)
+        cv2.createTrackbar("S-L", "Calibrations", 90, 255, nothing)
+        cv2.createTrackbar("S-H", "Calibrations", 255, 255, nothing)
+        cv2.createTrackbar("V-L", "Calibrations", 50, 255, nothing)
+        cv2.createTrackbar("V-H", "Calibrations", 229, 255, nothing)
+
+        while True:
+            frame, _ = self.video_generator.generate()
+            hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+            hl = cv2.getTrackbarPos("H-L", "Calibrations")
+            hh = cv2.getTrackbarPos("H-H", "Calibrations")
+            sl = cv2.getTrackbarPos("S-L", "Calibrations")
+            sh = cv2.getTrackbarPos("S-H", "Calibrations")
+            vl = cv2.getTrackbarPos("V-L", "Calibrations")
+            vh = cv2.getTrackbarPos("V-H", "Calibrations")
+
+            low_green = np.array([hl, sl, vl])
+            high_green = np.array([hh, sh, vh])
+            mask = cv2.inRange(hsv, low_green, high_green)
+            mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+
+            both = np.hstack((frame, mask))
+
+            cv2.imshow('Calibrations', both)
+
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
+                return low_green, high_green
+            elif key == ord('w'):
+                print('low: [' + str(hl) + ', ' + str(sl) + ', ' + str(vl) + ']')
+                print('high: [' + str(hh) + ', ' + str(sh) + ', ' + str(vh) + ']')
+                print('------------------')
 
     def run_accuracy_test(self):
         pass
 
     def run_calibration(self):
         self.run_floor_test("Running floor test. Press \'y\' to accept the floor frame or \'n\' to update it.")
+
+        low_green, high_green = self.update_greens()
+            #get 2 random values(r, g, b) that satisfies the predetermined range low_green to high_green
+            #add these two values to the green_data.csv
+            #if done adding, end
         # new_greens = self.run_greens_test()
         # print("New green values:", new_greens)
         # print(self.run_accuracy_test())
