@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from depth_live_generator import DepthLiveGenerator
 from video_live_generator import VideoLiveGenerator
+import random
 
 
 class OnFieldCalibration:
@@ -83,7 +84,7 @@ class OnFieldCalibration:
 
             cv2.imshow('Calibrations', both)
 
-            key = cv2.waitKey(1) & 0xFF
+            key = cv2.waitKey(1)
             if key == ord('q'):
                 return low_green, high_green
             elif key == ord('w'):
@@ -98,9 +99,21 @@ class OnFieldCalibration:
         self.run_floor_test("Running floor test. Press \'y\' to accept the floor frame or \'n\' to update it.")
 
         low_green, high_green = self.update_greens()
-            #get 2 random values(r, g, b) that satisfies the predetermined range low_green to high_green
-            #add these two values to the green_data.csv
-            #if done adding, end
+        img, _ = self.video_generator.generate()
+        mask = cv2.inRange(img, low_green, high_green)
+        greens = img[np.where((mask[:, :, 0] == 255))]
+        fout = open("green_data.csv","w")
+        for i in range(100):
+            row = random.randrange(0, len(greens))
+            fout.write(np.reshape(np.array(greens[row]), (1, 1, 3)), 0)
+            key = cv2.waitKey(1)
+            if key == ord('q'):
+                break
+        
+        print('Calibration complete!')
+
+
+
         # new_greens = self.run_greens_test()
         # print("New green values:", new_greens)
         # print(self.run_accuracy_test())
