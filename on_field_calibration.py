@@ -6,7 +6,7 @@ import random
 
 
 class OnFieldCalibration:
-    def __init__(self, video_port=1, depth_port=2, floor_destination):
+    def __init__(self, video_port=4, depth_port=3, floor_destination="FLOOR.csv"):
         self.video_generator = VideoLiveGenerator(video_port)
         self.depth_generator = DepthLiveGenerator(depth_port)
 
@@ -26,10 +26,12 @@ class OnFieldCalibration:
 
             key = cv2.waitKey(1)
             if key == ord('y'):
+                cv2.destroyAllWindows()
                 return
             elif key == ord('n'):
+                cv2.destroyAllWindows()
                 self.update_floor("Press \'s\' to accept the depth frame and save as " + self.floor_destination + ".")
-                return
+                print(prompt)
             elif key == ord('q'):
                 quit()
 
@@ -46,6 +48,7 @@ class OnFieldCalibration:
                 np.savetxt(self.floor_destination, depth, delimiter=",", fmt="%s")
                 self.floor_frame = depth
                 self.floor_frame[self.floor_frame > 4] = 0
+                cv2.destroyAllWindows()
                 return
             elif key == ord('q'):
                 quit()
@@ -54,6 +57,7 @@ class OnFieldCalibration:
         pass
 
     def update_greens(self):
+        cv2.namedWindow("Calibrations")
         def nothing(x):
             pass
 
@@ -85,7 +89,7 @@ class OnFieldCalibration:
             cv2.imshow('Calibrations', both)
 
             key = cv2.waitKey(1)
-            if key == ord('q'):
+            if key == ord('p'):
                 return low_green, high_green
             elif key == ord('w'):
                 print('low: [' + str(hl) + ', ' + str(sl) + ', ' + str(vl) + ']')
@@ -100,12 +104,15 @@ class OnFieldCalibration:
 
         low_green, high_green = self.update_greens()
         img, _ = self.video_generator.generate()
+        hsv = cv2.cvtColor(img, cv2.HSV2BGR)
         mask = cv2.inRange(img, low_green, high_green)
-        greens = img[np.where((mask[:, :, 0] == 255))]
-        fout = open("green_data.csv","w")
+        greens = img[np.where((mask == 255))]
+        fout = open("green_data1.csv","w")
         for i in range(100):
             row = random.randrange(0, len(greens))
-            fout.write(np.reshape(np.array(greens[row]), (1, 1, 3)), 0)
+            row = np.reshape(np.array(greens[row]), (1, 1, 3))[0, 0]
+            print(str(row[0]), ",", str
+            #fout.write(np.reshape(np.array(greens[row]), (1, 1, 3)))
             key = cv2.waitKey(1)
             if key == ord('q'):
                 break
