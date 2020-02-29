@@ -6,7 +6,7 @@ import random
 
 
 class OnFieldCalibration:
-    def __init__(self, video_port, depth_port, floor_destination):
+    def __init__(self, video_port=1, depth_port=2, floor_destination):
         self.video_generator = VideoLiveGenerator(video_port)
         self.depth_generator = DepthLiveGenerator(depth_port)
 
