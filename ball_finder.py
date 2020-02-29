@@ -14,7 +14,6 @@ class BallFinder:
 
         # Depth csv of empty floor
         self.floor_frame = np.loadtxt("FLOOR.csv", dtype=np.float32, delimiter=",")
-        self.floor_frame[self.floor_frame > 4] = 0
 
         # Displacement constants between rgb frame and depth frame
         self.DEPTH_X_SHIFT = -23
@@ -25,10 +24,6 @@ class BallFinder:
 
         # Minimum distance (in m) for finding obstacles (the distance from the camera to the front of the robot)
         self.MIN_OBSTACLE_DIST = 0.56
-
-    # Returns depth frame where all floor points have depth 0.
-    def remove_floor(self, depth):
-        return np.where(abs(depth - self.floor_frame) < 0.05, 0, depth)
 
     # Returns the center (x, y) of a contour based on its bounding box.
     def get_contour_center(self, contour):
@@ -54,11 +49,11 @@ class BallFinder:
         return math.degrees(math.atan(dist_to_center / self.FOCAL_LENGTH_PIXELS))
 
     # Returns list of obstacle contours with area greater than 1000 pixels.
-    def get_obstacles(self, depth, max_distance):
+    def get_obstacles(self, depth, max_dist):
         if depth is None:
             return []
 
-        mask = cv2.inRange(self.remove_floor(depth), self.MIN_OBSTACLE_DIST, float(max_distance) - 0.05)
+        mask = cv2.inRange(depth, self.MIN_OBSTACLE_DIST, min(float(max_dist) - 0.05, min(self.floor_frame, 4) + 0.05))
         obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         obstacle_contours.sort(key=lambda obstacle: self.get_distance(depth, self.get_contour_center(obstacle)))
 
