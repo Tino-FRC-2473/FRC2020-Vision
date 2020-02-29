@@ -15,5 +15,8 @@
     - Output success percentage of target detection
 
 ## Structure
-- `OnFieldCalibration` class
+- `OnFieldCalibrator` class
 - `run_calibration()` method
+
+## Use
+Run `python3 on_field_calibrator.py`
