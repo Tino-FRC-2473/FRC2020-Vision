@@ -34,6 +34,8 @@ with open(args.output, mode='w', newline='') as output_file:
                     r, t = pd.get_values(units=args.units, display=True)
                     key = cv2.waitKey(1)
                     if key == ord("n"):
+                        output_writer.writerow([filename, int(filename[filename.index('_')+1:filename.index(args.units[0])]), int(filename[:filename.index('d')]),
+                                               r[0], r[1], r[2], t[0], t[1], t[2]])
                         break
                     elif key == ord("q"):
                         exit()
