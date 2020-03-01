@@ -61,16 +61,13 @@ class OnFieldCalibrator:
 
         cv2.namedWindow("Calibrations")
 
-        def nothing(x):
-            pass
+        cv2.createTrackbar("H low", "Calibrations", 68, 255, lambda x: None)
+        cv2.createTrackbar("S low", "Calibrations", 100, 255, lambda x: None)
+        cv2.createTrackbar("V low", "Calibrations", 50, 255, lambda x: None)
 
-        cv2.createTrackbar("H low", "Calibrations", 68, 255, nothing)
-        cv2.createTrackbar("S low", "Calibrations", 100, 255, nothing)
-        cv2.createTrackbar("V low", "Calibrations", 50, 255, nothing)
-
-        cv2.createTrackbar("H high", "Calibrations", 84, 255, nothing)
-        cv2.createTrackbar("S high", "Calibrations", 255, 255, nothing)
-        cv2.createTrackbar("V high", "Calibrations", 255, 255, nothing)
+        cv2.createTrackbar("H high", "Calibrations", 84, 255, lambda x: None)
+        cv2.createTrackbar("S high", "Calibrations", 255, 255, lambda x: None)
+        cv2.createTrackbar("V high", "Calibrations", 255, 255, lambda x: None)
 
         while True:
             frame, _ = self.video_generator.generate()
@@ -114,16 +111,11 @@ class OnFieldCalibrator:
                 row = np.reshape(np.array(img[row]), (1, 1, 3))[0, 0]
                 file.write(",".join(row))
 
-    def run_accuracy_test(self):
-        pass
-
     def run_calibration(self):
         self.run_floor_test()
         low_green, high_green = self.update_greens()
         self.update_green_csv(low_green, high_green)
-
-        print("Calibration complete. Running accuracy test.")
-        print(self.run_accuracy_test())
+        print("Calibration complete.")
 
 
 parser = argparse.ArgumentParser()
