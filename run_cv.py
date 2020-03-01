@@ -4,7 +4,6 @@ import argparse
 import cv2
 from pose_calculator import PoseCalculator
 from depth_data_generator import DepthDataGenerator
-from depth_live_generator import DepthLiveGenerator
 from image_generator import ImageGenerator
 from video_file_generator import VideoFileGenerator
 from video_live_generator import VideoLiveGenerator
@@ -33,6 +32,7 @@ wait_time = 1
 if args.generator == "depth_data":
     generator = DepthDataGenerator(args.depth, args.image)
 elif args.generator == "depth_live":
+    from depth_live_generator import DepthLiveGenerator
     generator = DepthLiveGenerator(args.port)
     wait_time = 3
 elif args.generator == "image":
