@@ -20,3 +20,9 @@
 
 ## Use
 Run `python3 on_field_calibrator.py`
+
+Optional arguments:
+- `--video_port [int]`, `-v [int]` camera port to read for VideoLiveGenerator
+- `--depth_port [int]`, `-d [int]` camera port to read for DepthLiveGenerator
+- `--floor_path [str]`, `-f [str]` path of floor data CSV file
+- `--greens_path [str]`, `-g [str]` path of green data CSV file

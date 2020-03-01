@@ -1,3 +1,4 @@
+import argparse
 import cv2
 import numpy as np
 import random
@@ -125,5 +126,12 @@ class OnFieldCalibrator:
         print(self.run_accuracy_test())
 
 
-on_field_calibrator = OnFieldCalibrator()
+parser = argparse.ArgumentParser()
+parser.add_argument("--video_port", "-v", type=int, default=1, help="camera port to read for VideoLiveGenerator")
+parser.add_argument("--depth_port", "-d", type=int, default=2, help="camera port to read for DepthLiveGenerator")
+parser.add_argument("--floor_path", "-f", type=str, default="FLOOR.csv", help="path of floor data CSV file")
+parser.add_argument("--greens_path", "-g", type=str, default="green_data1.csv", help="path of green data CSV file")
+args = parser.parse_args()
+
+on_field_calibrator = OnFieldCalibrator(args.video_port, args.depth_port, args.floor_path, args.greens_path)
 on_field_calibrator.run_calibration()
