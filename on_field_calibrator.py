@@ -103,13 +103,13 @@ class OnFieldCalibrator:
         img, _ = self.video_generator.generate()
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv, low_green, high_green)
-        img = img[np.where((mask == 255))]
+        greens = img[np.where(mask == 255)]
 
         with open(self.greens_path, "w") as file:
             for i in range(100):
-                row = random.randrange(0, len(img))
-                row = np.reshape(np.array(img[row]), (1, 1, 3))[0, 0]
-                file.write(",".join(row))
+                row = random.randrange(0, len(greens))
+                rgb = np.flip(greens[row])
+                file.write(",".join(map(str, rgb)) + "\n")
 
     def run_calibration(self):
         self.run_floor_test()
