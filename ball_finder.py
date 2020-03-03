@@ -14,6 +14,7 @@ class BallFinder:
 
         # Depth csv of empty floor
         self.floor_frame = np.loadtxt("FLOOR.csv", dtype=np.float32, delimiter=",")
+        self.floor_frame[self.floor_frame > 4] = 4
 
         # Displacement constants between rgb frame and depth frame
         self.DEPTH_X_SHIFT = -23
@@ -53,7 +54,7 @@ class BallFinder:
         if depth is None:
             return []
 
-        mask = cv2.inRange(depth, self.MIN_OBSTACLE_DIST, min(float(max_dist) - 0.05, min(self.floor_frame, 4) + 0.05))
+        mask = cv2.inRange(depth, self.MIN_OBSTACLE_DIST, min(float(max_dist) - 0.05, self.floor_frame + 0.05))
         obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         obstacle_contours.sort(key=lambda obstacle: self.get_distance(depth, self.get_contour_center(obstacle)))
 
