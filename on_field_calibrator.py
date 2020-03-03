@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import random
 from depth_live_generator import DepthLiveGenerator
+from power_cell_detector import PowerCellDetector
 from video_live_generator import VideoLiveGenerator
 
 
@@ -111,10 +112,32 @@ class OnFieldCalibrator:
                 rgb = np.flip(greens[row])
                 file.write(",".join(map(str, rgb)) + "\n")
 
+    def run_ball_test(self):
+        print("Running balls test. Press \'c\' to continue.")
+        print("Press \'q\' to quit.")
+        power_cell_detector = PowerCellDetector(self.depth_generator)
+
+        while True:
+            circles, depth_frame = power_cell_detector.run_detector()
+            for circle in circles:
+                if circle is not None:
+                    cv2.circle(depth_frame, (int(circle[0]), int(circle[1])), int(circle[2]), (0, 0, 255), 3)
+                    cv2.circle(depth_frame, (int(circle[0]), int(circle[1])), 0, (255, 0, 0), 6)
+
+            cv2.imshow("Depth frame with balls", depth_frame * 0.4)
+
+            key = cv2.waitKey(1)
+            if key == ord("c"):
+                cv2.destroyAllWindows()
+                return
+            elif key == ord("q"):
+                quit()
+
     def run_calibration(self):
         self.run_floor_test()
         low_green, high_green = self.update_greens()
         self.update_green_csv(low_green, high_green)
+        self.run_ball_test()
         print("Calibration complete.")
 
 
