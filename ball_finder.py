@@ -54,7 +54,8 @@ class BallFinder:
         if depth is None:
             return []
 
-        mask = cv2.inRange(depth, self.MIN_OBSTACLE_DIST, min(float(max_dist) - 0.05, self.floor_frame + 0.05))
+        without_floor = np.where(abs(depth - self.floor_frame) < 0.05, 0, depth)
+        mask = cv2.inRange(without_floor, self.MIN_OBSTACLE_DIST, float(max_dist) - 0.05)
         obstacle_contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         obstacle_contours.sort(key=lambda obstacle: self.get_distance(depth, self.get_contour_center(obstacle)))
 
