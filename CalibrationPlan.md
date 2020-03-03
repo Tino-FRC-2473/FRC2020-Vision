@@ -26,3 +26,5 @@ Optional arguments:
 - `--depth_port [int]`, `-d [int]` camera port to read for DepthLiveGenerator
 - `--floor_path [str]`, `-f [str]` path of floor data CSV file
 - `--greens_path [str]`, `-g [str]` path of green data CSV file
+
+Example: `python3 on_field_calibrator.py -v 1 -d 3 -f FLOOR.csv -g green_data.csv`
