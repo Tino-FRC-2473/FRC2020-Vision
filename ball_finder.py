@@ -70,11 +70,11 @@ class BallFinder:
         detected_balls, depth_frame = self.detector.run_detector()
         if not detected_balls or depth_frame is None:
             closest_obstacle_dist = self.get_obstacles(depth_frame, 3)
-            return [[]] * 4, closest_obstacle_dist
+            return [[]] * 5, closest_obstacle_dist
 
         detected_balls.sort(key=lambda ball: self.get_distance(depth_frame, ball, True))
-        closest_balls = [[]] * 4
-        for i in range(len(detected_balls[:4])):
+        closest_balls = [[]] * 5
+        for i in range(len(detected_balls[:5])):
             dist = self.get_distance(depth_frame, detected_balls[i], True)
             angle = self.get_angle_deg(detected_balls[i])
             closest_balls[i] = [] if dist == 0 else [dist, angle]

@@ -114,14 +114,44 @@ Sends data from `PoseCalculator` and `BallFinder` over serial for use by robot c
 
 ### API
 #### `send_data()`
-Send distance from the robot to the target along the x and z axis, and the angle to the target over serial in the string format
-`"S [+/-]x_distance [+-]z_distance [+/-]angle E\n"`
+Sends data for the power port target, the closest five balls, and the closest obstacle in the way of the robot.
 
-Examples:
-- x = 296 cm, z = 1324 cm, angle = 123.4 degrees. Sends `"S +0296 +1324 +1234 E"`
-- x = 907 cm, z = 89 cm, angle = -4.2 degrees. Sends `"S +0907 +0089 -0042 E"`
+Data:
+- Target:
+    - target dy in cm
+    - target dx in cm
+    - target angle in degrees
+- For each of five balls:
+    - distance to ball in cm
+    - angle to ball in degrees
+- For obstacle:
+    - distance to closest obstacle in cm
 
-If robot does not detect target, sends `"S +9999 +9999 +9999 E"`
+Each distance value is in the format "+9999", with a sign at the front and four digits following.
+
+For all angles, the last digit is the tenths place after the decimal point. If the angle was -14.3 degrees, the value would be "-0143".
+
+When no target is detected, the values for dy, dx, and angle are all "+9999". When less than five balls are detected, the distance and angle values for the rest of the spaces are also "+9999".
+
+All values are surrounded by "S " at the start and " E" at the end, and values are separated by a single space in between.
+
+Format:
+```
+"S +9999 +9999 +9999 +9999 +9999 +9999 +9999 +9999 +9999 +9999 +9999 +9999 +9999 +9999 E"
+    t_dy  t_dx  t_a   b1_d  b1_a  b2_d  b2_a  b3_d  b3_a  b4_d  b4_a  b5_d  b5_a  ob_d
+    
+('t' is the target, 'b1' is the first ball, and 'ob' is the obstacle. 'd' is distance and 'a' is the angle.)
+```
+In total, there are 14 values, all surrounded by "S " and " E".
+
+Example for a situation where only one ball is seen:
+```
+dy       | dx       | angle        | ball1 dist       | ball1 angle      | obstacle     
+----------------------------------------------------------------------------------------
+296 cm   | 1324 cm  | 29.4 deg     | 152 cm           | -13.3 deg        | 98 cm
+
+"S +0296 +1324 + 0294 +0152 -0133 +9999 +9999 +9999 +9999 +9999 +9999 +9999 +9999 +0098 E"
+```
 
 `send_data()` does not need to be used outside of data_sender.py; code is included in the file to run `send_data()` continuously.
 Run `python3 data_sender.py` to use.
