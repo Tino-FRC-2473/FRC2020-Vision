@@ -1,22 +1,24 @@
-import sys
-sys.path.append("/usr/local/lib")
-
 import argparse
 import serial
-from ball_finder import BallFinder
-from depth_live_generator import DepthLiveGenerator
+import sys
 from pose_calculator import PoseCalculator
 from power_cell_detector import PowerCellDetector
 from power_port_detector import PowerPortDetector
 from video_live_generator import VideoLiveGenerator
+
+sys.path.append("/usr/local/lib")
 
 
 class DataSender:
     def __init__(self, name="ttyS0", rate=9600, video_port=0, depth_port=2, run_depth=True):
         self.s = serial.Serial("/dev/" + name, rate)
         self.pose_calculator = PoseCalculator(PowerPortDetector(VideoLiveGenerator(video_port)))
-        self.ball_finder = BallFinder(PowerCellDetector(DepthLiveGenerator(depth_port)))
+
         self.run_depth = run_depth
+        if run_depth:
+            from ball_finder import BallFinder
+            from depth_live_generator import DepthLiveGenerator
+            self.ball_finder = BallFinder(PowerCellDetector(DepthLiveGenerator(depth_port)))
 
     def get_power_port_data(self):
         rot, trans = self.pose_calculator.get_values(display=False)
@@ -55,7 +57,7 @@ class DataSender:
 parser = argparse.ArgumentParser()
 parser.add_argument("--video_port", "-v", type=int, default=0, help="camera port to read for VideoLiveGenerator")
 parser.add_argument("--depth_port", "-d", type=int, default=2, help="camera port to read for DepthLiveGenerator")
-parser.add_argument("--ignore_depth", "-i", action='store_false')
+parser.add_argument("--ignore_depth", "-i", action="store_false", help="only run power port detection")
 args = parser.parse_args()
 
 data_sender = DataSender(video_port=args.video_port, depth_port=args.depth_port, run_depth=args.ignore_depth)
