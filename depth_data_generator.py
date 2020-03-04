@@ -1,11 +1,11 @@
-import numpy as np
 import csv
 import cv2
+import numpy as np
 
 
 class DepthDataGenerator:
     def __init__(self, depth_path, image_path):
-        self.depth_file = open(depth_path, "r")
+        self.depth_path = depth_path
         self.image_path = image_path
 
         self.H_FIELD_OF_VIEW = 69.4
@@ -22,7 +22,7 @@ class DepthDataGenerator:
 
     def generate(self):
         depth_frame = []
-        with self.depth_file as f:
+        with open(self.depth_path, "r") as f:
             reader = csv.reader(f, quoting=csv.QUOTE_NONNUMERIC)
             for row in reader:
                 depth_frame.append(row)
