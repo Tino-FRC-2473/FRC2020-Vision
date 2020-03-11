@@ -36,7 +36,11 @@ class PowerCellDetector:
             return None, depth_frame
 
         detected_circles = np.uint16(np.around(circles))
-        circles = [[x, y, r] for x, y, r in detected_circles[0, :]]
+        circles = []
+        for x, y, r in detected_circles[0, :]:
+            if mask[y, x] != 0:
+                circles.append([x, y, r])
+    
         return circles, depth_frame
 
     def get_generator(self):
