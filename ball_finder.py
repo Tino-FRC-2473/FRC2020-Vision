@@ -45,7 +45,7 @@ class BallFinder:
         return depth_at_center
 
     def get_distance_obstacle(self, depth_frame, obstacle):
-        mask = np.zeros((480, 640, 1), dtype=np.uint8)
+        mask = np.zeros((480, 640), dtype=np.uint8)
         cv2.drawContours(mask, [obstacle], 0, (255, 255, 255), thickness=cv2.FILLED)
         depth_mask = (mask == 255) * depth_frame
         cv2.imshow("Depth mask", depth_mask)
