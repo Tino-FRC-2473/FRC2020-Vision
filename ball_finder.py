@@ -49,7 +49,7 @@ class BallFinder:
         cv2.drawContours(mask, [obstacle], 0, (255, 255, 255), thickness=cv2.FILLED)
         depth_mask = (mask == 255) * depth_frame
         cv2.imshow("Depth mask", depth_mask)
-        return min(depth_mask)
+        return min(depth_mask[:, 1])
 
     # Returns angle (in degrees) between center of camera to center of ball.
     def get_angle_deg(self, ball):
