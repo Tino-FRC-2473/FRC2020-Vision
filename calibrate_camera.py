@@ -20,7 +20,7 @@ objpoints = []  # 3d point in real world space
 imgpoints = []  # 2d points in image plane.
 
 for image in os.listdir(args.dir):
-    print(image)
+    # print(image)
     generator = ImageGenerator(args.dir + "/" + image)
     img, _ = generator.generate()
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -31,13 +31,16 @@ for image in os.listdir(args.dir):
         objpoints.append(objp)
         corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
         imgpoints.append(corners)
-        # Draw and display the corners
+        # Draw and display the cornerss
         cv2.drawChessboardCorners(img, (7, 6), corners2, ret)
-        cv2.imshow('img', img)
+        # cv2.imshow('img', img)
         cv2.waitKey(200)
         ret, mtx, dist, rvec, tvec = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
         print("matrix:", mtx)
-        print("dist:", dist)
+        # print("dist:", dist)
+        print("reprojection error:", ret)
+        print("translation vector:", tvec)
+        print("------------")
 
 cv2.destroyAllWindows()
